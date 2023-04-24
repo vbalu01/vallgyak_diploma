@@ -1,4 +1,5 @@
 ﻿using AutoPortal.Libs;
+using AutoPortal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -10,11 +11,10 @@ namespace AutoPortal.Controllers
 {
     public abstract class BaseController : Controller
     {
-        private SQL sql;
-
         protected SQL _SQL { get; private set; }
         protected IToastNotification _Notification { get; private set; }
         protected IConfiguration _Configuration { get; private set; }
+        protected JsonResponse resp;
 
         //protected User user;
 
@@ -23,11 +23,8 @@ namespace AutoPortal.Controllers
             this._Configuration = configuration;
             this._SQL = sql;
             this._Notification = notification;
-        }
-
-        protected BaseController(SQL sql)
-        {
-            this.sql = sql;
+            this.resp = new JsonResponse();
+            resp.Success = true;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden API hívás előtt lefut

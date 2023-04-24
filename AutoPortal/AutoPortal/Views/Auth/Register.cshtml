@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Regisztráció";
+}
+
+@section Scripts {
+	<script type="text/javascript">
+        $('#regBtn').click(function(){
+            if (!($('#email').val().trim()) || !($('#name').val().trim()) || !($('#password').val().trim()) || !($('#repassword').val().trim())) {
+                alert("Minden mező kitöltése kötelező!");
+                return false;
+            }
+            if ($('#password').val() != $('#repassword').val()) {
+                alert("A jelszavak nem egyeznek!");
+                return false;
+            }
+            if (!($("#acceptReg").is(':checked'))){
+                alert("A felhasználói feltételek elfogadása kötelező!");
+                return false;
+            }
+            $.ajax({
+                method: "POST",
+                url: "/Auth/RegisterUser",
+                async: true,
+                data: JSON.stringify({
+                    'email' : $('#email').val(),
+                    'name': $('#name').val(),
+                    'password': $('#password').val(),
+                    'repassword': $('#repassword').val(),
+
+                }),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (e) {
+                    if (e.Success) {
+                        $('#email').val("");
+                        $('#name').val("");
+                        $('#password').val("");
+                        $('#repassword').val("");
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        });
+    </script>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div>
+            <section>
+                <div class="container py-5 h-100">
+                    <div class="row d-flex justify-content-center align-items-center h-100">
+                        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                            <div class="card shadow-2-strong" style="border-radius: 1rem;background-color: #508bfc;">
+                                <div class="card-body p-5 text-center">
+
+                                    <h3 class="mb-5">Regisztráció</h3>
+
+                                    <form id="regForm" onSubmit="return false;">
+                                        <div class="form-outline mb-4">
+                                            <input type="email" id="email" name="email" class="form-control form-control-lg" />
+                                            <label class="form-label" for="email">E-mail</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="text" id="name" name="name" class="form-control form-control-lg" />
+                                            <label class="form-label" for="email">Teljes név</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="password" id="password" name="password" class="form-control form-control-lg" />
+                                            <label class="form-label" for="password">Jelszó</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="password" id="repassword" name="repassword" class="form-control form-control-lg" />
+                                            <label class="form-label" for="repassword">Jelszó megerősítése</label>
+                                        </div>
+
+                                        <div class="form-check d-flex justify-content-start mb-4">
+                                            <input class="form-check-input" type="checkbox" id="acceptReg" required/>
+                                            <label class="form-check-label" for="savePwd">A regisztrációval elfogadom a <a href="#">felhasználó feltételeket</a>.</label>
+                                        </div>
+
+                                        <button class="btn btn-success btn-lg btn-block" id="regBtn">Regisztráció</button>
+                                        <p style="margin-top:10px;">Már regisztrált? <a asp-controller="Auth" asp-action="Login" style="color:white;">Jelentkezzen</a> be!</p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

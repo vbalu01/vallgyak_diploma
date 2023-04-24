@@ -8,7 +8,7 @@ namespace AutoPortal.Libs
         public static string CreateSalt(int size)
         {
 
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+            var rng = new RNGCryptoServiceProvider();
             byte[] buff = new byte[size];
             rng.GetBytes(buff);
             return Convert.ToBase64String(buff);
@@ -17,14 +17,14 @@ namespace AutoPortal.Libs
         {
             if (String.IsNullOrEmpty(salt))
             {
-                Random rnd = new Random();
+                Random rnd = new();
 
                 int saltSize = rnd.Next(10, 17);
                 salt = CreateSalt(saltSize);
             }
 
             byte[] bytes = Encoding.UTF8.GetBytes(input + salt);
-            SHA256Managed sHA256ManagedString = new SHA256Managed();
+            var sHA256ManagedString = new SHA256Managed();
             byte[] hash = sHA256ManagedString.ComputeHash(bytes);
             return Convert.ToBase64String(hash) + "$" + salt;
         }

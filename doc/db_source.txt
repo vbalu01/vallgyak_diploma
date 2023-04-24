@@ -1,0 +1,9 @@
+Table portal.users{
+  id int [PK, increment]
+  email varchar [not null]
+  name varchar[not null]
+  password varchar[not null]
+  mail_confirmed boolean [not null]
+  enabled boolean [not null]
+  register_date datetime [not null]
+}

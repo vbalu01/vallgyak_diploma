@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Reflection;
 using System;
+using AutoPortal.Models.DbModels;
 
 namespace AutoPortal.Libs
 {
@@ -43,7 +44,7 @@ namespace AutoPortal.Libs
 
         #region Models
 
-        //public DbSet<T> db { get; set; }
+        public DbSet<User> users { get; set; }
         #endregion
     }
 }

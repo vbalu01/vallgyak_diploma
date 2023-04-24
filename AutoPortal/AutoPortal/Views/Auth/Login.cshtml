@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Bejelentkezés";
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        /*$('#loginBtn').click(function () {
+            $.ajax({
+                method: "POST",
+                url: "/Auth/LoginUser",
+                async: true,
+                data: JSON.stringify({
+                    'email': $('#email').val(),
+                    'password': $('#password').val()
+                }),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (e) {
+                    if (e.Success) {
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        });*/
+    </script>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div>
+            <section>
+                <div class="container py-5 h-100">
+                    <div class="row d-flex justify-content-center align-items-center h-100">
+                        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                            <div class="card shadow-2-strong" style="border-radius: 1rem;background-color: #508bfc;">
+                                <div class="card-body p-5 text-center">
+
+                                    <h3 class="mb-5">Bejelentkezés</h3>
+
+                                    <form method="POST">
+                                        <div class="form-outline mb-4">
+                                            <input type="email" id="email" name="email" class="form-control form-control-lg" />
+                                            <label class="form-label" for="email">E-mail</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="password" id="password" name="password" class="form-control form-control-lg" />
+                                            <label class="form-label" for="password">Jelszó</label>
+                                        </div>
+
+                                        <div class="form-check d-flex justify-content-start mb-4">
+                                            
+                                            <label class="form-check-label" for="savePwd">Jelszó megjegyzése</label>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success btn-lg btn-block">Bejelentkezés</button>
+                                        <p style="margin-top:10px;">Még nincs fiókja? <a asp-controller="Auth" asp-action="Register" style="color:white;">Regisztráljon</a> most!</p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
