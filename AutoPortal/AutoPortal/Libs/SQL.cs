@@ -34,10 +34,10 @@ namespace AutoPortal.Libs
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            /*modelBuilder.Entity<T>(e =>
+            modelBuilder.Entity<VehicleModel>(e =>
             {
-                e.HasKey(e => new { e.x, e.y });
-            });*/
+                e.HasKey(e => new { e.make, e.model });
+            });
 
             base.OnModelCreating(modelBuilder);
         }
@@ -45,6 +45,14 @@ namespace AutoPortal.Libs
         #region Models
 
         public DbSet<User> users { get; set; }
+        public DbSet<BodyType> bodyTypes { get; set; }
+        public DbSet<Models.DbModels.DriveType> driveTypes { get; set; }
+        public DbSet<FuelType> fuelTypes { get; set; }
+        public DbSet<TransmissionType> transmissionTypes { get; set; }
+        public DbSet<Vehicle> vehicles { get; set; }
+        public DbSet<VehicleCategory> vehicleCategories { get; set; }
+        public DbSet<VehicleMake> vehicleMakes { get; set; }
+        public DbSet<VehicleModel> vehicleModels { get; set; }
         #endregion
     }
 }
