@@ -20,7 +20,7 @@ Table portal.vehicleMakes{
 Table portal.vehicleModels{
   model varchar [PK, NOT NULL]
   make varchar [PK, NOT NULL]
-  category int [NOT NULL ref:> vehicleCategories.id]
+  category int [NOT NULL, ref:> portal.vehicleCategories.id]
 }
 
 Table portal.fuelTypes{
@@ -64,4 +64,20 @@ Table portal.vehicles{
   num_of_seats int [NOT NULL]
   weight int [NOT NULL]
   max_weight int [NOT NULL]
+}
+
+Table portal.roles{
+  role varchar [PK, NOT NULL]
+}
+
+Table portal.userRoles{
+  userId int [PK, NOT NULL, ref:> portal.users.id]
+  roleId varchar [PK, NOT NULL, ref:> portal.roles.role]
+}
+
+Table portal.factories{
+  id int [PK, NOT NULL]
+  email varchar [PK, NOT NULL]
+  password varchar [PK, NOT NULL]
+  enabled boolean [NOT NULL]
 }
