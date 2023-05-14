@@ -39,6 +39,11 @@ namespace AutoPortal.Libs
                 e.HasKey(e => new { e.make, e.model });
             });
 
+            modelBuilder.Entity<UserRole>(e =>
+            {
+                e.HasKey(e => new { e.roleId, e.userId });
+            });
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -53,6 +58,8 @@ namespace AutoPortal.Libs
         public DbSet<VehicleCategory> vehicleCategories { get; set; }
         public DbSet<VehicleMake> vehicleMakes { get; set; }
         public DbSet<VehicleModel> vehicleModels { get; set; }
+        public DbSet<Role> roles { get; set; }
+        public DbSet<UserRole> userRoles { get; set; }
         #endregion
     }
 }

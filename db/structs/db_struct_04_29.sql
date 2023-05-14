@@ -69,6 +69,24 @@ CREATE TABLE `portal`.`vehicles` (
   `max_weight` int NOT NULL
 );
 
+CREATE TABLE `portal`.`roles` (
+  `role` varchar(255) PRIMARY KEY NOT NULL
+);
+
+CREATE TABLE `portal`.`userRoles` (
+  `userId` int NOT NULL,
+  `roleId` varchar(255) NOT NULL,
+  PRIMARY KEY (`userId`, `roleId`)
+);
+
+CREATE TABLE `portal`.`factories` (
+  `id` int NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `enabled` boolean NOT NULL,
+  PRIMARY KEY (`id`, `email`, `password`)
+);
+
 ALTER TABLE `portal`.`vehicles` ADD FOREIGN KEY (`category`) REFERENCES `portal`.`vehicleCategories` (`id`);
 
 ALTER TABLE `portal`.`vehicles` ADD FOREIGN KEY (`fuel`) REFERENCES `portal`.`fuelTypes` (`id`);
@@ -78,3 +96,7 @@ ALTER TABLE `portal`.`vehicles` ADD FOREIGN KEY (`transmission`) REFERENCES `por
 ALTER TABLE `portal`.`vehicles` ADD FOREIGN KEY (`drive`) REFERENCES `portal`.`driveTypes` (`id`);
 
 ALTER TABLE `portal`.`vehicleModels` ADD FOREIGN KEY (`category`) REFERENCES `portal`.`vehicleCategories` (`id`);
+
+ALTER TABLE `portal`.`userRoles` ADD FOREIGN KEY (`userId`) REFERENCES `portal`.`users` (`id`);
+
+ALTER TABLE `portal`.`userRoles` ADD FOREIGN KEY (`roleId`) REFERENCES `portal`.`roles` (`role`);

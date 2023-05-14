@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace AutoPortal.Controllers
 {
@@ -98,7 +99,7 @@ namespace AutoPortal.Controllers
                     return View();
 				}
 
-                ClaimsPrincipal princ = this.GenerateClaim(user);
+                ClaimsPrincipal princ = this.GenerateClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId));
                 await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
                 {
                     IsPersistent = true
@@ -112,13 +113,17 @@ namespace AutoPortal.Controllers
             }
         }
 
-        private ClaimsPrincipal GenerateClaim(User user)
+        private ClaimsPrincipal GenerateClaim(User user, IEnumerable<string> Roles)
         {
             List<Claim> claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Email, user.email),
                 new Claim("UserId", user.id.ToString())
             };
+            foreach (string role in Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }
         #endregion

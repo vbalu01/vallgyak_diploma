@@ -1,0 +1,148 @@
+﻿@{
+    ViewData["Title"] = "Gépjármű rögzítés";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<div class="row">
+    <div class="col-12">
+        <h1>Gépjármű rögzítés</h1>
+
+        <div>
+            <form>
+                <div class="form-group">
+                    <label for="chassis_number">Alvázszám</label>
+                    <input type="text" name="chassis_number" class="form-control" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="engine_number">Motorszám</label>
+                    <input type="text" name="engine_number" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="license">Rendszám</label>
+                    <input type="text" name="license" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="engine_code">Motor kód</label>
+                    <input type="text" name="engine_code" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Kategória</label>
+                    <select class="js-example-basic-multiple form-control" name="category" required>
+                        @foreach (var category in ViewBag.vehicleCategories)
+                        {
+                            <option value="@category.id">@category.category</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="manufact_year">Évjárat</label>
+                    <input type="number" name="manufact_year" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="make">Márka</label>
+                    <datalist id="suggestions_make">
+                        @foreach (var make in ViewBag.makes)
+                        {
+                            <option value="@make.make">@make.make</option>
+                        }
+                    </datalist>
+                    <input autoComplete="on" name="make" list="suggestions_make" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="model">Modell</label>
+                    <input type="text" name="model" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="modeltype">Model típus</label>
+                    <input type="text" name="modeltype" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="fuel">Üzemanyag</label>
+                    <select name="fuel" class="form-control" required>
+                        @foreach(var fuel in ViewBag.fuels){
+                            <option value="@fuel.id">@fuel.fuel</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transmission">Váltó típus</label>
+                    <select name="transmission" class="form-control" required>
+                        @foreach (var transmission in ViewBag.transmissions)
+                        {
+                            <option value="@transmission.id">@transmission.transmission</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="drive">Meghajtás</label>
+                    <select name="drive" class="form-control" required>
+                        @foreach (var drive in ViewBag.drives)
+                        {
+                            <option value="@drive.id">@drive.drive</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="engine_ccm">Motor lökettérfogat</label>
+                    <input type="number" name="engine_ccm" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="performance">Teljesítmény</label>
+                    <input type="number" name="performance" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="torque">Nyomaték</label>
+                    <input type="number" name="torque" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="body">Kiveitel</label>
+                    <datalist id="suggestions_body">
+                        @foreach (var body in ViewBag.bodyTypes)
+                        {
+                            <option>@body.body</option>
+                        }
+                    </datalist>
+                    <input autoComplete="on" name="body" list="suggestions_body" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="num_of_doors">Ajtók száma</label>
+                    <input type="number" name="num_of_doors" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="num_of_seats">Max utas szám</label>
+                    <input type="number" name="num_of_seats" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Saját tömeg</label>
+                    <input type="number" name="weight" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="max_weight">Max tömeg</label>
+                    <input type="number" name="max_weight" class="form-control" required />
+                </div>
+                <button class="btn btn-primary btn-success">Jármű rögzítése</button>
+            </form>
+        </div>
+    </div>
+</div>

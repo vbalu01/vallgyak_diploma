@@ -29,6 +29,12 @@
                         </li>
                         @if (this.Context.User.Identity.IsAuthenticated)
                         {
+                            if (this.Context.User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link btn-danger" asp-area="" asp-controller="" asp-action="">Admin</a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Kijelentkezés</a>
                             </li>
