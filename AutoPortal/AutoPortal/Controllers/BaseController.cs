@@ -1,5 +1,6 @@
 ﻿using AutoPortal.Libs;
 using AutoPortal.Models;
+using AutoPortal.Models.DbModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -16,7 +17,7 @@ namespace AutoPortal.Controllers
         protected IConfiguration _Configuration { get; private set; }
         protected JsonResponse resp;
 
-        //protected User user;
+        protected User user;
 
         public BaseController(IConfiguration configuration, SQL sql, IToastNotification notification)
         {
@@ -32,7 +33,7 @@ namespace AutoPortal.Controllers
             if (this.HttpContext.User.Claims.Any(c => c.Type == "UserId")) //Bejelentkezett felhasználó
             {
                 int uid = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "UserId").Value);
-                //user = this._SQL.Users.SingleOrDefault(u => u.ID == uid);
+                user = this._SQL.users.SingleOrDefault(u => u.id == uid);
             }
             base.OnActionExecuting(context);
         }
