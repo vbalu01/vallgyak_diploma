@@ -43,6 +43,10 @@ namespace AutoPortal.Libs
             {
                 e.HasKey(e => new { e.roleId, e.userId });
             });
+            modelBuilder.Entity<VehiclePermission>(e =>
+            {
+                e.HasKey(e => new { e.vehicle_id, e.permission, e.target_id, e.target_type });
+            });
 
             base.OnModelCreating(modelBuilder);
         }
@@ -60,6 +64,7 @@ namespace AutoPortal.Libs
         public DbSet<VehicleModel> vehicleModels { get; set; }
         public DbSet<Role> roles { get; set; }
         public DbSet<UserRole> userRoles { get; set; }
+        public DbSet<VehiclePermission> vehiclePermissions { get; set; }
         #endregion
     }
 }

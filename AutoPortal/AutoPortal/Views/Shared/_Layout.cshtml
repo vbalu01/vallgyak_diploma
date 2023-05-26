@@ -8,6 +8,46 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AutoPortal.styles.css" asp-append-version="true" />
+    <style>
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+            /* Links inside the dropdown */
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+
+                /* Change color of dropdown links on hover */
+                .dropdown-content a:hover {
+                    background-color: #f1f1f1
+                }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Change the background color of the dropdown button when the dropdown content is shown */
+        .dropdown:hover .dropbtn {
+            background-color: #69b9ff;
+        }
+    </style>
     @RenderSection("CSS", required: false)
 </head>
 <body>
@@ -24,17 +64,30 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                         @if (this.Context.User.Identity.IsAuthenticated)
                         {
                             if (this.Context.User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link btn-danger" asp-area="" asp-controller="" asp-action="">Admin</a>
+                                    <div class="dropdown">
+                                        <a class="nav-link text-dark" href="#">Admin</a>
+                                        <div class="dropdown-content">
+                                            <a href="#">1</a>
+                                            <a href="#">2</a>
+                                            <a href="#">3</a>
+                                        </div>
+                                    </div>
                                 </li>
                             }
+                            <li class="nav-item">
+                                <div class="dropdown">
+                                    <a class="nav-link text-dark" href="#">Felhasználó</a>
+                                    <div class="dropdown-content">
+                                        <a asp-area="" asp-controller="User" asp-action="myCars">Járműveim</a>
+                                        <a asp-area="" asp-controller="User" asp-action="addCar">Jármű rögzítés</a>
+                                    </div>
+                                </div>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Kijelentkezés</a>
                             </li>

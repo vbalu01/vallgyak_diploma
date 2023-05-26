@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AutoPortal.Models.RequestModels;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoPortal.Models.DbModels
 {
     [Table("vehicles")]
-    public class Vehicle
+    public partial class Vehicle
     {
         [Key]
         [Required]
@@ -17,12 +18,12 @@ namespace AutoPortal.Models.DbModels
         [Required]
         public int category { get; set; }
         [Required]
-        public int maufact_year { get; set; }
+        public int manufact_year { get; set; }
         [Required]
         public string make { get; set; }
         [Required]
         public string model { get; set; }
-        public string modelType { get; set; }
+        public string modeltype { get; set; }
         [Required]
         public int fuel { get; set; }
         [Required]
@@ -43,5 +44,33 @@ namespace AutoPortal.Models.DbModels
         public int weight { get; set; }
         [Required]
         public int max_weight { get; set; }
+    }
+
+    public partial class Vehicle
+    {
+        public Vehicle() { }
+        public Vehicle(AddUserCarModel m)
+        {
+            this.chassis_number = m.chassis_number;
+            this.engine_number = m.engine_number;
+            this.license  = m.license;
+            this.engine_code = m.engine_code;
+            this.category = Convert.ToInt32(m.category);
+            this.manufact_year = Convert.ToInt32(m.manufact_year);
+            this.make = m.make;
+            this.model = m.model;
+            this.modeltype = m.modelType;
+            this.fuel = Convert.ToInt32(m.fuel);
+            this.transmission = Convert.ToInt32(m.transmission);
+            this.drive = Convert.ToInt32(m.drive);
+            this.engine_ccm = Convert.ToInt32(m.engine_ccm);
+            this.performance = Convert.ToInt32(m.performance);
+            this.torque = Convert.ToInt32(m.torque);
+            this.body = m.body;
+            this.num_of_doors = Convert.ToInt32(m.num_of_doors);
+            this.num_of_seats = Convert.ToInt32(m.num_of_seats);
+            this.weight = Convert.ToInt32(m.weight);
+            this.max_weight = Convert.ToInt32(m.max_weight);
+        }
     }
 }

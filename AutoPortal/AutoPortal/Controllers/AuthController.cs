@@ -118,7 +118,8 @@ namespace AutoPortal.Controllers
             List<Claim> claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Email, user.email),
-                new Claim("UserId", user.id.ToString())
+                new Claim("UserId", user.id.ToString()),
+                new Claim("LoginType", "USER")
             };
             foreach (string role in Roles)
             {

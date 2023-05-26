@@ -1,14 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AutoPortal.Libs;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoPortal.Models.DbModels
 {
     [Table("drivetypes")]
-    public class DriveType
+    public partial class DriveType
     {
         [Key]
         public int id { get; set; }
         [Required]
         public string drive { get; set; }
+    }
+
+    public partial class DriveType
+    {
+        public static int? findIdByDriveType(string drive)
+        {
+            using(SQL mysql = new SQL())
+            {
+                return mysql.driveTypes.SingleOrDefault(d => d.drive == drive).id;
+            }
+        }
     }
 }
