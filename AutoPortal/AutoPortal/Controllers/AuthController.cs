@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using AutoPortal.Models.AppModels;
 
 namespace AutoPortal.Controllers
 {
@@ -99,7 +100,7 @@ namespace AutoPortal.Controllers
                     return View();
 				}
 
-                ClaimsPrincipal princ = this.GenerateClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId));
+                ClaimsPrincipal princ = this.GenerateClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId), eVehicleTargetTypes.USER);
                 await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
                 {
                     IsPersistent = true
@@ -113,17 +114,21 @@ namespace AutoPortal.Controllers
             }
         }
 
-        private ClaimsPrincipal GenerateClaim(User user, IEnumerable<string> Roles)
+        private ClaimsPrincipal GenerateClaim(User user, IEnumerable<string> Roles, eVehicleTargetTypes t)
         {
             List<Claim> claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Email, user.email),
                 new Claim("UserId", user.id.ToString()),
-                new Claim("LoginType", "USER")
             };
+            if (t == eVehicleTargetTypes.USER)
+                claims.Add(new Claim("LoginType", "USER"));
             foreach (string role in Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+                if (t == eVehicleTargetTypes.USER)
+                    claims.Add(new Claim(ClaimTypes.Role, "user"));
+
             }
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }

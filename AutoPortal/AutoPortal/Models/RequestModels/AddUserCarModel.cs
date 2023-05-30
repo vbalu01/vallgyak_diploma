@@ -2,7 +2,7 @@
 
 namespace AutoPortal.Models.RequestModels
 {
-    public class AddUserCarModel
+    public abstract class AddUserCarModel
     {
         [Required]
         public string chassis_number { get; set; }

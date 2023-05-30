@@ -39,8 +39,10 @@ namespace AutoPortal.Controllers
                 int uid = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "UserId").Value);
                 this.loginId = uid;
                 user = this._SQL.users.SingleOrDefault(u => u.id == uid);
-                Enum.TryParse<eVehicleTargetTypes>(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "LoginType").Value, out eVehicleTargetTypes t);
-                loginType = t;
+                if (this.HttpContext.User.IsInRole("user")) //Bejelentkezés típusa
+                {
+                    loginType = eVehicleTargetTypes.USER;
+                }
             }
             base.OnActionExecuting(context);
         }
