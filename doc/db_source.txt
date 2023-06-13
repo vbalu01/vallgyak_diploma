@@ -66,6 +66,14 @@ Table portal.vehicles{
   max_weight int [NOT NULL]
 }
 
+Table portal.vehicleOwnerChanges{
+  id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  owner_type int [NOT NULL]
+  new_owner int [NOT NULL]
+  owner_change_date datetime [NOT NULL]
+}
+
 Table portal.roles{
   role varchar [PK, NOT NULL]
 }
@@ -87,7 +95,19 @@ Table portal.services{
   id int [PK, NOT NULL]
   email varchar [NOT NULL]
   name varchar [NOT NULL]
+  phone varchar [NOT NULL]
   password varchar [NOT NULL]
+  description varchar
+  status int [NOT NULL]
+}
+
+Table portal.dealers{
+  id int [PK, NOT NULL]
+  email varchar [NOT NULL]
+  phone varchar [NOT NULL]
+  name varchar [NOT NULL]
+  password varchar [NOT NULL]
+  description varchar
   status int [NOT NULL]
 }
 
@@ -96,4 +116,67 @@ Table portal.vehiclePermissions{
   target_id int [PK, NOT NULL]
   target_type int [PK, NOT NULL]
   permission int [PK, NOT NULL]
+}
+
+Table portal.serviceEvents{
+  id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  service_id int [NOT NULL, ref:> portal.services.id]
+  title varchar [NOT NULL]
+  description varchar [NOT NULL]
+  date datetime [NOT NULL]
+  mileage int [NOT NULL]
+  serviceType int [NOT NULL]
+  comment varchar
+}
+
+Table portal.crashEvent{
+  id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  date datetime [NOT NULL]
+  mileage int [NOT NULL]
+  description varchar
+  damageCost int
+}
+
+Table portal.otherCosts{
+  id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  title varchar [NOT NULL]
+  description varchar [NOT NULL]
+  cost int [NOT NULL]
+  date datetime [NOT NULL]
+}
+
+Table portal.refuels{
+  id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  refuel_cost int [NOT NULL]
+  traveled_distance int [NOT NULL]
+  amount_of_fuel int [NOT NULL]
+  premium_fuel bool [NOT NULL]
+  fueling_date datetime [NOT NULL]
+}
+
+Table portal.reviews{
+  id varchar [PK, NOT NULL]
+  source_type int [NOT NULL]
+  source_id int [NOT NULL]
+  target_type int [NOT NULL]
+  target_id int [NOT NULL]
+  rating int [NOT NULL]
+  description varchar
+  date datetime [NOT NULL]
+  edited bool [NOT NULL]
+}
+
+Table portal.saleVehicles{
+  transaction_id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  vehicle_cost int [NOT NULL]
+  phone varchar [NOT NULL]
+  email varchar [NOT NULL]
+  announcement_date datetime [NOT NULL]
+  description varchar [NOT NULL]
+  active bool [NOT NULL]
 }

@@ -19,7 +19,7 @@ namespace AutoPortal.Libs
             {
                 Random rnd = new();
 
-                int saltSize = rnd.Next(10, 17);
+                int saltSize = rnd.Next(10, 15);
                 salt = CreateSalt(saltSize);
             }
 
