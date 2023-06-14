@@ -130,7 +130,7 @@ Table portal.serviceEvents{
   comment varchar
 }
 
-Table portal.crashEvent{
+Table portal.crashEvents{
   id varchar [PK, NOT NULL]
   vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
   date datetime [NOT NULL]

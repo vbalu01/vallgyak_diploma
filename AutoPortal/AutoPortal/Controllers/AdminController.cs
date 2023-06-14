@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoPortal.Libs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NToastNotify;
 
 namespace AutoPortal.Controllers
 {
     [Authorize("Admin")]
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
+        AdminController(IConfiguration config, SQL sql, IToastNotification notification) : base(config, sql, notification)
+        {}
+
         [HttpGet]
         public IActionResult factoryManagement()
         {

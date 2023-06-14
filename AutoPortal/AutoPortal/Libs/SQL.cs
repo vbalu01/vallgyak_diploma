@@ -65,6 +65,15 @@ namespace AutoPortal.Libs
         public DbSet<Role> roles { get; set; }
         public DbSet<UserRole> userRoles { get; set; }
         public DbSet<VehiclePermission> vehiclePermissions { get; set; }
+        public DbSet<OtherCost> otherCosts { get; set; }
+        public DbSet<CrashEvent> crashEvents { get; set; }
+        public DbSet<VehicleOwnerChange> vehicleOwnerChanges { get; set; }
+        public DbSet<Refuel> refuels { get; set; }
+        public DbSet<ServiceEvent> serviceEvents { get; set; }
+        public DbSet<Service> services { get; set; }
+        public DbSet<Factory> factories { get; set; }
+        public DbSet<Dealer> dealers { get; set; }
+        public DbSet<Review> reviews { get; set; }
         #endregion
     }
 }
