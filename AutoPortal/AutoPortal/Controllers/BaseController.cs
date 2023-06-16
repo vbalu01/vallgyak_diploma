@@ -21,7 +21,7 @@ namespace AutoPortal.Controllers
         protected int loginId { get; private set; }
         protected eVehicleTargetTypes loginType { get; private set; }
 
-        protected User user;
+        protected dynamic user;
 
         public BaseController(IConfiguration configuration, SQL sql, IToastNotification notification)
         {
@@ -36,12 +36,21 @@ namespace AutoPortal.Controllers
         {
             if (this.HttpContext.User.Claims.Any(c => c.Type == "UserId")) //Bejelentkezett felhasználó
             {
-                int uid = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "UserId").Value);
-                this.loginId = uid;
-                user = this._SQL.users.SingleOrDefault(u => u.id == uid);
-                if (this.HttpContext.User.IsInRole("user")) //Bejelentkezés típusa
+                this.loginId = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "UserId").Value);
+                switch(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "LoginType").Value)
                 {
-                    loginType = eVehicleTargetTypes.USER;
+                    case "USER":
+                        user = this._SQL.users.SingleOrDefault(u => u.id == this.loginId);
+                        loginType = eVehicleTargetTypes.USER;
+                        break;
+                    case "SERVICE":
+                        user = this._SQL.services.SingleOrDefault(u => u.id == this.loginId);
+                        loginType = eVehicleTargetTypes.SERVICE;
+                        break;
+                    case "DEALER":
+                        user = this._SQL.dealers.SingleOrDefault(u => u.id == this.loginId);
+                        loginType = eVehicleTargetTypes.DEALER;
+                    break;
                 }
             }
             base.OnActionExecuting(context);

@@ -71,7 +71,7 @@ namespace AutoPortal.Controllers
                 password = PasswordManager.GenerateHash(m.password),
                 name = m.name,
                 register_date = DateTime.Now,
-                enabled = true
+                status = eAccountStatus.None
             };
             _SQL.users.Add(u);
             await _SQL.SaveChangesAsync();
@@ -100,10 +100,11 @@ namespace AutoPortal.Controllers
 
                 if (PasswordManager.AreEqual(password, user.password))
                 {
-                    if (!user.enabled) {
+                    /*
+                    if (!user.status.HasFlag(eAccountStatus.EMAIL_CONFIRM)) {
                         this._Notification.AddErrorToastMessage("A felhasználó nem elérhető!");
                         return View();
-                    }
+                    }*/
 
                     ClaimsPrincipal princ = this.GenerateUserClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId));
                     await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()

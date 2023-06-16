@@ -1,5 +1,7 @@
 ﻿using AutoPortal.Libs;
 using AutoPortal.Models;
+using AutoPortal.Models.AppModels;
+using AutoPortal.Models.DbModels;
 using Microsoft.AspNetCore.Mvc;
 using NToastNotify;
 using System.Diagnostics;
@@ -21,6 +23,44 @@ namespace AutoPortal.Controllers
 
         public IActionResult Index()
         {
+            return View();
+        }
+        
+        public IActionResult MyProfile()
+        {
+            switch (loginType)
+            {
+                case eVehicleTargetTypes.DEALER:
+                    ViewBag.loginType = "Kereskedő";
+                    ViewBag.pageCategory = 2;
+                    ViewBag.id = user.id;
+                    ViewBag.email = user.email;
+                    ViewBag.phone = user.phone;
+                    ViewBag.name = user.name;
+                    ViewBag.description = user.description;
+                    ViewBag.status = user.status;
+                break;
+                case eVehicleTargetTypes.SERVICE:
+                    ViewBag.loginType = "Szerviz";
+                    ViewBag.pageCategory = 1;
+                    ViewBag.id = user.id;
+                    ViewBag.email = user.email;
+                    ViewBag.phone = user.phone;
+                    ViewBag.name = user.name;
+                    ViewBag.description = user.description;
+                    ViewBag.status = user.status;
+                    break;
+                case eVehicleTargetTypes.USER:
+                    ViewBag.loginType = "Felhasználó";
+                    ViewBag.pageCategory = 0;
+                    ViewBag.id = user.id;
+                    ViewBag.email = user.email;
+                    ViewBag.name = user.name;
+                    ViewBag.register = user.register_date;
+                    ViewBag.status = user.status;
+                    ViewBag.roles = user.getRoles();
+                    break;
+            }
             return View();
         }
 

@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Profil";
+}
+
+<div class="row col-12">
+    <h1>Profilom (<i>@ViewBag.loginType</i>)</h1>
+    <div>
+        @if(ViewBag.pageCategory == 0) { // User
+            <p>Rendszerazonosító: @ViewBag.id</p>
+            <input type="text" id="userEmail" value="@ViewBag.email" />
+            <input type="text" id="userName" value="@ViewBag.name" />
+            <p>Regisztráció dátuma: @ViewBag.register</p>
+            <p>Státusz: @ViewBag.status</p>
+            @if(ViewBag.roles != null) {
+                <p>Jogosultságok: </p>
+                <ul>
+                @foreach (var role in ViewBag.roles){
+                    <li>@role.role</li>
+                }
+                </ul>
+            }
+        } else{ // Szerviz/Kereskedő
+            <p>Rendszerazonosító: @ViewBag.id</p>
+            <input type="text" id="userName" value="@ViewBag.name" />
+            <input type="text" id="userEmail" value="@ViewBag.email" />
+            <input type="text" id="userPhone" value="@ViewBag.phone" />
+            <input type="text" id="userDescription" value="@ViewBag.description" />
+            <p>Státusz: @ViewBag.status"</p>
+        }
+    </div>
+</div>

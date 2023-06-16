@@ -8,7 +8,7 @@ namespace AutoPortal.Controllers
     [Authorize("Admin")]
     public class AdminController : BaseController
     {
-        AdminController(IConfiguration config, SQL sql, IToastNotification notification) : base(config, sql, notification)
+        public AdminController(IConfiguration config, SQL sql, IToastNotification notification) : base(config, sql, notification)
         {}
 
         [HttpGet]

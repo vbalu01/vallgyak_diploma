@@ -88,8 +88,15 @@
                                     </div>
                                 </div>
                             </li>
+
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Kijelentkezés</a>
+                                <div class="dropdown">
+                                    <a class="nav-link text-dark" href="#">Profil</a>
+                                    <div class="dropdown-content">
+                                        <a asp-area="" asp-controller="Home" asp-action="MyProfile">Profil</a>
+                                        <a class="nav-link text-danger" asp-area="" asp-controller="Auth" asp-action="Logout">Kijelentkezés</a>
+                                    </div>
+                                </div>
                             </li>
                         }
                         else
