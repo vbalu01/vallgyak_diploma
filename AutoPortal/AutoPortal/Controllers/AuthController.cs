@@ -87,49 +87,155 @@ namespace AutoPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            if(!_SQL.users.Any(u=>u.email == email)) { 
+            eVehicleTargetTypes loginType = getLoginMethod(email);
+            if(loginType == eVehicleTargetTypes.NONE) { //Hibás bejelentkezés
                 _Notification.AddInfoToastMessage("Hibás felhasználónév, vagy jelszó!");
                 return View();
             }
-
-            User user = await this._SQL.users.SingleAsync(u => u.email == email);
-
-            if (PasswordManager.AreEqual(password, user.password)) {
-                if (!user.enabled) {
-                    this._Notification.AddErrorToastMessage("A felhasználó nem elérhető!");
-                    return View();
-				}
-
-                ClaimsPrincipal princ = this.GenerateClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId), eVehicleTargetTypes.USER);
-                await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
-                {
-                    IsPersistent = true
-                });
-                this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
-                return Redirect("/Home");
-            }
-            else {
-                this._Notification.AddInfoToastMessage("Hibás felhasználónév, vagy jelszó!");
+            else if(loginType == eVehicleTargetTypes.FACTORY) { //Gyártói bejelentkezés
+                _Notification.AddWarningToastMessage("Gyártói bejelentkezés csak API-n keresztül engedélyezett!");
                 return View();
+            } else if (loginType == eVehicleTargetTypes.USER) { //Felhasználói bejelentkezés
+                User user = await this._SQL.users.SingleAsync(u => u.email == email);
+
+                if (PasswordManager.AreEqual(password, user.password))
+                {
+                    if (!user.enabled) {
+                        this._Notification.AddErrorToastMessage("A felhasználó nem elérhető!");
+                        return View();
+                    }
+
+                    ClaimsPrincipal princ = this.GenerateUserClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId));
+                    await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
+                    {
+                        IsPersistent = true
+                    });
+                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
+                    return Redirect("/Home");
+                }
+                else
+                {
+                    this._Notification.AddInfoToastMessage("Hibás felhasználónév, vagy jelszó!");
+                    return View();
+                }
+            } else if(loginType == eVehicleTargetTypes.SERVICE) { //Szerviz bejelentkezés
+                Service service = await this._SQL.services.SingleAsync(s => s.email == email);
+
+                if (PasswordManager.AreEqual(password, service.password))
+                {
+                    if (service.status.HasFlag(eAccountStatus.BANNED)) {
+                        this._Notification.AddErrorToastMessage("A felhasználó kitiltva!");
+                        return View();
+                    }
+
+                    if (!service.status.HasFlag(eAccountStatus.EMAIL_CONFIRM)) {
+                        this._Notification.AddWarningToastMessage("Bejelentkezéshez E-mail megerősítés szükséges!");
+                        return View();
+                    }
+
+                    ClaimsPrincipal princ = this.GenerateServiceClaim(service);
+                    await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
+                    {
+                        IsPersistent = true
+                    });
+                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
+                    return Redirect("/Home");
+                }
+                else
+                {
+                    this._Notification.AddInfoToastMessage("Hibás felhasználónév, vagy jelszó!");
+                    return View();
+                }
+            } else if(loginType == eVehicleTargetTypes.DEALER) {
+                Dealer dealer = await this._SQL.dealers.SingleAsync(s => s.email == email);
+
+                if (PasswordManager.AreEqual(password, dealer.password))
+                {
+                    if (dealer.status.HasFlag(eAccountStatus.BANNED))
+                    {
+                        this._Notification.AddErrorToastMessage("A felhasználó kitiltva!");
+                        return View();
+                    }
+
+                    if (!dealer.status.HasFlag(eAccountStatus.EMAIL_CONFIRM))
+                    {
+                        this._Notification.AddWarningToastMessage("Bejelentkezéshez E-mail megerősítés szükséges!");
+                        return View();
+                    }
+
+                    ClaimsPrincipal princ = this.GenerateDealerClaim(dealer);
+                    await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
+                    {
+                        IsPersistent = true
+                    });
+                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
+                    return Redirect("/Home");
+                }
+                else
+                {
+                    this._Notification.AddInfoToastMessage("Hibás felhasználónév, vagy jelszó!");
+                    return View();
+                }
             }
+
+            this._Notification.AddErrorToastMessage("AUTH ERROR");
+            return View();
+
         }
 
-        private ClaimsPrincipal GenerateClaim(User user, IEnumerable<string> Roles, eVehicleTargetTypes t)
+        private eVehicleTargetTypes getLoginMethod(string email) {
+            if(_SQL.users.Any(u=>u.email == email)) { //Felhasználói bejelentkezés
+                return eVehicleTargetTypes.USER;
+            }else if(_SQL.factories.Any(f=>f.email == email)) { //Gyártói bejelentkezés
+                return eVehicleTargetTypes.FACTORY;
+            }else if(_SQL.services.Any(s=>s.email == email)) { //Szerviz bejelenetkezés
+                return eVehicleTargetTypes.SERVICE;
+            }else if(_SQL.dealers.Any(d=>d.email == email)) { //Kereskedői bejelentkezés
+                return eVehicleTargetTypes.DEALER;
+            }
+            return eVehicleTargetTypes.NONE; //Nem létezik a fiók
+        }
+
+        private ClaimsPrincipal GenerateUserClaim(User user, IEnumerable<string> Roles)
         {
             List<Claim> claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Email, user.email),
                 new Claim("UserId", user.id.ToString()),
+                new Claim("LoginType", "USER"),
+                new Claim(ClaimTypes.Role, "user")
             };
-            if (t == eVehicleTargetTypes.USER)
-                claims.Add(new Claim("LoginType", "USER"));
             foreach (string role in Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
-                if (t == eVehicleTargetTypes.USER)
-                    claims.Add(new Claim(ClaimTypes.Role, "user"));
-
             }
+
+            return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+        }
+
+        private ClaimsPrincipal GenerateServiceClaim(Service s)
+        {
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Email, s.email),
+                new Claim("UserId", s.id.ToString()),
+                new Claim("LoginType", "SERVICE"),
+                new Claim(ClaimTypes.Role, "service")
+            };
+
+            return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+        }
+
+        private ClaimsPrincipal GenerateDealerClaim(Dealer d)
+        {
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Email, d.email),
+                new Claim("UserId", d.id.ToString()),
+                new Claim("LoginType", "DEALER"),
+                new Claim(ClaimTypes.Role, "dealer")
+            };
+
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }
         #endregion
