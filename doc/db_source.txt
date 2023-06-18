@@ -54,6 +54,7 @@ Table portal.vehicles{
   modeltype varchar
   fuel int [NOT NULL, ref:> portal.fuelTypes.id]
   transmission int [NOT NULL, ref:> portal.transmissionTypes.id]
+  num_of_gears int [NOT NULL]
   drive int [NOT NULL, ref:> portal.driveTypes.id]
   engine_ccm int
   performance int [NOT NULL]
@@ -91,7 +92,7 @@ Table portal.factories{
 }
 
 Table portal.services{
-  id int [PK, NOT NULL]
+  id int [PK, NOT NULL, increment]
   email varchar [NOT NULL]
   name varchar [NOT NULL]
   phone varchar [NOT NULL]
@@ -101,7 +102,7 @@ Table portal.services{
 }
 
 Table portal.dealers{
-  id int [PK, NOT NULL]
+  id int [PK, NOT NULL, increment]
   email varchar [NOT NULL]
   phone varchar [NOT NULL]
   name varchar [NOT NULL]
@@ -123,6 +124,7 @@ Table portal.serviceEvents{
   service_id int [NOT NULL, ref:> portal.services.id]
   title varchar [NOT NULL]
   description varchar [NOT NULL]
+  cost int [NOT NULL]
   date datetime [NOT NULL]
   mileage int [NOT NULL]
   serviceType int [NOT NULL]
@@ -178,4 +180,11 @@ Table portal.saleVehicles{
   announcement_date datetime [NOT NULL]
   description varchar [NOT NULL]
   active bool [NOT NULL]
+}
+
+Table portal.mileageStands{
+  id varchar [PK, NOT NULL]
+  vehicle_id varchar [NOT NULL, ref:> portal.vehicles.chassis_number]
+  mileage int [NOT NULL]
+  date datetime [NOT NULL]
 }

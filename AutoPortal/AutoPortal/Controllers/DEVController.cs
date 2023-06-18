@@ -55,6 +55,7 @@ namespace AutoPortal.Controllers
             try { _SQL.factories.Any(); tables.Add("Factory", true);} catch { tables.Add("Factory", false);}
             try { _SQL.dealers.Any(); tables.Add("Dealer", true);} catch { tables.Add("Dealer", false);}
             try { _SQL.reviews.Any(); tables.Add("Review", true);} catch { tables.Add("Review", false);}
+            try { _SQL.mileageStands.Any(); tables.Add("MileageStand", true);} catch { tables.Add("MileageStand", false);}
 
             return tables;
         }

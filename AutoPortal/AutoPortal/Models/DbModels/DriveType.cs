@@ -22,5 +22,13 @@ namespace AutoPortal.Models.DbModels
                 return mysql.driveTypes.SingleOrDefault(d => d.drive == drive).id;
             }
         }
+
+        public static string findDriveTypeById(int id)
+        {
+            using (SQL mysql = new SQL())
+            {
+                return mysql.driveTypes.SingleOrDefault(d => d.id == id).drive;
+            }
+        }
     }
 }

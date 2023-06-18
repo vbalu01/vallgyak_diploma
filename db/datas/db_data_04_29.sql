@@ -16,7 +16,7 @@ INSERT INTO portal.fueltypes (fuel) VALUES ("Hidrogén");
 
 INSERT INTO portal.drivetypes (drive) VALUES ("Elsőkerék meghajtás");
 INSERT INTO portal.drivetypes (drive) VALUES ("Hátsókerék meghajtás");
-INSERT INTO portal.drivetypes (drive) VALUES ("Kapcsolható összkereék meghajtás");
+INSERT INTO portal.drivetypes (drive) VALUES ("Kapcsolható összkerék meghajtás");
 INSERT INTO portal.drivetypes (drive) VALUES ("Állandó összkereék meghajtás");
 
 INSERT INTO portal.bodytypes (body) VALUES ("Szedán");

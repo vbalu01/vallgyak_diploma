@@ -1,0 +1,354 @@
+﻿@using AutoPortal.Libs;
+@using AutoPortal.Models.AppModels;
+@using AutoPortal.Models.DbModels;
+@{
+    ViewData["Title"] = "Jármű kezelés";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+
+        let vid = "@ViewBag.vehicleData.v.chassis_number"; //Jármű id
+
+        function addNewCost() {
+            $('#newCostTitle').removeClass("is-invalid");
+            $('#newCostDescription').removeClass("is-invalid");
+            $('#newCostCost').removeClass("is-invalid");
+            $('#newCostDate').removeClass("is-invalid");
+
+            if (!$('#newCostTitle').val()){
+                $('#newCostTitle').addClass("is-invalid");
+                return;
+            }
+            if (!$('#newCostDescription').val()) {
+                $('#newCostDescription').addClass("is-invalid");
+                return;
+            }
+            if (!$('#newCostCost').val() || $('#newCostCost').val() < 1) {
+                $('#newCostCost').addClass("is-invalid");
+                return;
+            }
+            if (!$('#newCostDate').val()) {
+                $('#newCostDate').addClass("is-invalid");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "addNewCost",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'vehicle_id': vid,
+                    'title': $('#newCostTitle').val(),
+                    'description': $('#newCostDescription').val(),
+                    'cost': $('#newCostCost').val(),
+                    'date': $('#newCostDate').val()
+                }),
+                success: function (data) {
+                    $('#newCostTitle').val("");
+                    $('#newCostDescription').val("");
+                    $('#newCostCost').val(0);
+                }
+            });
+        }
+
+        function addNewRefuel() {
+            $('#newRefuelCost').removeClass("is-invalid");
+            $('#newRefuelDistance').removeClass("is-invalid");
+            $('#newRefuelAmount').removeClass("is-invalid");
+            $('#newRefuelDate').removeClass("is-invalid");
+
+            if (!$('#newRefuelCost').val() || $('#newRefuelCost').val() < 1) {
+                $('#newRefuelCost').addClass("is-invalid");
+                return;
+            }
+            if (!$('#newRefuelDistance').val() || $('#newRefuelDistance').val() < 1) {
+                $('#newRefuelDistance').addClass("is-invalid");
+                return;
+            }
+            if (!$('#newRefuelAmount').val() || $('#newRefuelAmount').val() < 1) {
+                $('#newRefuelAmount').addClass("is-invalid");
+                return;
+            }
+            if (!$('#newRefuelDate').val()) {
+                $('#newRefuelDate').addClass("is-invalid");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "addNewRefuel",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'vehicle_id' : vid,
+                    'refuel_cost' : $('#newRefuelCost').val(),
+                    'traveled_distance': $('#newRefuelDistance').val(),
+                    'amount_of_fuel': $('#newRefuelAmount').val(),
+                    'premium_fuel': $('#newRefuelPremium').is(":checked"),
+                    'fueling_date': $('#newRefuelDate').val()
+                }),
+                success: function (data) {
+                    $('#newRefuelCost').val(0);
+                    $('#newRefuelDistance').val(0);
+                    $('#newRefuelAmount').val(0);
+                }
+            });
+        }
+    </script>
+}
+
+@section CSS{
+    <style>
+        .tableTitle{
+            font-size: 30px;
+            text-align: center;
+            color: red;
+        }
+
+        .tableLeft{
+            text-align: left;
+        }
+
+        .tableRight{
+            text-align: right;
+        }
+
+        .tableCenter{
+            text-align: center;
+        }
+    </style>
+}
+
+<div class="row col-12">
+    <h1>Jármű kezelés: <label><i>@ViewBag.vehicleData.v.make  @ViewBag.vehicleData.v.model</i></label></h1>
+    <hr />
+    <!--Jármű adatok-->
+    <div class="col-12">
+        <table style="width:100%;" class="table table-striped">
+            <tbody>
+                <tr><th class="tableTitle" colspan="4">Általános adatok</th></tr>
+                <tr>
+                    <th class="tableLeft">Alvázszám</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.chassis_number</td>
+                    <th class="tableLeft">Rendszám</th>
+                    <td class="tableLeft"><input type="text" value="@ViewBag.vehicleData.v.license" /></td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Márka</th>
+                    <td>@ViewBag.vehicleData.v.make</td>
+                    <th class="tableLeft">Model</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.model</td>
+                </tr>
+                <tr>
+                    <th>Típusmegjelölés</th>
+                    <td>@ViewBag.vehicleData.v.modeltype</td>
+                    <th>Évjárat</th>
+                    <td>@ViewBag.vehicleData.v.manufact_year</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Jármű kategória</th>
+                    <td class="tableLeft">@VehicleCategory.findCategoryById(ViewBag.vehicleData.v.category)</td>
+                    <th class="tableLeft">Kivitel</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.body</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Ajtók száma</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.num_of_doors</td>
+                    <th class="tableLeft">Szállítható személyek száma</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.num_of_seats</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Karosszéria tömege</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.weight</td>
+                    <th class="tableLeft">Megengedett legnagyobb össztömeg</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.max_weight</td>
+                </tr>
+
+                <tr><th class="tableTitle" colspan="4">Motor adatok</th></tr>
+                <tr>
+                    <th class="tableLeft">Motorszám</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.engine_number</td>
+                    <th class="tableLeft">Motorkód</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.engine_code</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Üzemanyag</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.fuel</td>
+                    <th class="tableLeft">Lökettérfogat</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.engine_ccm</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Teljesítmény</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.performance</td>
+                    <th class="tableLeft">Nyomaték</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.torque</td>
+                </tr>
+
+                <tr><th class="tableTitle" colspan="4">Hajtáslánc adatok</th></tr>
+                <tr>
+                    <th class="tableLeft">Váltó típusa</th>
+                    <td class="tableLeft">@TransmissionType.findTransmissionById(ViewBag.vehicleData.v.transmission)</td>
+                    <th class="tableLeft">Váltó fokozatok száma</th>
+                    <td class="tableLeft">@ViewBag.vehicleData.v.num_of_gears</td>
+                </tr>
+                <tr>
+                    <th class="">Meghajtás</th>
+                    <td class="">@DriveType.findDriveTypeById(ViewBag.vehicleData.v.drive)</td>
+                    <th></th>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <hr />
+    <!--Adat rögzítés (tankolás, egyéb kiadás)-->
+    <div class="row col-12" style="padding-bottom:2%;">
+        <div class="col-6">
+            <h2>Tankolás rögzítése</h2>
+            <div>
+                <fieldset>
+                    <label for="newRefuelCost">Költség</label>
+                    <input type="number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" class="form-control" id="newRefuelCost" value="0" title="Költség" />
+
+                    <label for="newRefuelDistance">Előző tankolás óta megtett táv</label>
+                    <input type="number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" class="form-control" id="newRefuelDistance" value="0" title="Előző tankolás óta megtett táv" />
+
+                    <label for="newRefuelAmount">Tankolt mennyiség</label>
+                    <input type="number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" class="form-control" id="newRefuelAmount" value="0" title="Tankolt mennyiség" />
+                
+                    <input type="radio" id="newRefuelStandard" name="fuelType" checked/>
+                    <label for="newRefuelStandard">Hagyományos üzemanyag</label>
+                
+                    <br />
+                    <input type="radio" id="newRefuelPremium" name="fuelType" />
+                    <label for="newRefuelPremium">Prémium üzemanyag</label>
+                    <br />
+                    <br />
+
+                    <label for="newRefuelDate">Tankolás időpontja</label>
+                    <input type="datetime-local" class="form-control" id="newRefuelDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+
+                    <button class="btn btn-success" style="width:100%;" onclick="addNewRefuel();">Tankolás rögzítése</button>
+                </fieldset>
+            </div>
+        </div>
+        <div class="col-6">
+            <h2>Egyéb kiadás rögzítése</h2>
+            @if (ViewBag.vehicleData.p == eVehiclePermissions.OWNER || ViewBag.vehicleData.p == eVehiclePermissions.SUBOWNER){
+                <div>
+                    <label for="newCostTitle">Cím</label>
+                    <input type="text" class="form-control" id="newCostTitle" placeholder="Cím..." />
+
+                    <label for="newCostDescription">Leírás</label>
+                    <textarea id="newCostDescription" class="form-control" placeholder="Leírás..."></textarea>
+
+                    <label for="newCostCost">Költség</label>
+                    <input type="number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" class="form-control" id="newCostCost" value="0" placeholder="Költség" />
+
+                    <label for="newCostDate">Dátum</label>
+                    <input type="datetime-local" class="form-control" id="newCostDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+
+                    <button class="btn btn-success" style="width:100%;" onclick="addNewCost();">Költség rögzítése</button>
+                </div>
+            }else {
+                <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
+            }
+        </div>
+    </div>
+
+    <hr />
+    <!--Esemény adatok-->
+    <div>
+        <button type="button" class="collapsible">Tankolási adatok</button>
+        <div class="col-12 content">
+            <h2>Korábbi tankolások</h2>
+            @if (ViewBag.Refuels == null || ((List<Refuel>)ViewBag.Refuels).Count == 0) {
+                <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
+            } else {
+                @foreach(Refuel rf in ViewBag.Refuels) {
+                    <button type="button" class="collapsible">Tankolás - @rf.fueling_date</button>
+                    <div class="content">
+                        <div class="row col-12">
+                            <div class="offset-2 col-4">
+                                <p>Fizetett: @rf.refuel_cost</p>
+                                <p>Tankolt mennyiség: @rf.amount_of_fuel</p>
+                                <p>Megtett táv: @rf.traveled_distance</p>
+                            </div>
+                            <div class="col-4">
+                                <p>Prémium üzemanyag: @if (rf.premium_fuel) { <label style="color:green;"><b>Igen</b></label> }else{ <label style="color:red;"><b>Nem</b></label> }</p>
+                                <p>Átlag fogyasztás 100km-en: <b>@{Write((float)rf.amount_of_fuel/rf.traveled_distance*100);}</b></p>
+                                <p>Átlag költség 100km-en: <b>@{Write(((float)rf.amount_of_fuel/rf.traveled_distance*100) * ((float)rf.refuel_cost/rf.amount_of_fuel));}</b></p>
+                            </div>
+                            <p style="text-align:center;"><b>Tankolás dátuma: @rf.fueling_date</b></p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <button type="button" class="collapsible">Futás adatok</button>
+        <div class="col-12 content">
+            <h2>Futás adatok</h2>
+            @if (ViewBag.MileageStands == null || ((List<(DateTime, int)>)ViewBag.MileageStands).Count == 0) {
+                <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
+            } else {
+                <table>
+                    <tr>
+                        <th style="width:60%;">Dátum</th>
+                        <th style="width:40%;">Futásteljesítmény</th>
+                    </tr>
+                    @{(DateTime, int) lastRow = (DateTime.Now, -1);}
+                    @foreach (var row in (List<(DateTime, int)>)ViewBag.MileageStands) {
+                        <tr>
+                            <td>@row.Item1</td>
+                            <td @if (lastRow.Item2 != -1 && lastRow.Item2 > row.Item2) { Write("style=color:red;font-weight:bold;"); }>@row.Item2</td>
+                        </tr>
+
+                        lastRow = row;
+                        
+                    }
+                </table>
+            }
+        </div>
+
+        <button type="button" class="collapsible">Szerviz adatok</button>
+        <div class="col-12 content">
+            <h2>Korábbi szervizek</h2>
+            @if (ViewBag.ServiceEvents == null || ((List<ServiceEvent>)ViewBag.ServiceEvents).Count == 0) {
+                <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
+            } else {
+                @foreach(ServiceEvent se in ViewBag.ServiceEvents) {
+                    <button type="button" class="collapsible">@se.title</button>
+                    <div class="content">
+                        <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
+                        <p><b>Leírás: </b>@se.description</p>
+                        <p><b>Költség: </b>@se.cost</p>
+                        <p><b>Dátum: </b>@se.date</p>
+                        <p><b>Futásteljesítmény: </b>@se.mileage</p>
+                        <p><b>Megjegyzés: </b>@se.comment</p>
+                        <p><b>Szerviz: </b><a href="serviceProfile?id=@se.service_id">@Service.GetServiceNameById(se.service_id)</a></p>
+                    </div>
+                }
+            }
+        </div>
+
+        <button type="button" class="collapsible">Egyéb költség adatok</button>
+        <div class="col-12 content">
+            <h2>Korábbi egyéb költségek</h2>
+            @if (ViewBag.OtherCosts == null || ((List<OtherCost>)ViewBag.OtherCosts).Count == 0) {
+                <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
+            } else {
+                @foreach(OtherCost of in ViewBag.OtherCosts) {
+                    <button type="button" class="collapsible">@of.title</button>
+                    <div class="content">
+                        <p><b>Leírás: </b>@of.description</p>
+                        <p><b>Költség: </b>@of.cost</p>
+                        <p><b>Dátum: </b>@of.date</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

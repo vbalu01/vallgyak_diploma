@@ -24,7 +24,7 @@ namespace AutoPortal.Models.DbModels
 
     public partial class User
     {
-        public List<Role> getRoles()
+        public List<Role> GetRoles()
         {
             List<Role> roles = new();
             using(SQL mysql = new SQL())

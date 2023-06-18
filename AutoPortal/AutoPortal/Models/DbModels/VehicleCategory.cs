@@ -22,5 +22,13 @@ namespace AutoPortal.Models.DbModels
                 return mysql.vehicleCategories.SingleOrDefault(c=>c.category == category).id;
             }
         }
+
+        public static string findCategoryById(int id)
+        {
+            using (SQL mysql = new SQL())
+            {
+                return mysql.vehicleCategories.SingleOrDefault(c => c.id == id).category;
+            }
+        }
     }
 }

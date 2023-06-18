@@ -22,5 +22,13 @@ namespace AutoPortal.Models.DbModels
                 return mysql.transmissionTypes.SingleOrDefault(t => t.transmission == transmission).id;
             }
         }
+
+        public static string findTransmissionById(int id)
+        {
+            using (SQL mysql = new SQL())
+            {
+                return mysql.transmissionTypes.SingleOrDefault(t => t.id == id).transmission;
+            }
+        }
     }
 }

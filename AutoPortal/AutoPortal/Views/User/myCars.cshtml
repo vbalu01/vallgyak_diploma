@@ -16,7 +16,7 @@
                 </tr>
                 @foreach(var item in ViewBag.vehicles) {
                     <tr>
-                        <td>@item.v.chassis_number</td>
+                        <td><a href="manageVehicle?vehicleId=@item.v.chassis_number">@item.v.chassis_number</a></td>
                         <td>@item.v.make</td>
                         <td>@item.v.model</td>
                         <td>@item.v.manufact_year</td>

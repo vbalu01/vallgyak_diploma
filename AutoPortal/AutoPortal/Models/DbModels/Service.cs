@@ -1,11 +1,12 @@
-﻿using AutoPortal.Models.AppModels;
+﻿using AutoPortal.Libs;
+using AutoPortal.Models.AppModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoPortal.Models.DbModels
 {
     [Table("services")]
-    public class Service
+    public partial class Service
     {
         [Key]
         [Required]
@@ -22,5 +23,16 @@ namespace AutoPortal.Models.DbModels
         public string description { get; set; }
         [Required]
         public eAccountStatus status { get; set; }
+    }
+
+    public partial class Service
+    {
+        public static string GetServiceNameById(int id)
+        {
+            using(SQL mysql = new SQL())
+            {
+                return mysql.services.SingleOrDefault(s => s.id == id).name;
+            }
+        }
     }
 }

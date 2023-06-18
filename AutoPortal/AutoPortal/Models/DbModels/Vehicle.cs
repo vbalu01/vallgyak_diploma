@@ -29,6 +29,8 @@ namespace AutoPortal.Models.DbModels
         [Required]
         public int transmission { get; set; }
         [Required]
+        public int num_of_gears { get; set; }
+        [Required]
         public int drive { get; set; }
         public int engine_ccm { get; set; }
         [Required]

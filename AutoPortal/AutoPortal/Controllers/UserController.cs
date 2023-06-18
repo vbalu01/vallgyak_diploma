@@ -16,6 +16,8 @@ namespace AutoPortal.Controllers
         {
         }
 
+
+        #region Views
         public IActionResult addCar()
         {
             ViewBag.vehicleCategories = _SQL.vehicleCategories.ToList();
@@ -33,20 +35,52 @@ namespace AutoPortal.Controllers
             List<UserVehicle> vehicles = new List<UserVehicle>();
             foreach (var item in _SQL.vehiclePermissions.Where(i => i.target_type == loginType && i.target_id == loginId))
             {
-                using(SQL mysql = new SQL()) {
+                using (SQL mysql = new SQL()) {
                     vehicles.Add(new UserVehicle { p = item.permission, v = mysql.vehicles.SingleOrDefault(vh => vh.chassis_number == item.vehicle_id) });
                 }
             }
 
-            if(vehicles.Count > 0)
+            if (vehicles.Count > 0)
                 ViewBag.vehicles = vehicles;
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> addNewUserCar([FromBody]AddUserCarModel m)
+        public IActionResult manageVehicle(string vehicleId)
         {
-            if(ModelState.IsValid) {
+            Vehicle v = _SQL.vehicles.SingleOrDefault(ve => ve.chassis_number == vehicleId);
+
+            if (v == null) //Nincs ilyen jármű
+                return NotFound();
+
+            VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(p => p.target_type == loginType && p.target_id == loginId);
+
+            if (vp == null) //Nincs semmilyen jogosultsága a felhasználónak a járműhöz
+                return Forbid();
+
+            List<(DateTime, int)> mileageStands = new();
+
+            foreach (MileageStand ms in MileageStand.GetVehicleMileageStands(vehicleId)) {
+                mileageStands.Add((ms.date, ms.mileage));
+            }
+            foreach(ServiceEvent se in ServiceEvent.GetVehicleServiceEvents(vehicleId)) { 
+                mileageStands.Add((se.date, se.mileage));
+            }
+
+            ViewBag.Refuels = Refuel.GetVehicleRefuels(vehicleId);
+            ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
+            ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.Item1).ToList();
+
+            ViewBag.vehicleData = new UserVehicle() { p = vp.permission, v = v };
+            return View();
+        }
+
+        #endregion
+
+        #region handleRequests
+        [HttpPost]
+        public async Task<IActionResult> addNewUserCar([FromBody] AddUserCarModel m)
+        {
+            if (ModelState.IsValid) {
                 if (_SQL.vehicles.Any(v => v.chassis_number == m.chassis_number)) { //Már rögzítve lett a jármű
                     _Notification.AddWarningToastMessage("A megadott alvázszám már szerepel a rendszerben!\nKérjük vegye fel a kapcsolatot velünk.");
                     return Conflict();
@@ -56,7 +90,7 @@ namespace AutoPortal.Controllers
                 _SQL.vehicles.Add(v);
                 await _SQL.SaveChangesAsync();
 
-                _SQL.vehiclePermissions.Add(new VehiclePermission { vehicle_id = v.chassis_number, target_id = loginId, target_type = loginType, permission = eVehiclePermissions.OWNER});
+                _SQL.vehiclePermissions.Add(new VehiclePermission { vehicle_id = v.chassis_number, target_id = loginId, target_type = loginType, permission = eVehiclePermissions.OWNER });
                 await _SQL.SaveChangesAsync();
 
                 _Notification.AddSuccessToastMessage("Jármű sikeresen rögzítve!");
@@ -67,7 +101,67 @@ namespace AutoPortal.Controllers
                 _Notification.AddErrorToastMessage("Hibás adatok!");
                 return BadRequest();
             }
-            
         }
+
+        [HttpPost]
+        public async Task<IActionResult> addNewRefuel([FromBody]AddNewRefuelModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if(!_SQL.vehicles.Any(v=>v.chassis_number == m.vehicle_id)) {
+                    _Notification.AddErrorToastMessage("Jármű nem található!");
+                    return NotFound();
+                }
+
+
+                VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(v => v.target_type == loginType && v.target_id == loginId);
+
+                if(vp == null || vp.permission == eVehiclePermissions.NONE) {
+                    _Notification.AddErrorToastMessage("Nincs jogosultsága a járműhöz!");
+                    return Forbid();
+                }
+
+                Refuel rf = new Refuel(m);
+                await _SQL.refuels.AddAsync(rf);
+                await _SQL.SaveChangesAsync();
+
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                return Ok();
+            }
+            _Notification.AddErrorToastMessage("Hiányos adatok!");
+            return BadRequest();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> addNewCost([FromBody]AddNewCostModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if (!_SQL.vehicles.Any(v => v.chassis_number == m.vehicle_id))
+                {
+                    _Notification.AddErrorToastMessage("Jármű nem található!");
+                    return NotFound();
+                }
+
+
+                VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(v => v.target_type == loginType && v.target_id == loginId);
+
+                if (vp == null || (!vp.permission.HasFlag(eVehiclePermissions.OWNER) && !vp.permission.HasFlag(eVehiclePermissions.SUBOWNER)))
+                {
+                    _Notification.AddErrorToastMessage("Nincs jogosultsága a járműhöz!");
+                    return Forbid();
+                }
+
+                OtherCost oc = new OtherCost(m);
+                await _SQL.otherCosts.AddAsync(oc);
+                await _SQL.SaveChangesAsync();
+
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                return Ok();
+            }
+            _Notification.AddErrorToastMessage("Hiányos adatok!");
+            return BadRequest();
+        }
+        #endregion
     }
 }
