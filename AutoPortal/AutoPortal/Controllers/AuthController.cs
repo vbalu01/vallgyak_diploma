@@ -80,6 +80,79 @@ namespace AutoPortal.Controllers
             resp.Message = "Register success!";
             return Ok(resp.ToString());
         }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterCompany([FromBody] CompanyRegisterModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if (string.IsNullOrEmpty(m.name) || string.IsNullOrEmpty(m.email) || string.IsNullOrEmpty(m.password) || string.IsNullOrEmpty(m.repassword) || string.IsNullOrEmpty(m.phone) || string.IsNullOrEmpty(m.description))
+                {
+                    resp.Success = false;
+                    resp.Message = "Bad data fill";
+                    _Notification.AddErrorToastMessage("Minden adatot ki kell tölteni!");
+                    return BadRequest(resp.ToString());
+                }
+
+                if (m.password.Length < 6)
+                {
+                    resp.Success = false;
+                    resp.Message = "Passwords must be at least 6 chars!";
+                    _Notification.AddErrorToastMessage("A jelszónak min. 6 karakterből kell állnia!");
+                    return BadRequest(base.resp.ToString());
+                }
+
+                if (m.password != m.repassword)
+                {
+                    resp.Success = false;
+                    resp.Message = "Passwords not match!";
+                    _Notification.AddErrorToastMessage("A jelszavak nem egyeznek!");
+                    return BadRequest(base.resp.ToString());
+                }
+
+                if (_SQL.users.Any(u => u.email == m.email) || _SQL.services.Any(s=>s.email == m.email) || _SQL.dealers.Any(d=>d.email == m.email))
+                {
+                    resp.Success = false;
+                    resp.Message = "Email already taken.";
+                    _Notification.AddErrorToastMessage("Az Email már használatban van!");
+                    return BadRequest(resp.ToString());
+                }
+
+                if (m.regType) { //Szerviz
+                    _SQL.services.Add(new Service()
+                    {
+                        email = m.email,
+                        description= m.description,
+                        name = m.name,
+                        password= PasswordManager.GenerateHash(m.password),
+                        phone = m.phone,
+                        status = eAccountStatus.None
+                    });
+                } else { //Kereskedő
+                    _SQL.dealers.Add(new Dealer()
+                    {
+                        email = m.email,
+                        description = m.description,
+                        name = m.name,
+                        password = PasswordManager.GenerateHash(m.password),
+                        phone = m.phone,
+                        status = eAccountStatus.None
+                    });
+                }
+
+                await _SQL.SaveChangesAsync();
+
+                _Notification.AddSuccessToastMessage("Sikeres regisztráció!");
+                resp.Message = "Register success!";
+                return Ok(resp.ToString());
+            }
+            else {
+                resp.Success = false;
+                resp.Message = "Bad data fill";
+                _Notification.AddErrorToastMessage("Minden adatot ki kell tölteni!");
+                return BadRequest(resp.ToString());
+            }
+        }
         #endregion
 
         #region Login
