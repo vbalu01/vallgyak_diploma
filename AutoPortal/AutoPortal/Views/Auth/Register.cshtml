@@ -4,6 +4,15 @@
 
 @section Scripts {
 	<script type="text/javascript">
+        $('#registerAsCompany').click(function(){
+            $('#compRegDiv').show();
+            $('#userRegDiv').hide();
+        });
+        $('#registerAsUser').click(function () {
+            $('#compRegDiv').hide();
+            $('#userRegDiv').show();
+        });
+
         $('#regBtn').click(function(){
             if (!($('#email').val().trim()) || !($('#name').val().trim()) || !($('#password').val().trim()) || !($('#repassword').val().trim())) {
                 alert("Minden mező kitöltése kötelező!");
@@ -54,8 +63,7 @@
                     <div class="row d-flex justify-content-center align-items-center h-100">
                         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
                             <div class="card shadow-2-strong" style="border-radius: 1rem;background-color: #508bfc;">
-                                <div class="card-body p-5 text-center">
-
+                                <div class="card-body p-5 text-center" id="userRegDiv">
                                     <h3 class="mb-5">Regisztráció</h3>
 
                                     <form id="regForm" onSubmit="return false;">
@@ -66,7 +74,7 @@
 
                                         <div class="form-outline mb-4">
                                             <input type="text" id="name" name="name" class="form-control form-control-lg" />
-                                            <label class="form-label" for="email">Teljes név</label>
+                                            <label class="form-label" for="name">Teljes név</label>
                                         </div>
 
                                         <div class="form-outline mb-4">
@@ -81,10 +89,65 @@
 
                                         <div class="form-check d-flex justify-content-start mb-4">
                                             <input class="form-check-input" type="checkbox" id="acceptReg" required/>
-                                            <label class="form-check-label" for="savePwd">A regisztrációval elfogadom a <a href="#">felhasználó feltételeket</a>.</label>
+                                            <label class="form-check-label" for="acceptReg">A regisztrációval elfogadom a <a href="#">felhasználó feltételeket</a>.</label>
                                         </div>
 
                                         <button class="btn btn-success btn-lg btn-block" id="regBtn">Regisztráció</button>
+                                        <p style="margin-top:10px;" id="registerAsCompany">Reisztráció szolgáltatóként</p>
+                                        <p style="margin-top:10px;">Már regisztrált? <a asp-controller="Auth" asp-action="Login" style="color:white;">Jelentkezzen</a> be!</p>
+                                    </form>
+                                </div>
+
+                                <div class="card-body p-5 text-center" id="compRegDiv" style="display:none;">
+                                    <h3 class="mb-5">Regisztráció - Szolgáltató</h3>
+
+                                    <form id="regFormComp" onSubmit="return false;">
+                                        <div class="form-outline mb-4">
+                                            <input type="email" id="emailComp" class="form-control form-control-lg" />
+                                            <label class="form-label" for="emailComp">E-mail</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="text" id="nameComp" class="form-control form-control-lg" />
+                                            <label class="form-label" for="nameComp">Név</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="text" id="phoneComp" class="form-control form-control-lg" />
+                                            <label class="form-label" for="phoneComp">Telefon</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <label class="form-label" for="regRadioType1Comp">Szerviz</label>
+                                            <input type="radio" value="Szerviz" id="regRadioType1Comp" /><br />
+                                            <label class="form-label" for="regRadioType2Comp">Kereskedő</label>
+                                            <input type="radio" value="Kereskedő" id="regRadioType2Comp" />
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="password" id="passwordComp" class="form-control form-control-lg" />
+                                            <label class="form-label" for="passwordComp">Jelszó</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input type="password" id="repasswordComp" class="form-control form-control-lg" />
+                                            <label class="form-label" for="repasswordComp">Jelszó megerősítése</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">                                        
+                                            <textarea id="regDescriptionComp" class="form-control form-control-lg" placeholder="Cég leírása...">
+
+                                            </textarea>
+                                            <label class="form-label" for="regDescriptionComp">Cég leírása</label>
+                                        </div>
+
+                                        <div class="form-check d-flex justify-content-start mb-4">
+                                            <input class="form-check-input" type="checkbox" id="acceptRegComp" required />
+                                            <label class="form-check-label" for="acceptRegComp">A regisztrációval elfogadom a <a href="#">felhasználó feltételeket</a>.</label>
+                                        </div>
+
+                                        <button class="btn btn-success btn-lg btn-block" id="regBtnComp">Regisztráció</button>
+                                        <p style="margin-top:10px;" id="registerAsUser">Reisztráció felhasználóként</p>
                                         <p style="margin-top:10px;">Már regisztrált? <a asp-controller="Auth" asp-action="Login" style="color:white;">Jelentkezzen</a> be!</p>
                                     </form>
                                 </div>
