@@ -9,7 +9,6 @@ namespace AutoPortal.Models.DbModels
     public partial class Service
     {
         [Key]
-        [Required]
         public int id { get; set; }
         [Required]
         public string email { get; set; }

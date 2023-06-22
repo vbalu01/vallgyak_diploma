@@ -52,6 +52,51 @@
                 }
             });
         });
+
+        $('#regBtnComp').click(function () {
+            if (!($('#emailComp').val().trim()) || !($('#nameComp').val().trim()) || !($('#passwordComp').val().trim()) || !($('#repasswordComp').val().trim()) || !($('#phoneComp').val().trim()) || !($('#regDescriptionComp').val().trim())) {
+                alert("Minden mező kitöltése kötelező!");
+                return false;
+            }
+            if ($('#password').val() != $('#repassword').val()) {
+                alert("A jelszavak nem egyeznek!");
+                return false;
+            }
+            if (!($("#acceptRegComp").is(':checked'))) {
+                alert("A felhasználói feltételek elfogadása kötelező!");
+                return false;
+            }
+            $.ajax({
+                method: "POST",
+                url: "/Auth/RegisterCompany",
+                async: true,
+                data: JSON.stringify({
+                    'email': $('#emailComp').val(),
+                    'name': $('#nameComp').val(),
+                    'password': $('#passwordComp').val(),
+                    'repassword': $('#repasswordComp').val(),
+                    'phone' : $('#phoneComp').val(),
+                    'description': $('#regDescriptionComp').val(),
+                    'regType': $("#regRadioType1Comp").is(':checked')
+
+                }),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (e) {
+                    if (e.Success) {
+                        $('#emailComp').val("");
+                        $('#nameComp').val("");
+                        $('#passwordComp').val("");
+                        $('#repasswordComp').val("");
+                        $('#phoneComp').val("");
+                        $('#regDescriptionComp').val("");
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        });
     </script>
 }
 
@@ -63,6 +108,7 @@
                     <div class="row d-flex justify-content-center align-items-center h-100">
                         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
                             <div class="card shadow-2-strong" style="border-radius: 1rem;background-color: #508bfc;">
+                                <!--Felhasználó-->
                                 <div class="card-body p-5 text-center" id="userRegDiv">
                                     <h3 class="mb-5">Regisztráció</h3>
 
@@ -98,6 +144,8 @@
                                     </form>
                                 </div>
 
+                                <!--Céges-->
+
                                 <div class="card-body p-5 text-center" id="compRegDiv" style="display:none;">
                                     <h3 class="mb-5">Regisztráció - Szolgáltató</h3>
 
@@ -119,9 +167,9 @@
 
                                         <div class="form-outline mb-4">
                                             <label class="form-label" for="regRadioType1Comp">Szerviz</label>
-                                            <input type="radio" value="Szerviz" id="regRadioType1Comp" /><br />
+                                            <input type="radio" value="Szerviz" name="compRegTypeRb" id="regRadioType1Comp" checked /><br />
                                             <label class="form-label" for="regRadioType2Comp">Kereskedő</label>
-                                            <input type="radio" value="Kereskedő" id="regRadioType2Comp" />
+                                            <input type="radio" value="Kereskedő" name="compRegTypeRb" id="regRadioType2Comp" />
                                         </div>
 
                                         <div class="form-outline mb-4">
@@ -135,9 +183,7 @@
                                         </div>
 
                                         <div class="form-outline mb-4">                                        
-                                            <textarea id="regDescriptionComp" class="form-control form-control-lg" placeholder="Cég leírása...">
-
-                                            </textarea>
+                                            <textarea id="regDescriptionComp" class="form-control form-control-lg" placeholder="Cég leírása..."></textarea>
                                             <label class="form-label" for="regDescriptionComp">Cég leírása</label>
                                         </div>
 

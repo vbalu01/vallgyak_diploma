@@ -8,7 +8,6 @@ namespace AutoPortal.Models.DbModels
     public class Dealer
     {
         [Key]
-        [Required]
         public int id { get; set; }
         [Required]
         public string email { get; set; }
