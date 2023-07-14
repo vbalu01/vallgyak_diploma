@@ -16,8 +16,7 @@ namespace AutoPortal.Controllers
         {
         }
 
-
-        #region Views
+#region Views
         public IActionResult addCar()
         {
             ViewBag.vehicleCategories = _SQL.vehicleCategories.ToList();
@@ -74,7 +73,19 @@ namespace AutoPortal.Controllers
             return View();
         }
 
+        public IActionResult addServiceEvent()
+        {
+            if (((Service)user).isValid())
+                return View();
+            else
+            {
+                _Notification.AddErrorToastMessage("A funkció nem elérhető.\nA felhasználó nincs megerősítve, vagy blokkolva van.");
+                return Redirect("/");
+            }
+        }
+
         #endregion
+        
 
         #region handleRequests
         [HttpPost]

@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "Felhasználó kezelés";
+}
+
+@section Scripts{
+    <script>
+        var userStatus = {
+            None : 0,
+            EMAIL_CONFIRM : 1, //Email megerősítve
+            ADMIN_CONFIRM : 2, //Admin visszaigazolás
+            BANNED : 4, //Admin által tiltva
+            DISABLED : 8 //Tulaj által tiltva
+        }
+
+        function openUserModal(id) {
+            $.ajax({
+                type: "GET",
+                    url: "getUserData",
+                dataType: "json",
+                contentType: "application/json",
+                data:{
+                        'userId' : id
+                },
+                success: function(data) {
+                    $("#userModalContent").html("");
+
+                    $("#userModalContent").append('<h3>Felhasználói adatok</h3>' +
+                    '<label for="usermail">E-mail</label>' +
+                    '<input type="text" id="usermail" class="form-control" value="'+data.User.email+'"/>' +
+                    '<label for="username">Név</label>' +
+                    '<input type="text" id="username" class="form-control" value="'+data.User.name+'" />' +
+                    '<p>Regisztráció dátuma: '+data.User.register_date+'</p>' +
+
+                    '<h3>Státusz: </h3>' +
+                    '<input type="checkbox" id="userStatus1" />' +
+                    '<label for="userStatus1">Email megerősítés</label><br>' +
+                    '<input type="checkbox" id="userStatus2" />' +
+                    '<label for="userStatus1">Admin jóváhagyás</label><br>' +
+                    '<input type="checkbox" id="userStatus4" />' +
+                    '<label for="userStatus1">Zárolva (Admin)</label><br>' +
+                    '<input type="checkbox" id="userStatus8" />' +
+                    '<label for="userStatus1">Elrejtve (Felhasználó)</label><br>' +
+
+                    '<h3>Járművek:</h3>' +
+                    '<table class="table table-stripped">' +
+                        '<thead>' +
+                        '<tr>' +
+                                '<th>Alvázszám</th>' +
+                                '<th>Márka</th>' +
+                                '<th>Modell</th>' +
+                                '<th>Rendszám</th>' +
+                                '<th>Jogviszony</th>' +
+                            '</tr>' +
+                        '</thead>' +
+                        '<tbody id="userVehTableBody"></tbody></table>');
+
+
+                    data.UserVehicles.forEach(function (currentVehicle) {
+
+                        $("#userVehTableBody").append('<tr><td>' + currentVehicle.v.chassis_number + '</td><td>' + currentVehicle.v.make + '</td><td>' + currentVehicle.v.model + '</td>' +
+                            '<td>' + currentVehicle.v.license + '</td><td><select id="userVehiclePerm_' + currentVehicle.v.chassis_number + '"><option value="1">Tulaj</option>' +
+                            '<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td>');
+                        $('#userVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
+                    });
+
+                    if (data.User.status & userStatus.EMAIL_CONFIRM) {
+                        $('#userStatus1').prop('checked', true);
+                    }
+                    if (data.User.status & userStatus.ADMIN_CONFIRM) {
+                        $('#userStatus2').prop('checked', true);
+                    }
+                    if (data.User.status & userStatus.BANNED) {
+                        $('#userStatus4').prop('checked', true);
+                    }
+                    if (data.User.status & userStatus.DISABLED) {
+                        $('#userStatus8').prop('checked', true);
+                    }
+
+                    $("#userModal").show();
+                }
+            });
+            
+        }
+
+        $(document).ready(function () {
+            $('.modal-close').click(function () {
+                $("#userModal").hide();
+            });
+        });
+
+    </script>
+}
+
+<div class="row col-12">
+    <h1>Felhasználó kezelés</h1>
+
+    <div class="row col-12">
+        <table class="table table-stripped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>E-mail</th>
+                    <th>Name</th>
+                    <th>Register adte</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(ViewBag.Users != null)
+                {
+                    @foreach(var item in ViewBag.Users)
+                    {
+                        <tr>
+                            <td>@item.id</td>
+                            <td>@item.email</td>
+                            <td>@item.name</td>
+                            <td>@item.register_date</td>
+                            <td><button class="btn btn-success" onclick="openUserModal(@item.id)">Kezelés</button></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div id="userModalContent">
+                    <h3>Felhasználói adatok</h3>
+                    <label for="usermail">E-mail</label>
+                    <input type="text" id="usermail" class="form-control" />
+                    <label for="username">Név</label>
+                    <input type="text" id="username" class="form-control" />
+                    <p>Regisztráció dátuma: </p>
+                    <p>Státusz: </p>
+                    <input type="checkbox" id="userStatus1" />
+                    <label for="userStatus1">Email megerősítés</label><br>
+                    <input type="checkbox" id="userStatus2" />
+                    <label for="userStatus1">Admin jóváhagyás</label><br>
+                    <input type="checkbox" id="userStatus4" />
+                    <label for="userStatus1">Zárolva (Admin)</label><br>
+                    <input type="checkbox" id="userStatus8" />
+                    <label for="userStatus1">Elrejtve (Felhasználó)</label><br>
+                    <p>Járművek:</p>
+                    <table class="table table-stripped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Márka</th>
+                                <th>Modell</th>
+                                <th>Rendszám</th>
+                                <th>Alvázszám</th>
+                                <th>Jogviszony</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

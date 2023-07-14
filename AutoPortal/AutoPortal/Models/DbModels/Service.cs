@@ -33,5 +33,12 @@ namespace AutoPortal.Models.DbModels
                 return mysql.services.SingleOrDefault(s => s.id == id).name;
             }
         }
+
+        public bool isValid()
+        {
+            if (this.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && this.status.HasFlag(eAccountStatus.ADMIN_CONFIRM) && !this.status.HasFlag(eAccountStatus.DISABLED) && !this.status.HasFlag(eAccountStatus.BANNED))
+                return true;
+            return false;
+        }
     }
 }

@@ -73,11 +73,37 @@
                                         <a class="nav-link text-dark btn-danger" href="#">Admin</a>
                                         <div class="dropdown-content">
                                             <a asp-area="" asp-controller="Admin" asp-action="factoryManagement">Gépjárműgyár kezelés</a>
+                                            <a asp-area="" asp-controller="Admin" asp-action="userManagement">Felhasználó kezelés</a>
+                                            <a asp-area="" asp-controller="Admin" asp-action="serviceManagement">Szerviz kezelés</a>
+                                            <a asp-area="" asp-controller="Admin" asp-action="dealerManagement">Kereskedő kezelés</a>
                                             <a href="#">2</a>
                                             <a href="#">3</a>
                                         </div>
                                     </div>
                                 </li>
+                            }
+                            switch (this.Context.User.Claims.SingleOrDefault(c => c.Type == "LoginType").Value)
+                            {
+                                case "SERVICE":
+                                    <li class="nav-item">
+                                        <div class="dropdown">
+                                            <a class="nav-link text-dark" href="#">Szerviz</a>
+                                            <div class="dropdown-content">
+                                                <a asp-area="" asp-controller="User" asp-action="addServiceEvent">Szerviz rögzítés</a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    break;
+                                case "DEALER":
+                                    <li class="nav-item">
+                                        <div class="dropdown">
+                                            <a class="nav-link text-dark" href="#">Kereskedés</a>
+                                            <div class="dropdown-content">
+                                                <a asp-area="" asp-controller="User" asp-action="myCars">Járműveim</a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    break;
                             }
                             <li class="nav-item">
                                 <div class="dropdown">
