@@ -179,6 +179,12 @@ namespace AutoPortal.Controllers
                         return View();
                     }*/
 
+                    if (user.status.HasFlag(eAccountStatus.BANNED))
+                    {
+                        _Notification.AddErrorToastMessage("A felhasználót egy admin letiltotta!");
+                        return View();
+                    }
+
                     ClaimsPrincipal princ = this.GenerateUserClaim(user, this._SQL.userRoles.Where(a => a.userId == user.id).Select(a => a.roleId));
                     await this.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, princ, new AuthenticationProperties()
                     {

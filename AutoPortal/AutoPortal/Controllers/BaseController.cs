@@ -2,6 +2,9 @@
 using AutoPortal.Models;
 using AutoPortal.Models.AppModels;
 using AutoPortal.Models.DbModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -20,6 +23,7 @@ namespace AutoPortal.Controllers
         protected JsonResponse resp;
         protected int loginId { get; private set; }
         protected eVehicleTargetTypes loginType { get; private set; }
+        
 
         protected dynamic user;
 
@@ -37,21 +41,38 @@ namespace AutoPortal.Controllers
             if (this.HttpContext.User.Claims.Any(c => c.Type == "UserId")) //Bejelentkezett felhasználó
             {
                 this.loginId = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "UserId").Value);
+
                 switch(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "LoginType").Value)
                 {
                     case "USER":
                         user = this._SQL.users.SingleOrDefault(u => u.id == this.loginId);
                         loginType = eVehicleTargetTypes.USER;
+                        if (((User)user).status.HasFlag(eAccountStatus.BANNED))
+                        {
+                            this.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            Redirect("/Auth/Login");
+                        }
                         break;
                     case "SERVICE":
                         user = this._SQL.services.SingleOrDefault(u => u.id == this.loginId);
                         loginType = eVehicleTargetTypes.SERVICE;
+                        if (((Service)user).status.HasFlag(eAccountStatus.BANNED))
+                        {
+                            this.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            Redirect("/Auth/Login");
+                        }
                         break;
                     case "DEALER":
                         user = this._SQL.dealers.SingleOrDefault(u => u.id == this.loginId);
                         loginType = eVehicleTargetTypes.DEALER;
+                        if (((Dealer)user).status.HasFlag(eAccountStatus.BANNED))
+                        {
+                            this.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            Redirect("/Auth/Login");
+                        }
                     break;
                 }
+
             }
             base.OnActionExecuting(context);
         }

@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Jármű kezelés";
+}
+
+<div class="row col-12">
+
+    @if (@ViewBag.Vehicle != null)
+    {
+        <h1>Jármű kezelés - @ViewBag.Vehicle.chassis_number</h1>
+        <div class="row">
+
+        </div>
+    }
+    else
+    {
+        <h1 class="text-danger">A keresett jármű nem található</h1>
+    }
+
+</div>

@@ -12,6 +12,54 @@
             DISABLED : 8 //Tulaj által tiltva
         }
 
+        let roles = [];
+
+        function saveModify(id) {
+            let userStatus = 0;
+            let userRoles = [];
+
+            if ($('#userStatus1').prop('checked')) {
+                userStatus += 1;
+            }
+            if ($('#userStatus2').prop('checked')) {
+                userStatus += 2;
+            }
+            if ($('#userStatus4').prop('checked')) {
+                userStatus += 4;
+            }
+            if ($('#userStatus8').prop('checked')) {
+                userStatus += 8;
+            }
+
+            roles.forEach(function(currentRole){
+                if ($('#roleBox_' + currentRole).prop('checked')) {
+                    userRoles.push(currentRole);
+                }
+            });
+
+            let userEmail = $('#usermail').val();
+            let userName = $('#username').val();
+
+            $.ajax({
+                type: "POST",
+                url: "updateUserData",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'id': id,
+                    'email': userEmail,
+                    'userName': userName,
+                    'status': userStatus,
+                    'roles' : userRoles
+
+                }),
+                success: function (data) {
+                    alert(data);
+                }
+            });
+
+        }
+
         function openUserModal(id) {
             $.ajax({
                 type: "GET",
@@ -40,6 +88,22 @@
                     '<label for="userStatus1">Zárolva (Admin)</label><br>' +
                     '<input type="checkbox" id="userStatus8" />' +
                     '<label for="userStatus1">Elrejtve (Felhasználó)</label><br>' +
+                    '<h3>Jogosultságok: </h3>');
+
+                    roles = [];
+
+                    data.Roles.forEach(function (currentRole) {
+
+                        $("#userModalContent").append('<input type="checkbox" id="roleBox_' + currentRole.role + '" />' +
+                            '<label for="roleBox_' + currentRole.role + '">' + currentRole.role + '</label><br>');
+                        roles.push(currentRole.role);
+                    });
+
+                    data.UserRoles.forEach(function (currentRole) {
+                        $('#roleBox_' + currentRole.roleId).prop('checked', true);
+                    });
+
+                    $("#userModalContent").append('<button class="btn btn-success bi bi-check2" style="margin-top: 2%;" onclick="saveModify(' + id + ')"> Módosítások Mentése</button>' +
 
                     '<h3>Járművek:</h3>' +
                     '<table class="table table-stripped">' +
@@ -50,6 +114,7 @@
                                 '<th>Modell</th>' +
                                 '<th>Rendszám</th>' +
                                 '<th>Jogviszony</th>' +
+                                '<th>Művelet</th>' +
                             '</tr>' +
                         '</thead>' +
                         '<tbody id="userVehTableBody"></tbody></table>');
@@ -57,9 +122,9 @@
 
                     data.UserVehicles.forEach(function (currentVehicle) {
 
-                        $("#userVehTableBody").append('<tr><td>' + currentVehicle.v.chassis_number + '</td><td>' + currentVehicle.v.make + '</td><td>' + currentVehicle.v.model + '</td>' +
+                        $("#userVehTableBody").append('<tr><td><a href="vehicleHandler?vehicleId=' + currentVehicle.v.chassis_number + '" target="_blank">' + currentVehicle.v.chassis_number + '</a></td><td>' + currentVehicle.v.make + '</td><td>' + currentVehicle.v.model + '</td>' +
                             '<td>' + currentVehicle.v.license + '</td><td><select id="userVehiclePerm_' + currentVehicle.v.chassis_number + '"><option value="1">Tulaj</option>' +
-                            '<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td>');
+                            '<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash"> Jogosultság megvonása</button></td></tr>');
                         $('#userVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
                     });
 
