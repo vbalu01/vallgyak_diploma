@@ -119,7 +119,7 @@ CREATE TABLE `portal`.`vehiclePermissions` (
   `target_id` int NOT NULL,
   `target_type` int NOT NULL,
   `permission` int NOT NULL,
-  PRIMARY KEY (`vehicle_id`, `target_id`, `target_type`, `permission`)
+  PRIMARY KEY (`vehicle_id`, `target_id`, `target_type`)
 );
 
 CREATE TABLE `portal`.`serviceEvents` (
@@ -128,6 +128,7 @@ CREATE TABLE `portal`.`serviceEvents` (
   `service_id` int NOT NULL,
   `title` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL,
+  `cost` int NOT NULL,
   `date` datetime NOT NULL,
   `mileage` int NOT NULL,
   `serviceType` int NOT NULL,

@@ -45,7 +45,7 @@ namespace AutoPortal.Libs
             });
             modelBuilder.Entity<VehiclePermission>(e =>
             {
-                e.HasKey(e => new { e.vehicle_id, e.permission, e.target_id, e.target_type });
+                e.HasKey(e => new { e.vehicle_id, e.target_id, e.target_type });
             });
 
             base.OnModelCreating(modelBuilder);

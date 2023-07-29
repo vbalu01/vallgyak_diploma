@@ -60,6 +60,27 @@
 
         }
 
+        function changeUserVehiclePerm(perm, vehId, uid) {
+
+            $.ajax({
+                type: "POST",
+                url: "updateUserVehiclePerm",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'perm': perm,
+                    'vehId': vehId,
+                    'uType': 1,
+                    'uid': uid
+                },
+                success: function (data) {
+                    if(perm == 0){
+                        $('#vehicleTableRow_'+vehId).remove();
+                    }
+                }
+            });
+        }
+
         function openUserModal(id) {
             $.ajax({
                 type: "GET",
@@ -119,12 +140,11 @@
                         '</thead>' +
                         '<tbody id="userVehTableBody"></tbody></table>');
 
-
                     data.UserVehicles.forEach(function (currentVehicle) {
 
-                        $("#userVehTableBody").append('<tr><td><a href="vehicleHandler?vehicleId=' + currentVehicle.v.chassis_number + '" target="_blank">' + currentVehicle.v.chassis_number + '</a></td><td>' + currentVehicle.v.make + '</td><td>' + currentVehicle.v.model + '</td>' +
-                            '<td>' + currentVehicle.v.license + '</td><td><select id="userVehiclePerm_' + currentVehicle.v.chassis_number + '"><option value="1">Tulaj</option>' +
-                            '<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash"> Jogosultság megvonása</button></td></tr>');
+                        $("#userVehTableBody").append(`<tr id="vehicleTableRow_` + currentVehicle.v.chassis_number + `"><td><a href="vehicleHandler?vehicleId=` + currentVehicle.v.chassis_number + `" target="_blank">` + currentVehicle.v.chassis_number + `</a></td><td>` + currentVehicle.v.make + `</td><td>` + currentVehicle.v.model + `</td>` +
+                            `<td>` + currentVehicle.v.license + `</td><td><select id="userVehiclePerm_` + currentVehicle.v.chassis_number + `" onchange="changeUserVehiclePerm(this.value, '` + currentVehicle.v.chassis_number + `', ` + id + `)"><option value="1">Tulaj</option>` +
+                            `<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeUserVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
                         $('#userVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
                     });
 

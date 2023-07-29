@@ -115,7 +115,7 @@ Table portal.vehiclePermissions{
   vehicle_id varchar [PK, NOT NULL, ref:> portal.vehicles.chassis_number]
   target_id int [PK, NOT NULL]
   target_type int [PK, NOT NULL]
-  permission int [PK, NOT NULL]
+  permission int [NOT NULL]
 }
 
 Table portal.serviceEvents{

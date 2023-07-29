@@ -44,6 +44,7 @@ namespace AutoPortal.Controllers
 
         public IActionResult vehicleManagement()
         {
+            ViewBag.Vehicles = _SQL.vehicles.ToList();
             return View();
         }
 
@@ -143,8 +144,90 @@ namespace AutoPortal.Controllers
             }
             
         }
+
+        [HttpPost]
+        public async Task<IActionResult> updateUserVehiclePerm(eVehiclePermissions perm, string vehId, eVehicleTargetTypes uType, int uid)
+        {
+            if(!_SQL.vehicles.Any(v=>v.chassis_number == vehId)) //Nem a létezik a jármű
+            {
+                _Notification.AddErrorToastMessage("A keresett jármű nem található!");
+                return NotFound("A keresett jármű nem található!");
+            }
+
+            switch (uType) //Felhasználó létezik? => Jogosultság adás
+            {
+                case eVehicleTargetTypes.NONE:
+                    _Notification.AddErrorToastMessage("Hibás célcsoport!");
+                    return BadRequest("Hibás célcsoport!");
+                    break;
+                case eVehicleTargetTypes.USER:
+                    if(!_SQL.users.Any(u=>u.id == uid))
+                    {
+                        _Notification.AddErrorToastMessage("A keresett felhasználó nem található!");
+                        return NotFound("Felhasználó nem található!");
+                    }
+                    break;
+                case eVehicleTargetTypes.SERVICE:
+                    if (!_SQL.services.Any(u => u.id == uid))
+                    {
+                        _Notification.AddErrorToastMessage("A keresett szerviz nem található!");
+                        return NotFound("Felhasználó nem található!");
+                    }
+                    break;
+                case eVehicleTargetTypes.DEALER:
+                    if (!_SQL.dealers.Any(u => u.id == uid))
+                    {
+                        _Notification.AddErrorToastMessage("A keresett kereskedő nem található!");
+                        return NotFound("Felhasználó nem található!");
+                    }
+                    break;
+                case eVehicleTargetTypes.FACTORY:
+                    if (!_SQL.factories.Any(u => u.id == uid))
+                    {
+                        _Notification.AddErrorToastMessage("A keresett gyártó nem található!");
+                        return NotFound("Felhasználó nem található!");
+                    }
+                    break;
+            }
+
+            if (_SQL.vehiclePermissions.Any(vp => vp.target_type == uType && vp.target_id == uid && vp.vehicle_id == vehId))
+            {
+                if (perm == eVehiclePermissions.NONE)
+                {
+                    VehiclePermission toRemove = _SQL.vehiclePermissions.Single(vp => vp.target_type == uType && vp.target_id == uid && vp.vehicle_id == vehId);
+                    _SQL.vehiclePermissions.Remove(toRemove);
+                    _SQL.SaveChanges();
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    return Ok("Sikeres módosítás!");
+                }
+                else
+                {
+                    VehiclePermission toUpdate = _SQL.vehiclePermissions.Single(vp => vp.target_type == uType && vp.target_id == uid && vp.vehicle_id == vehId);
+                    toUpdate.permission = perm;
+                    _SQL.vehiclePermissions.Update(toUpdate);
+                    _SQL.SaveChanges();
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    return Ok("Sikeres módosítás");
+                }
+            }
+            else
+            {
+                if (perm == eVehiclePermissions.NONE)
+                {
+                    _Notification.AddInfoToastMessage("Nem történt módosítás");
+                    return Ok("Nem történt módosítás");
+                }
+                else
+                {
+                    _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = uid, target_type = uType, vehicle_id = vehId });
+                    _SQL.SaveChanges();
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    return Ok("Sikeres módosítás");
+                }
+            }
+        }
         #endregion
 
 
-    }
+        }
 }

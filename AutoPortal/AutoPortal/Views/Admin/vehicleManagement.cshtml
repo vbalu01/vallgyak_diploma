@@ -1,3 +1,49 @@
 ﻿@{
     ViewData["Title"] = "Jármű kezelő";
 }
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#vehiclesTable").fancyTable({
+                sortColumn: 0,// column number for initial sorting
+                sortOrder: 'descending',// 'desc', 'descending', 'asc', 'ascending', -1 (descending) and 1 (ascending)
+                sortable: true,
+                pagination: true,// default: false
+                searchable: true,
+                inputStyle: "",
+                inputPlaceholder: "Keresés..."
+
+            });
+        });
+        
+    </script>
+}
+
+<div class="row">
+    <h1>Gépjármű áttekintő</h1>
+    <div class="col-12">
+        <table id="vehiclesTable" class="table table-stripped">
+            <thead>
+                <tr>
+                    <th>Alvázszám</th>
+                    <th>Gyártó</th>
+                    <th>Model</th>
+                    <th>Évjárat</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach(var vehicle in ViewBag.Vehicles)
+                {
+                    <tr>
+                        <td><a href="vehicleHandler?vehicleId=@vehicle.chassis_number" target="_blank">@vehicle.chassis_number</a></td>
+                        <td>@vehicle.make</td>
+                        <td>@vehicle.model</td>
+                        <td>@vehicle.manufact_year</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
