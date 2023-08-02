@@ -50,8 +50,36 @@ namespace AutoPortal.Controllers
 
         public IActionResult vehicleHandler(string vehicleId)
         {
-            Vehicle vehicle = _SQL.vehicles.SingleOrDefault(v=>v.chassis_number == vehicleId);
-            ViewBag.Vehicle = vehicle;
+            Vehicle v = _SQL.vehicles.SingleOrDefault(ve => ve.chassis_number == vehicleId);
+
+            if (v == null) //Nincs ilyen jármű
+                return NotFound();
+
+            List<(DateTime, int)> mileageStands = new();
+
+            foreach (MileageStand ms in MileageStand.GetVehicleMileageStands(vehicleId))
+            {
+                mileageStands.Add((ms.date, ms.mileage));
+            }
+
+            foreach (ServiceEvent se in ServiceEvent.GetVehicleServiceEvents(vehicleId))
+            {
+                mileageStands.Add((se.date, se.mileage));
+            }
+
+            ViewBag.Refuels = Refuel.GetVehicleRefuels(vehicleId);
+            ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
+            ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.Item1).ToList();
+            ViewBag.Vehicle = v;
+
+            List<Service> services = _SQL.services.ToList();
+            foreach (Service service in services)
+            {
+                service.password = null;
+            }
+
+            ViewBag.Services = services;
+
             return View();
         }
 

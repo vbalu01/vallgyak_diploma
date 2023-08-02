@@ -152,3 +152,5 @@ INSERT INTO portal.vehiclemodels (model, make, category) VALUES ("SQ5", "Audi", 
 INSERT INTO portal.vehiclemodels (model, make, category) VALUES ("SQ8", "Audi", 1);
 INSERT INTO portal.vehiclemodels (model, make, category) VALUES ("SQ8 e-tron", "Audi", 1);
 INSERT INTO portal.vehiclemodels (model, make, category) VALUES ("TT", "Audi", 1);
+
+INSERT INTO `portal`.`services` (`id`, `email`, `name`, `phone`, `password`, `description`, `status`) VALUES ('0', '-', 'Ismeretlen', '-', 'eiQVWm/lJBAGgfGUoJfhbCciZIobKhnG90A2Crc0SiA=$hnFhvoe6wL4DQvGToQ==', '-', '12');
