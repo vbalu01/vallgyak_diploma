@@ -2,7 +2,7 @@
 
 namespace AutoPortal.Models.RequestModels
 {
-    public abstract class AddUserCarModel
+    public class AddUserCarModel
     {
         [Required]
         public string chassis_number { get; set; }
@@ -41,5 +41,10 @@ namespace AutoPortal.Models.RequestModels
         public int? weight { get; set; }
         [Required]
         public int? max_weight {get; set; }
+
+        public AddUserCarModel()
+        {
+
+        }
     }
 }
