@@ -89,7 +89,7 @@ namespace AutoPortal.Controllers
         [HttpGet]
         public async Task<IActionResult> getUserData(int userId)
         {
-            dynamic returnModel = new System.Dynamic.ExpandoObject(); ;
+            dynamic returnModel = new System.Dynamic.ExpandoObject();
             User findUser = _SQL.users.SingleOrDefault(u => u.id == userId);
 
             if (findUser == null)

@@ -84,8 +84,15 @@ namespace AutoPortal.Controllers
             }
         }
 
+        public IActionResult pastServices()
+        {
+            int sid = ((Service)user).id;
+            ViewBag.ServiceEvents = _SQL.serviceEvents.Where(se => se.service_id == sid).ToList();
+            return View();
+        }
+
         #endregion
-        
+
 
         #region handleRequests
         [HttpPost]
@@ -172,6 +179,110 @@ namespace AutoPortal.Controllers
             }
             _Notification.AddErrorToastMessage("Hiányos adatok!");
             return BadRequest();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> addServiceEvent(AddServiceEventModel serviceData)
+        {
+            if(ModelState.IsValid)
+            {
+                if (!((Service)user).isValid())
+                {
+                    _Notification.AddErrorToastMessage("Nincs jogosultsága rögzíteni! A szerviz inaktív, vagy ki lett tiltva.");
+                    return View();
+                }
+                if(!_SQL.vehicles.Any(v=>v.chassis_number == serviceData.vehicleId))
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: A keresett jármű nem szerepel a rendszerben.");
+                    return View();
+                }
+                if(serviceData.serviceCost == null || serviceData.serviceMileage == null)
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: Hibás numerikus mezők.");
+                    return View();
+                }
+
+                if(serviceData.serviceDate <= DateTime.Now.AddDays(-2).AddHours(-1))//További -1 óra, mivel kliensolalon nem frissül mp-enként a min => Eltelhet x idő mire elküldi ténylegesen
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: Legfeljebb 48 órával nappal visszamenőleg lehet szerviz eseményt felvenni. Kérjük vegye fel a kapcsolatot egy adminnal.");
+                    return View();
+                }
+
+                if(serviceData.serviceDate > DateTime.Now.AddDays(1))
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: Legfeljebb 24 órával előre lehet szerviz eseményt felvenni.");
+                    return View();
+                }
+
+                _SQL.serviceEvents.Add(new ServiceEvent() { 
+                    service_id = ((Service)user).id,
+                    serviceType = serviceData.serviceType,
+                    comment = serviceData.serviceComment,
+                    cost = (int)serviceData.serviceCost,
+                    date = serviceData.serviceDate,
+                    description = serviceData.serviceDescription,
+                    mileage = (int)serviceData.serviceMileage,
+                    title = serviceData.serviceTitle,
+                    vehicle_id = serviceData.vehicleId,
+                    id = new Guid()
+                });
+
+                _SQL.SaveChanges();
+
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                return View();
+            }
+            else{
+                _Notification.AddErrorToastMessage("Sikertelen rögzítés: Adathiba!");
+                return View();
+            }
+            
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> getServiceEventDetails(string serviceEventId)
+        {
+            if (!_SQL.serviceEvents.Any(se => se.id == Guid.Parse(serviceEventId)))
+            {
+                _Notification.AddErrorToastMessage("A keresett azonosító alatt nem található szerviz esemény!");
+                return NotFound();
+            }
+            if (_SQL.serviceEvents.SingleOrDefault(se => se.id == Guid.Parse(serviceEventId)).service_id != ((Service)user).id)
+            {
+                _Notification.AddErrorToastMessage("Nincs jogosultsága a művelethez!");
+                return Forbid();
+            }
+            dynamic returnModel = new System.Dynamic.ExpandoObject();
+            returnModel.ServiceEvent = _SQL.serviceEvents.SingleOrDefault(se => se.id == Guid.Parse(serviceEventId));
+            string chassis = returnModel.ServiceEvent.vehicle_id;
+            Vehicle veh = _SQL.vehicles.Single(v=>v.chassis_number == chassis);
+            returnModel.Vehicle_Make = veh.make;
+            returnModel.Vehicle_Model = veh.model;
+            returnModel.Vehicle_ModelType = veh.modeltype;
+            returnModel.Vehicle_Manufact_year = veh.manufact_year;
+            returnModel.Vehicle_Chassis_number = veh.chassis_number;
+
+            return Ok(returnModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteServiceEvent(string serviceEventId)
+        {
+            if(!_SQL.serviceEvents.Any(se=>se.id == Guid.Parse(serviceEventId)))
+            {
+                _Notification.AddErrorToastMessage("A keresett azonosító alatt nem található szerviz esemény!");
+                return NotFound();
+            }
+            if (_SQL.serviceEvents.SingleOrDefault(se => se.id == Guid.Parse(serviceEventId)).service_id != ((Service)user).id)
+            {
+                _Notification.AddErrorToastMessage("Nincs jogosultsága a művelethez!");
+                return Forbid();
+            }
+            ServiceEvent se = _SQL.serviceEvents.Single(e => e.id == Guid.Parse(serviceEventId));
+            _SQL.serviceEvents.Remove(se);
+            _SQL.SaveChanges();
+            _Notification.AddSuccessToastMessage("Sikerese törlés!");
+            return Ok();
         }
         #endregion
     }

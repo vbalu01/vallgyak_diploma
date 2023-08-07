@@ -8,8 +8,8 @@ namespace AutoPortal.Models.AppModels
         OTHER = 0, //Egyéb
         [Description("Éves szerviz")]
         ANNUAL_SERVICE = 1, //Éves szerviz
-        [Description("Rendszeres szerviz")]
-        REGULAR_SERVICE = 2, //Rendszeres karbantartás
+        [Description("Évközi szerviz")]
+        REGULAR_SERVICE = 2, //Évközi karbantartás
         [Description("Garanciális szerviz")]
         WARRANTY_SERVICE = 3, //Garanciális szerviz
         [Description("Kerék csere")]

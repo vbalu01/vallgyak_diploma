@@ -1,4 +1,43 @@
-﻿@{
+﻿@using AutoPortal.Libs;
+@using AutoPortal.Models.AppModels;
+@{
     ViewData["Title"] = "Szerviz rögzítés";
 }
 
+<div class="row">
+    <h1>Szervizesemény rögzítése</h1>
+    <div>
+        <form method="post">
+            <label for="vehicleId">Jármű alvázszáma</label>
+            <input type="text" id="vehicleId" name="vehicleId" class="form-control" required />
+
+            <label for="serviceTitle">Szerviz rövid leírása (cím)</label>
+            <input type="text" id="serviceTitle" name="serviceTitle" class="form-control" required />
+
+            <label for="serviceDescription">Szerviz részletes leírása</label>
+            <textarea id="serviceDescription" name="serviceDescription" class="form-control" required></textarea>
+
+            <label for="serviceCost">Szerviz költsége</label>
+            <input type="number" id="serviceCost" name="serviceCost" class="form-control" required />
+
+            <label for="serviceDate">Szerviz időpontja</label>
+            <input type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" min="@DateTime.Now.AddDays(-2).ToString("yyyy-MM-ddTHH:mm")" max="@DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm")" id="serviceDate" name="serviceDate" class="form-control" required />
+
+            <label for="serviceMileage">Jármű aktuális futásteljesítménye</label>
+            <input type="number" id="serviceMileage" name="serviceMileage" class="form-control" required />
+
+            <label for="serviceMileage">Szerviz típusa</label>
+            <select id="serviceType" name="serviceType" class="form-control" required>
+                @foreach (int type in Enum.GetValues(typeof(eServiceType)))
+                {
+                    <option value="@type">@EnumHelper.GetServiceTypeString((eServiceType)type)</option>
+                }
+            </select>
+
+            <label for="serviceComment">Szerviz megjegyzés</label>
+            <textarea id="serviceComment" name="serviceComment" class="form-control" required></textarea>
+
+            <input type="submit" value="Szerviz rögzítése" class="btn btn-success" />
+        </form>
+    </div>
+</div>

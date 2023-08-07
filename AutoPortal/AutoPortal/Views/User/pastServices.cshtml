@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Korábbi szervizek";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        function openServiceEventModal(serviceEventId) {
+
+            $.ajax({
+                type: "GET",
+                url: "getServiceEventDetails",
+                dataType: "json",
+                contentType: "application/json",
+                data: {
+                    'serviceEventId': serviceEventId
+                },
+                success: function (data) {
+                    console.log(data);
+
+                    $("#serviceEventModalContent").append('<h2>Szerviz adatok</h2><p>Tranzakció azonosító: '+data.ServiceEvent.id+'</p><p>Szerviz: '+data.ServiceEvent.title+'</p><p>Leírás: '+data.ServiceEvent.description+'</p>' + 
+                    '<p>Költség: '+data.ServiceEvent.cost+'</p><p>Dátum: '+data.ServiceEvent.date+'</p><p>Kilóméteróra állás: '+data.ServiceEvent.mileage+'</p><p>'+data.ServiceEvent.comment+'</p>' + 
+                    '<h2>Jármű adatok</h2><p>Alvázszám: '+data.Vehicle_Chassis_number+'</p><p>Márka: '+data.Vehicle_Make+'</p><p>Modell: '+data.Vehicle_Model+'</p><p>Típus: '+data.Vehicle_ModelType+'</p><p>Évjárat: '+data.Vehicle_Manufact_year+'</p>');
+
+                    $("#serviceEventModal").show();
+                }
+            });
+        }
+
+        function deleteServiceEvent(serviceEventId) {
+            $.ajax({
+                type: "POST",
+                url: "deleteServiceEvent",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'serviceEventId': serviceEventId
+                },
+                success: function (data) {
+                    $('#row_' + serviceEventId).remove();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.modal-close').click(function () {
+                $("#serviceEventModal").hide();
+            });
+        });
+    </script>
+}
+
+<div class="row">
+    <h1>Korábbi szervizek</h1>
+    <div class="row">
+        <table class="table table-stripped">
+            <thead>
+                <tr>
+                    <th>Tranzakció azonosító</th>
+                    <th>Alvázszám</th>
+                    <th>Dátum</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach(var serviceEvent in ViewBag.ServiceEvents)
+                {
+                    <tr id="row_@serviceEvent.id">
+                        <td><a href="#" onclick="openServiceEventModal('@serviceEvent.id')" title="Részletek">@serviceEvent.id</a></td>
+                        <td>@serviceEvent.vehicle_id</td>
+                        <td>@serviceEvent.date</td>
+                        <td><button class="btn btn-danger bi bi-trash" onclick="deleteServiceEvent('@serviceEvent.id')"> </button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div id="serviceEventModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div id="serviceEventModalContent">
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
