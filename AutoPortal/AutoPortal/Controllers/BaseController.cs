@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using NToastNotify;
 using System.Net;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
 
 namespace AutoPortal.Controllers
 {
@@ -38,6 +39,18 @@ namespace AutoPortal.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden API hívás előtt lefut
         {
+            var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
+            var methodInfo = descriptor.MethodInfo;
+
+            if (methodInfo.GetCustomAttributes(typeof(ActionLog), false).Any())
+            {
+                ActionLog attr = (ActionLog)methodInfo.GetCustomAttributes(typeof(ActionLog), true).First(atr => atr.GetType() == typeof(ActionLog));
+                if (attr.LogParams)
+                    WriteLog("ActionExecute: + " + context.ActionDescriptor.DisplayName + "\n" + JsonConvert.SerializeObject(context.ActionArguments));
+                else
+                    WriteLog("ActionExecute: + " + context.ActionDescriptor.DisplayName);
+            }
+
             if (this.HttpContext.User.Claims.Any(c => c.Type == "UserId")) //Bejelentkezett felhasználó
             {
                 this.loginId = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "UserId").Value);
@@ -80,6 +93,11 @@ namespace AutoPortal.Controllers
         public override void OnActionExecuted(ActionExecutedContext context)//Ez a metódus lefut minden API hívás lefutása után
         {
             base.OnActionExecuted(context);
+        }
+
+        protected void WriteLog(string text, [CallerMemberName] string caller = "", [CallerFilePath] string file = "")
+        {
+            Log.LogMessageAsync(text, this.HttpContext, caller, file);
         }
     }
 }

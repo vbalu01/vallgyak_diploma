@@ -58,7 +58,7 @@ namespace AutoPortal.Controllers
                     ViewBag.name = user.name;
                     ViewBag.register = user.register_date;
                     ViewBag.status = user.status;
-                    ViewBag.roles = user.getRoles();
+                    ViewBag.roles = user.GetRoles();
                     break;
             }
             return View();

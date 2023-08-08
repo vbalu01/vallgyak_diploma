@@ -10,6 +10,7 @@ namespace AutoPortal
         public static ServerVersion v_MysqlVersion;
         public static string SQLConnectionString { get; set; }
         public static string TokenKey { get; set; }
+        private static Log Log;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,6 +24,7 @@ namespace AutoPortal
             SQLConnectionString = Configuration.GetConnectionString("SQL");
             TokenKey = Configuration.GetValue(typeof(string), "TokenKey").ToString();
             v_MysqlVersion = new MySqlServerVersion(new Version(8, 0, 26));
+            Log = new Log();
             services.AddDbContext<SQL>(option =>
             {
                 option.UseMySql(SQLConnectionString, v_MysqlVersion);

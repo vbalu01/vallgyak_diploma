@@ -56,18 +56,11 @@ namespace AutoPortal.Controllers
             if (vp == null) //Nincs semmilyen jogosultsága a felhasználónak a járműhöz
                 return Forbid();
 
-            List<(DateTime, int)> mileageStands = new();
-
-            foreach (MileageStand ms in MileageStand.GetVehicleMileageStands(vehicleId)) {
-                mileageStands.Add((ms.date, ms.mileage));
-            }
-            foreach(ServiceEvent se in ServiceEvent.GetVehicleServiceEvents(vehicleId)) { 
-                mileageStands.Add((se.date, se.mileage));
-            }
+            List<MileageStandModel> mileageStands = v.getMileageStands();
 
             ViewBag.Refuels = Refuel.GetVehicleRefuels(vehicleId);
             ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
-            ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.Item1).ToList();
+            ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.RecordedDate).ToList();
 
             ViewBag.vehicleData = new UserVehicle() { p = vp.permission, v = v };
             return View();

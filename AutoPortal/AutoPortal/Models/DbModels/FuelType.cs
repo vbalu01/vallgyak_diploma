@@ -22,5 +22,13 @@ namespace AutoPortal.Models.DbModels
                 return mysql.fuelTypes.SingleOrDefault(f=>f.fuel == fuel).id;
             }
         }
+
+        public static string findFuelById(int id)
+        {
+            using (SQL mysql = new SQL())
+            {
+                return mysql.fuelTypes.SingleOrDefault(f => f.id == id).fuel;
+            }
+        }
     }
 }

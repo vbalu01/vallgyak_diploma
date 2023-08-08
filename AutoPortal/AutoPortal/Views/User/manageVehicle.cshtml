@@ -96,6 +96,51 @@
                 }
             });
         }
+
+        $(document).ready(function() {
+            var context = $('#mileageChart')[0].getContext('2d');
+
+            var mileageLineChart = new Chart(context, {
+                type: 'line', //Diagram típus
+                data: {
+                    labels: [
+                        @{ 
+                           List<MileageStandModel> models = ViewBag.MileageStands;
+                           foreach(MileageStandModel msm in models){
+                               string text = "\"" + msm.RecordedDate.ToString("yyyy-MM-dd") + "\"";
+                                if (msm != models.Last())
+                                    text += ",\n";
+                                WriteLiteral(text);
+                           }
+                        }
+                    ], //X tengely címkék
+                    datasets: [{
+                        label: 'Futás adatok', //Adatsor címkék
+                        data: [
+                            @{
+                                foreach(MileageStandModel m in models)
+                                {
+                                    if (m == models.Last())
+                                        Write(m.MileageStand);
+                                    else
+                                        Write(m.MileageStand + ", ");
+                                }
+                            }
+                        ], //Adatok
+                        backgroundColor: 'rgba(255, 0, 0, 0.6)', //Kitöltés színe
+                        borderColor: 'rgba(255, 0, 0, 1)', //Vonal színe
+                        borderWidth: 2 //Vonal vastagság
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true // Az y tengely minimum értéke 0
+                        }
+                    }
+                }
+            });
+        });
     </script>
 }
 
@@ -175,7 +220,7 @@
                 </tr>
                 <tr>
                     <th class="tableLeft">Üzemanyag</th>
-                    <td class="tableLeft">@ViewBag.vehicleData.v.fuel</td>
+                    <td class="tableLeft">@FuelType.findFuelById(ViewBag.vehicleData.v.fuel)</td>
                     <th class="tableLeft">Lökettérfogat</th>
                     <td class="tableLeft">@ViewBag.vehicleData.v.engine_ccm</td>
                 </tr>
@@ -291,7 +336,7 @@
         <button type="button" class="collapsible">Futás adatok</button>
         <div class="col-12 content">
             <h2>Futás adatok</h2>
-            @if (ViewBag.MileageStands == null || ((List<(DateTime, int)>)ViewBag.MileageStands).Count == 0) {
+            @if (ViewBag.MileageStands == null || ((List<MileageStandModel>)ViewBag.MileageStands).Count == 0) {
                 <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
             } else {
                 <table>
@@ -299,17 +344,16 @@
                         <th style="width:60%;">Dátum</th>
                         <th style="width:40%;">Futásteljesítmény</th>
                     </tr>
-                    @{(DateTime, int) lastRow = (DateTime.Now, -1);}
-                    @foreach (var row in (List<(DateTime, int)>)ViewBag.MileageStands) {
+                    @{MileageStandModel lastRow = null;}
+                    @foreach (MileageStandModel row in (List<MileageStandModel>)ViewBag.MileageStands) {
                         <tr>
-                            <td>@row.Item1</td>
-                            <td @if (lastRow.Item2 != -1 && lastRow.Item2 > row.Item2) { Write("style=color:red;font-weight:bold;"); }>@row.Item2</td>
+                            <td>@row.RecordedDate</td>
+                            <td @if ((lastRow == null || lastRow.MileageStand <= row.MileageStand) && row.MileageStandType == eMileageStandType.USER_RECORDED) { Write("style=color:orange;font-weight:bold;"); } @if (lastRow != null && lastRow.MileageStand > row.MileageStand) { Write("style=color:red;font-weight:bold;"); }>@row.MileageStand @if (row.MileageStandType == eMileageStandType.USER_RECORDED) { <i>(Felhasználó által rögzítve)</i>}</td>
                         </tr>
-
                         lastRow = row;
-                        
                     }
                 </table>
+                <canvas id="mileageChart"></canvas>
             }
         </div>
 

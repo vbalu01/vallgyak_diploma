@@ -1,4 +1,6 @@
-﻿using AutoPortal.Models.RequestModels;
+﻿using AutoPortal.Libs;
+using AutoPortal.Models.AppModels;
+using AutoPortal.Models.RequestModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -73,6 +75,27 @@ namespace AutoPortal.Models.DbModels
             this.num_of_seats = Convert.ToInt32(m.num_of_seats);
             this.weight = Convert.ToInt32(m.weight);
             this.max_weight = Convert.ToInt32(m.max_weight);
+        }
+
+        public List<MileageStandModel> getMileageStands()
+        {
+            List<MileageStandModel> stands = new List<MileageStandModel>();
+            
+            using(SQL mysql = new SQL())
+            {
+                //Felhasználó által rögzített
+                foreach (MileageStand s in mysql.mileageStands.Where(st=>st.vehicle_id == this.chassis_number))
+                {
+                    stands.Add(new MileageStandModel() { MileageStand = s.mileage, RecordedDate = s.date, MileageStandType = eMileageStandType.USER_RECORDED });
+                }
+                //Szerviz adatok
+                foreach(ServiceEvent s in mysql.serviceEvents.Where(se=>se.vehicle_id == this.chassis_number))
+                {
+                    stands.Add(new MileageStandModel() { MileageStand = s.mileage, RecordedDate = s.date, MileageStandType = eMileageStandType.SERVICE_RECORDED });
+                }
+            }
+
+            return stands;
         }
     }
 }
