@@ -5,6 +5,101 @@
     ViewData["Title"] = "Jármű kezelés";
 }
 
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var context = $('#mileageChart')[0].getContext('2d');
+
+            var mileageLineChart = new Chart(context, {
+                type: 'line', //Diagram típus
+                data: {
+                    labels: [
+                        @{
+                            List<MileageStandModel> models = ViewBag.MileageStands;
+                            foreach (MileageStandModel msm in models)
+                            {
+                                string text = "\"" + msm.RecordedDate.ToString("yyyy-MM-dd") + "\"";
+                                if (msm != models.Last())
+                                    text += ",\n";
+                                WriteLiteral(text);
+                            }
+                        }
+                    ], //X tengely címkék
+                    datasets: [{
+                        label: 'Futás adatok', //Adatsor címkék
+                        data: [
+                            @{
+                                foreach (MileageStandModel m in models)
+                                {
+                                    if (m == models.Last())
+                                        Write(m.MileageStand);
+                                    else
+                                        Write(m.MileageStand + ", ");
+                                }
+                            }
+                        ], //Adatok
+                        backgroundColor: 'rgba(255, 0, 0, 0.6)', //Kitöltés színe
+                        borderColor: 'rgba(255, 0, 0, 1)', //Vonal színe
+                        borderWidth: 2 //Vonal vastagság
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true // Az y tengely minimum értéke 0
+                        }
+                    }
+                }
+            });
+        });
+
+        function changeUserVehiclePermBtb(){
+            let userMail = $('#newUserVehiclePermMail').val();
+            let userPerm = $('#newUserVehiclePermPerm').val();
+
+            $('#newUserVehiclePermMail').val("");
+            $('#newUserVehiclePermPerm').val(0);
+
+            changeUserVehiclePerm(userMail, userPerm);
+        }
+
+        function changeUserVehiclePerm(userMail, value){
+            let vehicle = "@ViewBag.Vehicle.chassis_number";
+            $.ajax({
+                type: "POST",
+                url: "updateVehicleUserpPerm",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'targerMail': userMail,
+                    'vehId': vehicle,
+                    'perm': value
+                },
+                success: function (data) {
+                    if (value == 0) {
+                        if (document.getElementById("permTable_" + userMail)) {
+                            document.getElementById("permTable_" + userMail).remove();
+                        }
+                    } else{
+                        if (!document.getElementById("permTable_" + userMail)) {
+                            let optionsTag = "";
+                            if(value == 1)
+                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3">Sofőr</option><option value="0">Jogosultság megszűntetése</option>';
+                            if(value == 2)
+                                optionsTag = '<option value="1">Tulaj</option><option value="2" selected>Üzembentartó</option><option value="3">Sofőr</option><option value="0">Jogosultság megszűntetése</option>';
+                            if(value == 3)
+                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3" selected>Sofőr</option><option value="0">Jogosultság megszűntetése</option>';
+                            console.log(optionsTag);
+                            $('#permTableBody').append(`<tr id="permTable_` + userMail + `"><td>`+userMail+`</td><td><select class="form-control" onchange="changeUserVehiclePerm('`+userMail+`', this.value);">` +
+                            (optionsTag) + `</select></td></tr>`);
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
+
 <div class="row col-12">
 
     @if (@ViewBag.Vehicle != null)
@@ -180,6 +275,62 @@
                         <button class="btn btn-success" style="width:100%;" onclick="addNewCost();">Költség rögzítése</button>
                     </div>
                 </div>
+
+                <div class="col-6">
+                    <h2>Jogosultság kezelés</h2>
+                    <h3>Jármű jogosultságok</h3>
+                    <div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Jogosultság</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="permTableBody">
+                                @foreach (var item in (List<(string, eVehiclePermissions)>)ViewBag.VehiclePermissions)
+                                {
+                                    <tr id="permTable_@item.Item1">
+                                        <td>@item.Item1</td>
+                                        <td><select class="form-control" onchange="changeUserVehiclePerm('@item.Item1', this.value);">
+                                            @if(item.Item2 == eVehiclePermissions.OWNER)
+                                            {
+                                                <option value="1" selected>Tulaj</option>
+                                                <option value="2">Üzembentartó</option>
+                                                <option value="3">Sofőr</option>
+                                                <option value="0">Jogosultság megszűntetése</option>
+                                            }
+                                            @if(item.Item2 == eVehiclePermissions.SUBOWNER)
+                                            {
+                                                <option value="1">Tulaj</option>
+                                                <option value="2" selected>Üzembentartó</option>
+                                                <option value="3">Sofőr</option>
+                                                <option value="0">Jogosultság megszűntetése</option>
+                                            }
+                                            @if(item.Item2 == eVehiclePermissions.DRIVER)
+                                            {
+                                                <option value="1">Tulaj</option>
+                                                <option value="2">Üzembentartó</option>
+                                                <option value="3" selected>Sofőr</option>
+                                                <option value="0">Jogosultság megszűntetése</option>
+                                            }
+                                        </select></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <h3>Új jogosultság</h3>
+                        <input type="text" class="form-control" id="newUserVehiclePermMail" />
+                        <select class="form-control" id="newUserVehiclePermPerm">
+                            <option value="1">Tulaj</option>
+                            <option value="2">Üzembentartó</option>
+                            <option value="3">Sofőr</option>
+                            <option value="0" selected>Nincs</option>
+                        </select>
+                        <button class="btn btn-success" onclick="changeUserVehiclePermBtb();">Jogosultság felvétele</button>
+                    </div>
+                </div>
             </div>
 
             <hr />
@@ -230,7 +381,7 @@
                 <button type="button" class="collapsible">Futás adatok</button>
                 <div class="col-12 content">
                     <h2>Futás adatok</h2>
-                    @if (ViewBag.MileageStands == null || ((List<(DateTime, int)>)ViewBag.MileageStands).Count == 0)
+                    @if (ViewBag.MileageStands == null || ((List<MileageStandModel>)ViewBag.MileageStands).Count == 0)
                     {
                         <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
                     }
@@ -242,19 +393,21 @@
                                 <th style="width:40%;">Futásteljesítmény</th>
                             </tr>
                             @{
-                                (DateTime, int) lastRow = (DateTime.Now, -1);
+                                MileageStandModel lastRow = null;
                             }
-                            @foreach (var row in (List<(DateTime, int)>)ViewBag.MileageStands)
+                            @foreach (MileageStandModel row in (List<MileageStandModel>)ViewBag.MileageStands)
                             {
                                 <tr>
-                                    <td>@row.Item1</td>
-                                    <td @if (lastRow.Item2 != -1 && lastRow.Item2 > row.Item2) { Write("style=color:red;font-weight:bold;"); }>@row.Item2</td>
+                                    <td>@row.RecordedDate</td>
+                                    <td @if ((lastRow == null || lastRow.MileageStand <= row.MileageStand) && row.MileageStandType == eMileageStandType.USER_RECORDED) { Write("style=color:orange;font-weight:bold;"); } @if (lastRow != null && lastRow.MileageStand > row.MileageStand) { Write("style=color:red;font-weight:bold;"); }>@row.MileageStand @if (row.MileageStandType == eMileageStandType.USER_RECORDED)
+                                        {
+                                            <i>(Felhasználó által rögzítve)</i>
+                                        }</td>
                                 </tr>
-
                                 lastRow = row;
-
                             }
                         </table>
+                        <canvas id="mileageChart"></canvas>
                     }
                 </div>
 

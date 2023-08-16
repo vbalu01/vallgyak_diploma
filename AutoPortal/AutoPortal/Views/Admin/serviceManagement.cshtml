@@ -2,6 +2,166 @@
     ViewData["Title"] = "Szerviz kezelés";
 }
 
+@section Scripts{
+    <script>
+        var userStatus = {
+            None: 0,
+            EMAIL_CONFIRM: 1, //Email megerősítve
+            ADMIN_CONFIRM: 2, //Admin visszaigazolás
+            BANNED: 4, //Admin által tiltva
+            DISABLED: 8 //Tulaj által tiltva
+        }
+
+        function saveModify(id) {
+            let userStatus = 0;
+
+            if ($('#serviceStatus1').prop('checked')) {
+                userStatus += 1;
+            }
+            if ($('#serviceStatus2').prop('checked')) {
+                userStatus += 2;
+            }
+            if ($('#serviceStatus4').prop('checked')) {
+                userStatus += 4;
+            }
+            if ($('#serviceStatus8').prop('checked')) {
+                userStatus += 8;
+            }
+
+            let serviceEmail = $('#servicemail').val();
+            let serviceName = $('#servicename').val();
+            let servicePhone = $('#servicephone').val();
+            let serviceCountry = $('#servicecountry').val();
+            let serviceCity = $('#servicecity').val();
+            let serviceAddress = $('#serviceaddress').val();
+            let serviceWebsite = $('#serviceweb').val();
+            let serviceDescription = $('#servicedescription').val();
+
+            $.ajax({
+                type: "POST",
+                url: "updateServiceData",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'id': id,
+                    'email': serviceEmail,
+                    'name': serviceName,
+                    'phone': servicePhone,
+                    'country': serviceCountry,
+                    'city': serviceCity,
+                    'address': serviceAddress,
+                    'website': serviceWebsite,
+                    'description': serviceDescription,
+                    'status': userStatus
+                }),
+                success: function (data) {
+                    alert(data);
+                }
+            });
+        }
+
+        function changeServiceVehiclePerm(perm, vehId, uid) {
+
+            $.ajax({
+                type: "POST",
+                url: "updateUserVehiclePerm",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'perm': perm,
+                    'vehId': vehId,
+                    'uType': 4,
+                    'uid': uid
+                },
+                success: function (data) {
+                    if (perm == 0) {
+                        $('#vehicleTableRow_' + vehId).remove();
+                    }
+                }
+            });
+        }
+
+        function openServiceModal(id) {
+            $.ajax({
+                type: "GET",
+                url: "getServiceData",
+                dataType: "json",
+                contentType: "application/json",
+                data: {
+                    'serviceId': id
+                },
+                success: function (data) {
+                    $("#serviceModalContent").html("");
+
+                    $("#serviceModalContent").append('<h3>Felhasználói adatok</h3>' +
+                        '<label for="servicemail">E-mail</label>' +
+                        '<input type="text" id="servicemail" class="form-control" value="' + data.Service.email + '"/>' +
+                        '<label for="servicename">Név</label>' +
+                        '<input type="text" id="servicename" class="form-control" value="' + data.Service.name + '" />' +
+                        '<label for="servicephone">Telefon</label><input type="text" id="servicephone" value="'+data.Service.phone+'" class="form-control" />' +
+                        '<label for="servicecountry">Ország</label><input type="text" id="servicecountry" value="'+data.Service.country+'" class="form-control" />' +
+                        '<label for="servicecity">Település</label><input type="text" id="servicecity" value="'+data.Service.city+'" class="form-control" />' +
+                        '<label for="serviceaddress">Cím</label><input type="text" id="serviceaddress" value="'+data.Service.address+'" class="form-control" />' +
+                        '<label for="serviceweb">Weboldal</label><input type="text" id="serviceweb" value="'+data.Service.website+'" class="form-control" />' +
+                        '<label for="servicedescription">Leírás</label><textarea type="text" id="servicedescription" class="form-control">'+data.Service.description+'</textarea>' +
+                        '<h3>Státusz: </h3>' +
+                        '<input type="checkbox" id="serviceStatus1" />' +
+                        '<label for="serviceStatus1">Email megerősítés</label><br>' +
+                        '<input type="checkbox" id="serviceStatus2" />' +
+                        '<label for="serviceStatus2">Admin jóváhagyás</label><br>' +
+                        '<input type="checkbox" id="serviceStatus4" />' +
+                        '<label for="serviceStatus4">Zárolva (Admin)</label><br>' +
+                        '<input type="checkbox" id="serviceStatus8" />' +
+                        '<label for="serviceStatus8">Elrejtve (Felhasználó)</label><br>' +
+                        '<button class="btn btn-success bi bi-check2" style="margin-top: 2%;" onclick="saveModify(' + id + ')"> Módosítások Mentése</button>' +
+                        '<h3>Járművek:</h3>' +
+                        '<table class="table table-stripped">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Alvázszám</th>' +
+                        '<th>Márka</th>' +
+                        '<th>Modell</th>' +
+                        '<th>Rendszám</th>' +
+                        '<th>Jogviszony</th>' +
+                        '<th>Művelet</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody id="serviceVehTableBody"></tbody></table>');
+
+                    data.ServiceVehicles.forEach(function (currentVehicle) {
+
+                        $("#serviceVehTableBody").append(`<tr id="vehicleTableRow_` + currentVehicle.v.chassis_number + `"><td><a href="vehicleHandler?vehicleId=` + currentVehicle.v.chassis_number + `" target="_blank">` + currentVehicle.v.chassis_number + `</a></td><td>` + currentVehicle.v.make + `</td><td>` + currentVehicle.v.model + `</td>` +
+                            `<td>` + currentVehicle.v.license + `</td><td><select id="serviceVehiclePerm_` + currentVehicle.v.chassis_number + `" onchange="changeServiceVehiclePerm(this.value, '` + currentVehicle.v.chassis_number + `', ` + id + `)"><option value="1">Tulaj</option>` +
+                            `<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeServiceVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
+                        $('#serviceVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
+                    });
+
+                    if (data.Service.status & userStatus.EMAIL_CONFIRM) {
+                        $('#serviceStatus1').prop('checked', true);
+                    }
+                    if (data.Service.status & userStatus.ADMIN_CONFIRM) {
+                        $('#serviceStatus2').prop('checked', true);
+                    }
+                    if (data.Service.status & userStatus.BANNED) {
+                        $('#serviceStatus4').prop('checked', true);
+                    }
+                    if (data.Service.status & userStatus.DISABLED) {
+                        $('#serviceStatus8').prop('checked', true);
+                    }
+
+                    $("#serviceModal").show();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.modal-close').click(function () {
+                $("#serviceModal").hide();
+            });
+        });
+    </script>
+}
+
 <div class="row col-12">
     <h1>Szerviz kezelés</h1>
     <div class="row col-12">
@@ -10,10 +170,75 @@
                 <tr>
                     <th>ID</th>
                     <th>E-Mail</th>
-                    <th>Name</th>
-                    <th>Phone</th>
+                    <th>Név</th>
+                    <th>Ország/Település</th>
+                    <th>Telefon</th>
+                    <th>Művelet</th>
                 </tr>
             </thead>
+            <tbody>
+                @foreach(var item in ViewBag.Services)
+                {
+                    <tr>
+                        <td>@item.id</td>
+                        <td>@item.email</td>
+                        <td>@item.name</td>
+                        <td>@item.city, @item.country </td>
+                        <td>@item.phone</td>
+                        <td><button class="btn btn-success" onclick="openServiceModal(@item.id)">Kezelés</button></td>
+                    </tr>
+                }
+            </tbody>
         </table>
+
+        <div id="serviceModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div id="serviceModalContent">
+                    <h3>Szerviz adatok</h3>
+                    <label for="servicemail">E-mail</label>
+                    <input type="text" id="servicemail" class="form-control" />
+                    <label for="servicename">Név</label>
+                    <input type="text" id="servicename" class="form-control" />
+                    <label for="servicephone">Telefon</label>
+                    <input type="text" id="servicephone" class="form-control" />
+                    <label for="servicecountry">Ország</label>
+                    <input type="text" id="servicecountry" class="form-control" />
+                    <label for="servicecity">Település</label>
+                    <input type="text" id="servicecity" class="form-control" />
+                    <label for="serviceaddress">Cím</label>
+                    <input type="text" id="serviceaddress" class="form-control" />
+                    <label for="serviceweb">Weboldal</label>
+                    <input type="text" id="serviceweb" class="form-control" />
+                    <label for="servicedescription">Leírás</label>
+                    <textarea id="servicedescription" class="form-control"></textarea>
+                    <p>Státusz: </p>
+                    <input type="checkbox" id="serviceStatus1" />
+                    <label for="serviceStatus1">Email megerősítés</label><br>
+                    <input type="checkbox" id="serviceStatus2" />
+                    <label for="serviceStatus1">Admin jóváhagyás</label><br>
+                    <input type="checkbox" id="serviceStatus4" />
+                    <label for="serviceStatus1">Zárolva (Admin)</label><br>
+                    <input type="checkbox" id="serviceStatus8" />
+                    <label for="serviceStatus1">Elrejtve (Felhasználó)</label><br>
+                    <p>Járművek:</p>
+                    <table class="table table-stripped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Márka</th>
+                                <th>Modell</th>
+                                <th>Rendszám</th>
+                                <th>Alvázszám</th>
+                                <th>Jogviszony</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

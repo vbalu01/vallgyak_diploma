@@ -61,6 +61,7 @@ namespace AutoPortal.Controllers
             ViewBag.Refuels = Refuel.GetVehicleRefuels(vehicleId);
             ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
             ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.RecordedDate).ToList();
+            ViewBag.ServiceEvents = _SQL.serviceEvents.Where(tmp => tmp.vehicle_id == vehicleId).ToList();
 
             ViewBag.vehicleData = new UserVehicle() { p = vp.permission, v = v };
             return View();

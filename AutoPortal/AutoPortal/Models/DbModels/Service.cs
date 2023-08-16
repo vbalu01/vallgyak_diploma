@@ -18,8 +18,14 @@ namespace AutoPortal.Models.DbModels
         public string phone { get; set; }
         [Required]
         public string password { get; set; }
-        [Required]
         public string description { get; set; }
+        [Required]
+        public string country { get; set; }
+        [Required]
+        public string city { get; set; }
+        [Required]
+        public string address { get; set; }
+        public string website { get; set; }
         [Required]
         public eAccountStatus status { get; set; }
     }

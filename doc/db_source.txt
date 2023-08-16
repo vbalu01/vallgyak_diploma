@@ -98,6 +98,10 @@ Table portal.services{
   phone varchar [NOT NULL]
   password varchar [NOT NULL]
   description varchar
+  country varchar [NOT NULL]
+  city varchar [NOT NULL]
+  address varchar [NOT NULL]
+  website varchar
   status int [NOT NULL]
 }
 
@@ -108,6 +112,10 @@ Table portal.dealers{
   name varchar [NOT NULL]
   password varchar [NOT NULL]
   description varchar
+  country varchar [NOT NULL]
+  city varchar [NOT NULL]
+  address varchar [NOT NULL]
+  website varchar
   status int [NOT NULL]
 }
 
