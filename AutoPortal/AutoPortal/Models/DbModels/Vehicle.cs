@@ -86,7 +86,7 @@ namespace AutoPortal.Models.DbModels
                 //Felhasználó által rögzített
                 foreach (MileageStand s in mysql.mileageStands.Where(st=>st.vehicle_id == this.chassis_number))
                 {
-                    stands.Add(new MileageStandModel() { MileageStand = s.mileage, RecordedDate = s.date, MileageStandType = eMileageStandType.USER_RECORDED });
+                    stands.Add(new MileageStandModel() { MileageStand = s.mileage, RecordedDate = s.date, MileageStandType = eMileageStandType.USER_RECORDED, id = s.id.ToString() });
                 }
                 //Szerviz adatok
                 foreach(ServiceEvent s in mysql.serviceEvents.Where(se=>se.vehicle_id == this.chassis_number))

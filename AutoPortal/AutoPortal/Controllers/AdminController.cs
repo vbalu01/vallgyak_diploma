@@ -517,5 +517,177 @@ namespace AutoPortal.Controllers
         }
         #endregion
 
+        #region vehicleRegion
+
+        [HttpPost]
+        public async Task<IActionResult> deleteFuelingData(string fuelingId)
+        {
+            if(_SQL.refuels.Any(rf=>rf.id == Guid.Parse(fuelingId)))
+            {
+                Refuel refu = _SQL.refuels.Single(rf => rf.id == Guid.Parse(fuelingId));
+                _SQL.refuels.Remove(refu);
+                _SQL.SaveChanges();
+                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                return Ok("Sikeres törlés!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett tankolás nem található!");
+                return NotFound("A keresett tankolás nem található!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteServiceEventData(string serviceEventId)
+        {
+            if (_SQL.serviceEvents.Any(se => se.id == Guid.Parse(serviceEventId)))
+            {
+                ServiceEvent sev = _SQL.serviceEvents.Single(se => se.id == Guid.Parse(serviceEventId));
+                _SQL.serviceEvents.Remove(sev);
+                _SQL.SaveChanges();
+                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                return Ok("Sikeres törlés!");
+            }
+            else
+            {
+                _Notification.AddSuccessToastMessage("A keresett szerviz nem található!");
+                return NotFound("A keresett szerviz nem található!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteMileageData(string mileageId)
+        {
+            if (_SQL.mileageStands.Any(ms => ms.id == Guid.Parse(mileageId)))
+            {
+                MileageStand mst = _SQL.mileageStands.Single(ms => ms.id == Guid.Parse(mileageId));
+                _SQL.mileageStands.Remove(mst);
+                _SQL.SaveChanges();
+                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                return Ok("Sikeres törlés!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett adat nem található!");
+                return NotFound("A keresett adat nem található!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteOtherCostData(string costId)
+        {
+            if (_SQL.otherCosts.Any(oc => oc.id == Guid.Parse(costId)))
+            {
+                OtherCost otc = _SQL.otherCosts.Single(oc => oc.id == Guid.Parse(costId));
+                _SQL.otherCosts.Remove(otc);
+                _SQL.SaveChanges();
+                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                return Ok("Sikeres törlés!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett adat nem található!");
+                return NotFound("A keresett adat nem található!");
+            }
+        }
+
+        /*[HttpPost]
+        public async Task<IActionResult> addMileageStand(string vehicleId, int mileage, DateTime date)
+        {
+
+        }*/
+
+        [HttpPost]
+        public async Task<IActionResult> addServiceEvent([FromBody] AddServiceEventAdminMondel serviceData)
+        {
+            if (ModelState.IsValid)
+            {
+                if (!_SQL.vehicles.Any(v => v.chassis_number == serviceData.vehicleId))
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: A keresett jármű nem szerepel a rendszerben.");
+                    return BadRequest("A jármű nem található!");
+                }
+                if (serviceData.newServiceCost == null || serviceData.newServiceMileage == null)
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: Hibás numerikus mezők.");
+                    return BadRequest("Hibás beviteli mezők!");
+                }
+
+                if(!_SQL.services.Any(s=>s.id == serviceData.newServiceService)) {
+                    _Notification.AddErrorToastMessage("Sikertelen rögzítés: Hibás szerviz.");
+                    return BadRequest("Hibás szerviz!");
+                }
+
+                _SQL.serviceEvents.Add(new ServiceEvent()
+                {
+                    service_id = (int)serviceData.newServiceService,
+                    serviceType = serviceData.newServiceType,
+                    comment = serviceData.newServiceOther,
+                    cost = (int)serviceData.newServiceCost,
+                    date = serviceData.newServiceDate,
+                    description = serviceData.newServiceDescription,
+                    mileage = (int)serviceData.newServiceMileage,
+                    title = serviceData.newServiceTitle,
+                    vehicle_id = serviceData.vehicleId,
+                    id = new Guid()
+                });
+
+                _SQL.SaveChanges();
+
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                return Ok("Sikeres rögzítés!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("Sikertelen rögzítés: Adathiba!");
+                return BadRequest("Adat hiba!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> addOtherCost([FromBody] AddNewCostModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if (!_SQL.vehicles.Any(v => v.chassis_number == m.vehicle_id))
+                {
+                    _Notification.AddErrorToastMessage("Jármű nem található!");
+                    return NotFound();
+                }
+
+                OtherCost oc = new OtherCost(m);
+                await _SQL.otherCosts.AddAsync(oc);
+                await _SQL.SaveChangesAsync();
+
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                return Ok();
+            }
+            _Notification.AddErrorToastMessage("Hiányos adatok!");
+            return BadRequest();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> addRefuelingData([FromBody] AddNewRefuelModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if (!_SQL.vehicles.Any(v => v.chassis_number == m.vehicle_id))
+                {
+                    _Notification.AddErrorToastMessage("Jármű nem található!");
+                    return NotFound();
+                }
+
+                Refuel rf = new Refuel(m);
+                await _SQL.refuels.AddAsync(rf);
+                await _SQL.SaveChangesAsync();
+
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                return Ok();
+            }
+            _Notification.AddErrorToastMessage("Hiányos adatok!");
+            return BadRequest();
+        }
+
+        #endregion
     }
 }

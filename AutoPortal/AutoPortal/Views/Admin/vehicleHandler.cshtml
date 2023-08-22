@@ -97,7 +97,147 @@
                 }
             });
         }
+
+        function deleteFueilingEvent(fuelingId){
+            $.ajax({
+                type: "POST",
+                url: "deleteFuelingData",
+                data: {
+                    'fuelingId': fuelingId
+                },
+                success: function (data) {
+                    $('#refuelData_' + fuelingId).remove();
+                }
+            });
+        }
+
+        function deleteServiceEvent(eventId){
+            $.ajax({
+                type: "POST",
+                url: "deleteServiceEventData",
+                data: {
+                    'serviceEventId': eventId
+                },
+                success: function (data) {
+                    $('#serviceEventData_' + eventId).remove();
+                }
+            });
+        }
+
+        function deleteOtherCost (costId){
+            $.ajax({
+                type: "POST",
+                url: "deleteOtherCostData",
+                data: {
+                    'costId': costId
+                },
+                success: function (data) {
+                    $('#otherCostDiv_' + costId).remove();
+                }
+            });
+        }
+
+        function deleteMileageStand(standId){
+            $.ajax({
+                type: "POST",
+                url: "deleteMileageData",
+                data: {
+                    'mileageId': standId
+                }
+            });
+            location.reload();
+        }
+
+        function addMileageStand(vid){
+
+        }
+
+        function addServiceEvent(vid) {
+            $.ajax({
+                type: "POST",
+                url: "addServiceEvent",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'vehicleId': vid,
+                    'newServiceService': $('#newServiceService').val(),
+                    'newServiceTitle': $('#newServiceTitle').val(),
+                    'newServiceDescription': $('#newServiceDescription').val(),
+                    'newServiceOther': $('#newServiceOther').val(),
+                    'newServiceCost': $('#newServiceCost').val(),
+                    'newServiceDate': $('#newServiceDate').val(),
+                    'newServiceMileage': $('#newServiceMileage').val(),
+                    'newServiceType': $('#newServiceType').val()
+                }),
+                success: function(data){
+                    refreshPage();
+                }
+            });
+        }
+
+        function addOtherCost(vid){
+            $.ajax({
+                type: "POST",
+                url: "addOtherCost",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'vehicle_id': vid,
+                    'title': $('#newCostTitle').val(),
+                    'description': $('#newCostDescription').val(),
+                    'cost': $('#newCostCost').val(),
+                    'date': $('#newCostDate').val()
+                }),
+                success: function (data) {
+                    refreshPage();
+                }
+            });
+        }
+
+        function addFuelingData(vid) {
+            $.ajax({
+                type: "POST",
+                url: "addRefuelingData",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'vehicle_id': vid,
+                    'refuel_cost': $('#newRefuelCost').val(),
+                    'traveled_distance': $('#newRefuelDistance').val(),
+                    'amount_of_fuel': $('#newRefuelAmount').val(),
+                    'premium_fuel': $('#newRefuelPremium').is(":checked"),
+                    'fueling_date': $('#newRefuelDate').val()
+                }),
+                success: function (data) {
+                    refreshPage();
+                }
+            });
+        }
+
+        function refreshPage() {
+            console.log(location);
+            location.reload();
+        }
     </script>
+}
+
+@section CSS{
+    <style>
+        .tableTitle {
+            font-size: 30px;
+            text-align: center;
+            color: red;
+        }
+
+        .tableLeft {
+            text-align: left;
+        }
+
+        .tableRight {
+            text-align: right;
+        }
+
+        .tableCenter {
+            text-align: center;
+        }
+    </style>
 }
 
 <div class="row col-12">
@@ -186,6 +326,8 @@
             </div>
 
             <!--Adat rögzítés (tankolás, egyéb kiadás)-->
+
+            <!--Tankolás rögzítés-->
             <div class="row col-12" style="padding-bottom:2%;">
                 <div class="col-6">
                     <h2>Tankolás rögzítése</h2>
@@ -212,10 +354,12 @@
                             <label for="newRefuelDate">Tankolás időpontja</label>
                             <input type="datetime-local" class="form-control" id="newRefuelDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
 
-                            <button class="btn btn-success" style="width:100%;" onclick="addNewRefuel();">Tankolás rögzítése</button>
+                            <button class="btn btn-success" style="width:100%;" onclick="addFuelingData('@ViewBag.Vehicle.chassis_number');">Tankolás rögzítése</button>
                         </fieldset>
                     </div>
                 </div>
+
+                <!--Egyéb kiadás rögzítés-->
                 <div class="col-6">
                     <h2>Egyéb kiadás rögzítése</h2>
                     <div>
@@ -231,9 +375,11 @@
                         <label for="newCostDate">Dátum</label>
                         <input type="datetime-local" class="form-control" id="newCostDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
 
-                        <button class="btn btn-success" style="width:100%;" onclick="addNewCost();">Költség rögzítése</button>
+                        <button class="btn btn-success" style="width:100%;" onclick="addOtherCost('@ViewBag.Vehicle.chassis_number');">Költség rögzítése</button>
                     </div>
                 </div>
+
+                <!--Szerviz rögzítés-->
                 <div class="col-6">
                     <h2>Szerviz rögzítése</h2>
                     <div>
@@ -272,10 +418,14 @@
                             
                         </select>
 
-                        <button class="btn btn-success" style="width:100%;" onclick="addNewCost();">Költség rögzítése</button>
+                        <label for="newServiceOther">Megjegyzés</label>
+                        <input type="text" class="form-control" name="newServiceOther" id="newServiceOther" />
+
+                        <button class="btn btn-success" style="width:100%;" onclick="addServiceEvent('@ViewBag.Vehicle.chassis_number');">Szerviz rögzítése</button>
                     </div>
                 </div>
 
+                <!--Jogosultság kezelés-->
                 <div class="col-6">
                     <h2>Jogosultság kezelés</h2>
                     <h3>Jármű jogosultságok</h3>
@@ -321,7 +471,7 @@
                             </tbody>
                         </table>
                         <h3>Új jogosultság</h3>
-                        <input type="text" class="form-control" id="newUserVehiclePermMail" />
+                        <input type="text" class="form-control" placeholder="E-Mail" id="newUserVehiclePermMail" />
                         <select class="form-control" id="newUserVehiclePermPerm">
                             <option value="1">Tulaj</option>
                             <option value="2">Üzembentartó</option>
@@ -347,31 +497,34 @@
                     {
                         @foreach (Refuel rf in ViewBag.Refuels)
                         {
-                            <button type="button" class="collapsible">Tankolás - @rf.fueling_date</button>
-                            <div class="content">
-                                <div class="row col-12">
-                                    <div class="offset-2 col-4">
-                                        <p>Fizetett: @rf.refuel_cost</p>
-                                        <p>Tankolt mennyiség: @rf.amount_of_fuel</p>
-                                        <p>Megtett táv: @rf.traveled_distance</p>
+                            <div id="refuelData_@rf.id">
+                                <button type="button" class="collapsible">Tankolás - @rf.fueling_date</button>
+                                <div class="content">
+                                    <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteFueilingEvent('@rf.id')" ></button>
+                                    <div class="row col-12">
+                                        <div class="offset-2 col-4">
+                                            <p>Fizetett: @rf.refuel_cost</p>
+                                            <p>Tankolt mennyiség: @rf.amount_of_fuel</p>
+                                            <p>Megtett táv: @rf.traveled_distance</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <p>Prémium üzemanyag: @if (rf.premium_fuel)
+                                                {
+                                                    <label style="color:green;"><b>Igen</b></label>
+                                                }
+                                                else
+                                                {
+                                                    <label style="color:red;"><b>Nem</b></label>
+                                                }</p>
+                                            <p>Átlag fogyasztás 100km-en: <b>@{
+                                                        Write((float)rf.amount_of_fuel / rf.traveled_distance * 100);
+                                                    }</b></p>
+                                            <p>Átlag költség 100km-en: <b>@{
+                                                        Write(((float)rf.amount_of_fuel / rf.traveled_distance * 100) * ((float)rf.refuel_cost / rf.amount_of_fuel));
+                                                    }</b></p>
+                                        </div>
+                                        <p style="text-align:center;"><b>Tankolás dátuma: @rf.fueling_date</b></p>
                                     </div>
-                                    <div class="col-4">
-                                        <p>Prémium üzemanyag: @if (rf.premium_fuel)
-                                            {
-                                                <label style="color:green;"><b>Igen</b></label>
-                                            }
-                                            else
-                                            {
-                                                <label style="color:red;"><b>Nem</b></label>
-                                            }</p>
-                                        <p>Átlag fogyasztás 100km-en: <b>@{
-                                                    Write((float)rf.amount_of_fuel / rf.traveled_distance * 100);
-                                                }</b></p>
-                                        <p>Átlag költség 100km-en: <b>@{
-                                                    Write(((float)rf.amount_of_fuel / rf.traveled_distance * 100) * ((float)rf.refuel_cost / rf.amount_of_fuel));
-                                                }</b></p>
-                                    </div>
-                                    <p style="text-align:center;"><b>Tankolás dátuma: @rf.fueling_date</b></p>
                                 </div>
                             </div>
                         }
@@ -389,8 +542,9 @@
                     {
                         <table>
                             <tr>
-                                <th style="width:60%;">Dátum</th>
-                                <th style="width:40%;">Futásteljesítmény</th>
+                                <th style="width:50%;">Dátum</th>
+                                <th style="width:35%;">Futásteljesítmény</th>
+                                <th style="width:15%">Művelet</th>
                             </tr>
                             @{
                                 MileageStandModel lastRow = null;
@@ -403,6 +557,11 @@
                                         {
                                             <i>(Felhasználó által rögzítve)</i>
                                         }</td>
+                                    <td>@if (row.MileageStandType == eMileageStandType.USER_RECORDED)
+                                        {
+                                            <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteMileageStand('@row.id')"></button>
+                                        }
+                                    </td>
                                 </tr>
                                 lastRow = row;
                             }
@@ -422,15 +581,18 @@
                     {
                         @foreach (ServiceEvent se in ViewBag.ServiceEvents)
                         {
-                            <button type="button" class="collapsible">@se.title</button>
-                            <div class="content">
-                                <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
-                                <p><b>Leírás: </b>@se.description</p>
-                                <p><b>Költség: </b>@se.cost</p>
-                                <p><b>Dátum: </b>@se.date</p>
-                                <p><b>Futásteljesítmény: </b>@se.mileage</p>
-                                <p><b>Megjegyzés: </b>@se.comment</p>
-                                <p><b>Szerviz: </b><a href="serviceProfile?id=@se.service_id">@Service.GetServiceNameById(se.service_id)</a></p>
+                            <div id="serviceEventData_@se.id">
+                                <button type="button" class="collapsible">@se.title</button>
+                                <div class="content">
+                                    <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteServiceEvent('@se.id')"></button>
+                                    <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
+                                    <p><b>Leírás: </b>@se.description</p>
+                                    <p><b>Költség: </b>@se.cost</p>
+                                    <p><b>Dátum: </b>@se.date</p>
+                                    <p><b>Futásteljesítmény: </b>@se.mileage</p>
+                                    <p><b>Megjegyzés: </b>@se.comment</p>
+                                    <p><b>Szerviz: </b><a href="serviceProfile?id=@se.service_id">@Service.GetServiceNameById(se.service_id)</a></p>
+                                </div>
                             </div>
                         }
                     }
@@ -447,11 +609,14 @@
                     {
                         @foreach (OtherCost of in ViewBag.OtherCosts)
                         {
-                            <button type="button" class="collapsible">@of.title</button>
-                            <div class="content">
-                                <p><b>Leírás: </b>@of.description</p>
-                                <p><b>Költség: </b>@of.cost</p>
-                                <p><b>Dátum: </b>@of.date</p>
+                            <div id="otherCostDiv_@of.id">
+                                <button type="button" class="collapsible">@of.title</button>
+                                <div class="content">
+                                    <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteOtherCost('@of.id')"></button>
+                                    <p><b>Leírás: </b>@of.description</p>
+                                    <p><b>Költség: </b>@of.cost</p>
+                                    <p><b>Dátum: </b>@of.date</p>
+                                </div>
                             </div>
                         }
                     }

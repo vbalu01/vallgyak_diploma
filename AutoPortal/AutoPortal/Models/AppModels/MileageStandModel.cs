@@ -5,5 +5,7 @@
         public int MileageStand { get; set; }
         public DateTime RecordedDate { get; set; }
         public eMileageStandType MileageStandType { get; set;}
+
+        public string id { get; set; }
     }
 }
