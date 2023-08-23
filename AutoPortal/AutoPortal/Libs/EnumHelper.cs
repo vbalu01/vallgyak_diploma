@@ -12,5 +12,28 @@ namespace AutoPortal.Libs
             var valueAttributes = enumValueMemberInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
             return ((DescriptionAttribute)valueAttributes[0]).Description;
         }
+
+        public static string GetAccountstatusString(eAccountStatus status)
+        {
+            var enumType = typeof(eAccountStatus);
+            var memberInfos = enumType.GetMember(status.ToString());
+            var enumValueMemberInfo = memberInfos.FirstOrDefault(m => m.DeclaringType == enumType);
+            var valueAttributes = enumValueMemberInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            return ((DescriptionAttribute)valueAttributes[0]).Description;
+        }
+
+        public static List<string> GetStatusStringList(eAccountStatus s)
+        {
+            List<string> statuses = new();
+            foreach(eAccountStatus status in Enum.GetValues(typeof(eAccountStatus)))
+            {
+                if (s.HasFlag(status))
+                {
+                    if(status != eAccountStatus.None)
+                        statuses.Add(GetAccountstatusString(status));
+                }
+            }
+            return statuses;
+        }
     }
 }

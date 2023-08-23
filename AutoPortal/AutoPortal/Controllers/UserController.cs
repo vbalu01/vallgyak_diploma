@@ -51,7 +51,7 @@ namespace AutoPortal.Controllers
             if (v == null) //Nincs ilyen jármű
                 return NotFound();
 
-            VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(p => p.target_type == loginType && p.target_id == loginId);
+            VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(p => p.target_type == loginType && p.target_id == loginId && p.vehicle_id == vehicleId);
 
             if (vp == null) //Nincs semmilyen jogosultsága a felhasználónak a járműhöz
                 return Forbid();

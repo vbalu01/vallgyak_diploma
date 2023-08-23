@@ -38,8 +38,12 @@ namespace AutoPortal.Controllers
                     ViewBag.phone = user.phone;
                     ViewBag.name = user.name;
                     ViewBag.description = user.description;
-                    ViewBag.status = user.status;
-                break;
+                    ViewBag.statuses = EnumHelper.GetStatusStringList(user.status);
+                    ViewBag.country = user.country;
+                    ViewBag.city = user.city;
+                    ViewBag.address = user.address;
+                    ViewBag.website = user.website;
+                    break;
                 case eVehicleTargetTypes.SERVICE:
                     ViewBag.loginType = "Szerviz";
                     ViewBag.pageCategory = 1;
@@ -48,7 +52,11 @@ namespace AutoPortal.Controllers
                     ViewBag.phone = user.phone;
                     ViewBag.name = user.name;
                     ViewBag.description = user.description;
-                    ViewBag.status = user.status;
+                    ViewBag.statuses = EnumHelper.GetStatusStringList(user.status);
+                    ViewBag.country = user.country;
+                    ViewBag.city = user.city;
+                    ViewBag.address = user.address;
+                    ViewBag.website = user.website;
                     break;
                 case eVehicleTargetTypes.USER:
                     ViewBag.loginType = "Felhasználó";
@@ -57,7 +65,7 @@ namespace AutoPortal.Controllers
                     ViewBag.email = user.email;
                     ViewBag.name = user.name;
                     ViewBag.register = user.register_date;
-                    ViewBag.status = user.status;
+                    ViewBag.statuses = EnumHelper.GetStatusStringList(user.status);
                     ViewBag.roles = user.GetRoles();
                     break;
             }

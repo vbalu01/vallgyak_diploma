@@ -1,4 +1,5 @@
-﻿@{
+﻿@using AutoPortal.Models.DbModels;
+@{
     ViewData["Title"] = "Profil";
 }
 
@@ -6,26 +7,153 @@
     <h1>Profilom (<i>@ViewBag.loginType</i>)</h1>
     <div>
         @if(ViewBag.pageCategory == 0) { // User
-            <p>Rendszerazonosító: @ViewBag.id</p>
-            <input type="text" id="userEmail" value="@ViewBag.email" />
-            <input type="text" id="userName" value="@ViewBag.name" />
-            <p>Regisztráció dátuma: @ViewBag.register</p>
-            <p>Státusz: @ViewBag.status</p>
-            @if(ViewBag.roles != null) {
-                <p>Jogosultságok: </p>
-                <ul>
-                @foreach (var role in ViewBag.roles){
-                    <li>@role.role</li>
-                }
-                </ul>
-            }
+            <h2>Felhasználó adatok</h2>
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td width="20%">Rendszerazonosító</td>
+                        <td width="30%">user_@ViewBag.id</td>
+                        <td width="20%">Regisztráció dátuma</td>
+                        <td width="30%">@ViewBag.register</td>
+                    </tr>
+                    <tr>
+                        <td width="20%">Név</td>
+                        <td width="30%"><input type="text" id="userName" value="@ViewBag.name" /></td>
+                        <td width="20%">E-mail cím</td>
+                        <td width="30%"><input type="text" id="userEmail" value="@ViewBag.email" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4"><button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;">Minden módosítás mentése</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr />
+
+            <div class="row">
+                <div class="offset-3 col-6">
+                    <h2>Jelszó módosítás</h2>
+                    <label for="oldPwdTb">Régi jelszó</label>
+                    <input type="password" id="oldPwdTb" name="oldPwdTb" class="form-control" /><br>
+                    <label for="oldPwdTb">Új jelszó</label>
+                    <input type="password" id="newPwdTb" name="newPwdTb" class="form-control" /><br>
+                    <label for="oldPwdTb">Új jelszó megerősítése</label>
+                    <input type="password" id="newPwdTbRe" name="newPwdTbRe" class="form-control" /><br>
+                    <button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="">Jelszó módosítása</button>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="row">
+                <div class="offset-3 col-6">
+                    <h2>Státuszok, Jogosultságok</h2>
+                    <table class="table table-stripped" style="text-align:center;">
+                        <thead>
+                            <tr>
+                                <th style="width:50%;">Státuszok</th>
+                                <th style="width:50%;">Jogosultságok</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (((List<Role>)ViewBag.roles).Count >= ((List<string>)ViewBag.statuses).Count){
+                                @for (int i = 0; i < ((List<Role>)ViewBag.roles).Count; i++)
+                                {
+                                    <tr>
+                                        <td>@{Write(((List<Role>)ViewBag.roles)[i].role);}</td>
+                                        <td>@if (((List<string>)ViewBag.statuses).ElementAtOrDefault(i) != null) { Write(((List<string>)ViewBag.statuses)[i]); }else{ Write("-"); }</td>
+                                    </tr>
+                                }
+                            }else{
+                                @for (int i = 0; i < ((List<string>)ViewBag.statuses).Count; i++)
+                                {
+                                    <tr>
+                                        <td>@if (((List<Role>)ViewBag.roles).ElementAtOrDefault(i) != null) { Write(((List<Role>)ViewBag.roles)[i].role); } else { Write("-"); }</td>
+                                        <td>@{Write(((List<string>)ViewBag.statuses)[i]);}</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         } else{ // Szerviz/Kereskedő
-            <p>Rendszerazonosító: @ViewBag.id</p>
-            <input type="text" id="userName" value="@ViewBag.name" />
-            <input type="text" id="userEmail" value="@ViewBag.email" />
-            <input type="text" id="userPhone" value="@ViewBag.phone" />
-            <input type="text" id="userDescription" value="@ViewBag.description" />
-            <p>Státusz: @ViewBag.status"</p>
+            <h2>Fiók adatok</h2>
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td width="20%">Rendszerazonosító</td>
+                        <td width="30%">@if (ViewBag.pageCategory == 1) { Write("service_"); }else{ Write("dealer_"); }@ViewBag.id</td>
+                        <td width="20%">Név</td>
+                        <td width="30%"><input type="text" id="userName" value="@ViewBag.name" /></td>
+                    </tr>
+                    <tr>
+                        <td width="20%">E-mail cím</td>
+                        <td width="30%"><input type="text" id="userEmail" value="@ViewBag.email" /></td>
+                        <td width="20%">Telefonszám</td>
+                        <td width="30%"><input type="text" id="userPhone" value="@ViewBag.phone" /></td>
+                    </tr>
+                    <tr>
+                        <td width="20%">Ország</td>
+                        <td width="30%"><input type="text" id="userCountry" value="@ViewBag.country" /></td>
+                        <td width="20%">Település</td>
+                        <td width="30%"><input type="text" id="userCity" value="@ViewBag.city" /></td>
+                    </tr>
+                    <tr>
+                        <td width="20%">Cím</td>
+                        <td width="30%"><input type="text" id="userAddress" value="@ViewBag.address" /></td>
+                        <td width="20%">Weboldal</td>
+                        <td width="30%"><input type="text" id="userWebsite" value="@ViewBag.website" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <p style="text-align:center;"><b>Leírás</b></p>
+                            <textarea id="userDescription" style="width:100%;" rows="5">@ViewBag.description</textarea>  
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4"><button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;">Minden módosítás mentése</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr />
+
+            <div class="row">
+                <div class="offset-3 col-6">
+                    <h2>Jelszó módosítás</h2>
+                    <label for="oldPwdTb">Régi jelszó</label>
+                    <input type="password" id="oldPwdTb" name="oldPwdTb" class="form-control" /><br>
+                    <label for="oldPwdTb">Új jelszó</label>
+                    <input type="password" id="newPwdTb" name="newPwdTb" class="form-control" /><br>
+                    <label for="oldPwdTb">Új jelszó megerősítése</label>
+                    <input type="password" id="newPwdTbRe" name="newPwdTbRe" class="form-control" /><br>
+                    <button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="">Jelszó módosítása</button>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="row">
+                <div class="offset-3 col-6">
+                    <h2>Státuszok</h2>
+                    <table class="table table-stripped" style="text-align:center;">
+                        <thead>
+                            <tr>
+                                <th style="width:100%;">Státuszok</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < ((List<string>)ViewBag.statuses).Count; i++)
+                            {
+                                <tr>
+                                    <td>@{Write(((List<string>)ViewBag.statuses)[i]);}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         }
     </div>
 </div>
