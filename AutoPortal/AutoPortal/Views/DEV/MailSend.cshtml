@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "DEV - E-mail küldő";
+}
+
+@section Scripts{
+    <script src="/lib/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
+    <link href="/lib/jQuery-TE_v.1.4.0/jquery-te-1.4.0.css" rel="stylesheet">
+
+    <script type="text/javascript">
+        function sendMail() {
+            $.ajax({
+                type: "POST",
+                url: "SendDevMail",
+                data: {
+                    'to': $('#mailTo').val(),
+                    'subject': $('#mailSubject').val(),
+                    'body': $('#mailBody').val()
+                },
+                success: function (data) {
+                    $('#mailTo').val("");
+                    $('#mailSubject').val("");
+                    $('#mailBody').val("");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $(".editor").jqte();
+        });
+    </script>
+}
+
+<div class="row">
+    <h1>Levelező</h1>
+    <div>
+        <label>Címzett</label>
+        <input type="text" id="mailTo" class="form-control" />
+        <label>Tárgy</label>
+        <input type="text" id="mailSubject" class="form-control" />
+        <label>Üzenet</label>
+        <textarea class="editor" id="mailBody"></textarea>
+        <button class="btn btn-success" onclick="sendMail();">Küldés</button>
+    </div>
+
+    
+</div>

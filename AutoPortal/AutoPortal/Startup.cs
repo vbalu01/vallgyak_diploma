@@ -1,4 +1,5 @@
 ﻿using AutoPortal.Libs;
+using AutoPortal.Models.AppModels;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -30,6 +31,13 @@ namespace AutoPortal
                 option.UseMySql(SQLConnectionString, v_MysqlVersion);
             });
 
+            //Mail sender setup
+            MailSettingsModel.host = Configuration.GetSection("MailSettings").GetValue(typeof(string), "Host").ToString();
+            MailSettingsModel.port = Convert.ToInt32(Configuration.GetSection("MailSettings").GetValue(typeof(int), "Port"));
+            MailSettingsModel.username = Configuration.GetSection("MailSettings").GetValue(typeof(string), "Username").ToString();
+            MailSettingsModel.password = Configuration.GetSection("MailSettings").GetValue(typeof(string), "Password").ToString();
+            MailSettingsModel.useSSL = Convert.ToBoolean(Configuration.GetSection("MailSettings").GetValue(typeof(bool), "MailUseSSL"));
+            MailSettingsModel.defaultSender = Configuration.GetSection("MailSettings").GetValue(typeof(string), "DefaultSender").ToString();
 
             #region Authorization
             services.AddAuthentication(x =>

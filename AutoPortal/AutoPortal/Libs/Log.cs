@@ -28,6 +28,17 @@
             LogList.Add(text);
         }
 
+        public static void ErrorLog(string row, string caller = "", string file = "")
+        {
+            string baseText = "";
+            if (file != null)
+                baseText += file;
+            if (caller != null)
+                baseText += "::" + caller;
+            string text = "\n~~~~~~~~~~" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + ":ERROR:" + baseText + "~~~~~~~~~~\n" + row + "\n~~~~~~~~~~" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "~~~~~~~~~~\n";
+            LogList.Add(text);
+        }
+
         private static void ProcessVoid()
         {
             while (true)

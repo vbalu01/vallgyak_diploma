@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using AutoPortal.Models.AppModels;
 
 namespace AutoPortal.Controllers
 {
@@ -29,6 +30,40 @@ namespace AutoPortal.Controllers
             ViewBag.data = JsonConvert.SerializeObject(returnObj);
 
             return View("index");
+        }
+
+        public async Task<IActionResult> MailSend()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendDevMail(string to, string subject, string body)
+        {
+            if(string.IsNullOrEmpty(to) || string.IsNullOrEmpty(subject))
+            {
+                _Notification.AddErrorToastMessage("Levél küldés sikertelen: Adathiba!");
+                return BadRequest("Levél küldés sikertelen: Adathiba!");
+            }
+            MailModel m = new MailModel()
+            {
+                to = to,
+                body = body,
+                subject = subject,
+                from = "dev@AutoPortal.hu",
+                isHtml = true,
+            };
+            bool res = await MailSender.SendMail(m);
+
+            if (res) {
+                _Notification.AddSuccessToastMessage("Email sikeresen elküldve!");
+                return Ok("Sikeres levél küldés!");
+            }
+            else {
+                _Notification.AddErrorToastMessage("Levél küldés sikertelen!");
+                return BadRequest("Levél küldés sikertelen!");
+            }
+                
         }
 
         private Dictionary<string, bool> checkTables()
