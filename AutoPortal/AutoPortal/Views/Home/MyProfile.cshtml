@@ -3,6 +3,76 @@
     ViewData["Title"] = "Profil";
 }
 
+@section Scripts{
+    <script type="text/javascript">
+        function saveUserChanges(){
+            $.ajax({
+                type: "POST",
+                url: "saveUserChanges",
+                data: {
+                    'email': $('#userEmail').val(),
+                    'name': $('#userName').val()
+                }
+            });
+        }
+
+        function changeUserPassword(){
+            $.ajax({
+                type: "POST",
+                url: "changeUserPassword",
+                data: {
+                    'oldPwd': $('#oldPwdTb').val(),
+                    'newPwd': $('#newPwdTb').val(),
+                    'newPwdRe': $('#newPwdTbRe').val()
+                },
+                success: function (data) {
+                    $('#oldPwdTb').val("");
+                    $('#newPwdTb').val("");
+                    $('#newPwdTbRe').val("");
+                }
+            });
+        }
+
+        function saveCompanyChanges(){
+            $.ajax({
+                type: "POST",
+                url: "saveCompanyChanges",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'email': $('#userEmail').val(),
+                    'name': $('#userName').val(),
+                    'phone': $('#userPhone').val(),
+                    'country': $('#userCountry').val(),
+                    'city': $('#userCity').val(),
+                    'address': $('#userAddress').val(),
+                    'website': $('#userWebsite').val(),
+                    'description': $('#userDescription').val()
+                }),
+                success: function (data) {
+
+                }
+            });
+        }
+
+        function changeCompanyPassword(){
+            $.ajax({
+                type: "POST",
+                url: "changeCompanyPassword",
+                data: {
+                    'oldPwd': $('#oldPwdTb').val(),
+                    'newPwd': $('#newPwdTb').val(),
+                    'newPwdRe': $('#newPwdTbRe').val()
+                },
+                success:function(data){
+                    $('#oldPwdTb').val("");
+                    $('#newPwdTb').val("");
+                    $('#newPwdTbRe').val("");
+                }
+            });
+        }
+    </script>
+}
+
 <div class="row col-12">
     <h1>Profilom (<i>@ViewBag.loginType</i>)</h1>
     <div>
@@ -23,7 +93,7 @@
                         <td width="30%"><input type="text" id="userEmail" value="@ViewBag.email" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4"><button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;">Minden módosítás mentése</button></td>
+                        <td colspan="4"><button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="saveUserChanges()">Minden módosítás mentése</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -39,7 +109,7 @@
                     <input type="password" id="newPwdTb" name="newPwdTb" class="form-control" /><br>
                     <label for="oldPwdTb">Új jelszó megerősítése</label>
                     <input type="password" id="newPwdTbRe" name="newPwdTbRe" class="form-control" /><br>
-                    <button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="">Jelszó módosítása</button>
+                    <button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="changeUserPassword()">Jelszó módosítása</button>
                 </div>
             </div>
 
@@ -112,7 +182,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4"><button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;">Minden módosítás mentése</button></td>
+                        <td colspan="4"><button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="saveCompanyChanges();">Minden módosítás mentése</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -128,7 +198,7 @@
                     <input type="password" id="newPwdTb" name="newPwdTb" class="form-control" /><br>
                     <label for="oldPwdTb">Új jelszó megerősítése</label>
                     <input type="password" id="newPwdTbRe" name="newPwdTbRe" class="form-control" /><br>
-                    <button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="">Jelszó módosítása</button>
+                    <button class="btn btn-lg btn-success" style="width:50%;margin-left:25%;" onclick="changeCompanyPassword();">Jelszó módosítása</button>
                 </div>
             </div>
 
