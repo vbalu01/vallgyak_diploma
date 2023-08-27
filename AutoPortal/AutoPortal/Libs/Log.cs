@@ -28,7 +28,7 @@
             LogList.Add(text);
         }
 
-        public static void ErrorLog(string row, string caller = "", string file = "")
+        public static void ErrorLog(string row, HttpContext obj, string caller = "", string file = "")
         {
             string baseText = "";
             if (file != null)

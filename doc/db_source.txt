@@ -196,3 +196,13 @@ Table portal.mileageStands{
   mileage int [NOT NULL]
   date datetime [NOT NULL]
 }
+
+Table tokens{
+  token varchar [PK, NOT NULL]
+  token_type int [NOT NULL]
+  target_type int [NOT NULL]
+  target_id int [NOT NULL]
+  expire datetime [NOT NULL]
+  remain int [NOT NULL]
+  available bool [NOT NULL]
+}

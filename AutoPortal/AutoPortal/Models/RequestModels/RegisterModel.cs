@@ -2,7 +2,7 @@
 
 namespace AutoPortal.Models.RequestModels
 {
-    public abstract class RegisterModel
+    public class RegisterModel
     {
         [Required]
         public string email { get; set; }

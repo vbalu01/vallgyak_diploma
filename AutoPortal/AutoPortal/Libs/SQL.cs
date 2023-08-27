@@ -75,6 +75,7 @@ namespace AutoPortal.Libs
         public DbSet<Dealer> dealers { get; set; }
         public DbSet<Review> reviews { get; set; }
         public DbSet<MileageStand> mileageStands { get; set; }
+        public DbSet<Token> tokens { get; set; }
         #endregion
     }
 }

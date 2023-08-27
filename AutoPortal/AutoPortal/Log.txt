@@ -18,3 +18,7 @@ SendMail: {"from":"dev@AutoPortal.hu","to":"h1rwpp@inf.elte.hu","subject":"Cső 
 ~~~~~~~~~~2023-08-26 19:51:04::::~~~~~~~~~~
 SendMail: {"from":"dev@AutoPortal.hu","to":"yp5y25@inf.elte.hu","subject":"Csáá Kiki","body":null,"isHtml":true}
 ~~~~~~~~~~2023-08-26 19:51:04~~~~~~~~~~
+
+~~~~~~~~~~2023-08-27 14:50:42::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"noreply@autoportal.hu","to":"donat.vbalu@gmail.com","subject":"AutoPortal - Regisztráció","body":"<p><strong>Tisztelt Zenélő Bébitelefon!</strong></p>\r\n\r\n<p>Köszönjük, hogy regisztrált az AutoPortal oldalára, felhasználói fiókját sikeresen létrehoztuk.</p>\r\n\r\n<p>Kérjük, hogy az alkalmazás korlátok nélküli használata érdekében erősítse meg az e-mail címét <a href=\"http://localhost:4288/Token/ConfirmRegistration?token=a0IpKQsO3kCZKuJ9vr1q4gd5\">ide</a> kattintva, vagy másolja be a böngészőbe az alábbi linket: </p>\r\n\r\n<p><a href=\"http://localhost:4288/Token/ConfirmRegistration?token=a0IpKQsO3kCZKuJ9vr1q4gd5\">http://localhost:4288/Token/ConfirmRegistration?token=a0IpKQsO3kCZKuJ9vr1q4gd5</a></p>\r\n\r\n<p><strong>Az AutoPortal csapata</strong></p>\r\n","isHtml":true}
+~~~~~~~~~~2023-08-27 14:50:42~~~~~~~~~~

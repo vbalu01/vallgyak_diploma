@@ -73,8 +73,15 @@ namespace AutoPortal.Controllers
                 register_date = DateTime.Now,
                 status = eAccountStatus.None
             };
+
             _SQL.users.Add(u);
-            await _SQL.SaveChangesAsync();
+            _SQL.SaveChanges();
+
+            Token t = TokenHandler.GenerateMailConfirmToken(u.id, eVehicleTargetTypes.USER);
+            _SQL.tokens.Add(t);
+            _SQL.SaveChanges();
+
+            MailSender.SendSuccessRegisterMail(u, t, this.Request.Host.ToString());
 
             _Notification.AddSuccessToastMessage("Sikeres regisztráció!");
             resp.Message = "Register success!";
@@ -118,18 +125,12 @@ namespace AutoPortal.Controllers
                     return BadRequest(resp.ToString());
                 }
 
+                int regId = -1;
+                eVehicleTargetTypes type = eVehicleTargetTypes.NONE;
+
                 if (m.regType) { //Szerviz
-                    _SQL.services.Add(new Service()
-                    {
-                        email = m.email,
-                        description= m.description,
-                        name = m.name,
-                        password= PasswordManager.GenerateHash(m.password),
-                        phone = m.phone,
-                        status = eAccountStatus.None
-                    });
-                } else { //Kereskedő
-                    _SQL.dealers.Add(new Dealer()
+                    type = eVehicleTargetTypes.SERVICE;
+                    Service s = new Service()
                     {
                         email = m.email,
                         description = m.description,
@@ -137,10 +138,31 @@ namespace AutoPortal.Controllers
                         password = PasswordManager.GenerateHash(m.password),
                         phone = m.phone,
                         status = eAccountStatus.None
-                    });
+                    };
+                    _SQL.services.Add(s);
+                    await _SQL.SaveChangesAsync();
+                    regId = s.id;
+                } else { //Kereskedő
+                    type = eVehicleTargetTypes.DEALER;
+                    Dealer d = new Dealer()
+                    {
+                        email = m.email,
+                        description = m.description,
+                        name = m.name,
+                        password = PasswordManager.GenerateHash(m.password),
+                        phone = m.phone,
+                        status = eAccountStatus.None
+                    };
+                    _SQL.dealers.Add(d);
+                    await _SQL.SaveChangesAsync();
+                    regId = d.id;
                 }
 
-                await _SQL.SaveChangesAsync();
+                Token t = TokenHandler.GenerateMailConfirmToken(regId, type);
+                _SQL.tokens.Add(t);
+                _SQL.SaveChanges();
+
+                MailSender.SendSuccessRegisterMail(regId, t, this.Request.Host.ToString());
 
                 _Notification.AddSuccessToastMessage("Sikeres regisztráció!");
                 resp.Message = "Register success!";
