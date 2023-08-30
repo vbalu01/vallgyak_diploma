@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Jármű eladása";
+}
+
+<div class="row">
+    <h1>Jármű eladás</h1>
+
+    <label for="make">Jármű</label>
+    <datalist id="vehicles">
+        @foreach (var vehicle in ViewBag.vehicles)
+        {
+            <option value="@vehicle.chassis_number">@vehicle.make @vehicle.model</option>
+        }
+    </datalist>
+    <input autoComplete="on" name="vehicle" id="vehicle" list="vehicles" class="form-control" required />
+
+    <label for="vehiclePrice">Ár</label>
+    <input type="number" class="form-control" id="vehicle_price" />
+
+    <label for="userPhone">Elérhetőség (telefon)</label>
+    <input type="text" class="form-control" id="vehicle_price" />
+
+    <label for="userMail">Elérhetőség (E-Mail)</label>
+    <input type="text" class="form-control" id="vehicle_price" />
+
+    <label for="saleStartDate">Hirdetés megkezdésének dátuma</label>
+    <input type="datetime-local" class="form-control" id="saleStartDate" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+    
+    <label for="saleDescription">Leírás</label>
+    <textarea id="saleDescription" class="form-control">
+
+    </textarea>
+
+    <button onclick="" class="btn btn-success">Hirdetés feladása</button>
+</div>

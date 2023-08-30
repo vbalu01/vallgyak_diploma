@@ -85,6 +85,18 @@ namespace AutoPortal.Controllers
             return View();
         }
 
+        public IActionResult createVehicleSale()
+        {
+            List<Vehicle> vehicles = new();
+            List<VehiclePermission> uv = _SQL.vehiclePermissions.Where(p=>p.target_type == loginType && p.target_id == loginId).ToList();
+            foreach(VehiclePermission vp in uv)
+            {
+                vehicles.Add(_SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id));
+            }
+            ViewBag.vehicles = vehicles;
+            return View();
+        }
+
         #endregion
 
 
