@@ -2,6 +2,49 @@
     ViewData["Title"] = "Jármű eladása";
 }
 
+@section Scripts{
+    <script type="text/javascript">
+        function saleVehicle(){
+            if (!$('#acceptRules').is(':checked')) {
+                alert('A felhasználói feltételek elfogadása kötelező!');
+                return;
+            }
+
+            var formData = new FormData();
+            var fileUpload = $('#saleImages').get(0);
+            var files = fileUpload.files;
+            for (var i = 0; i < files.length; i++) {
+                console.log(files[i].name);
+                formData.append(files[i].name, files[i]);
+            }
+            formData.append('vehicleId', $('#vehicleId').val());
+            formData.append('vehiclePrice', $('#vehiclePrice').val());
+            formData.append('userPhone', $('#userPhone').val());
+            formData.append('userMail', $('#userMail').val());
+            formData.append('saleStartDate', $('#saleStartDate').val());
+            formData.append('saleDescription', $('#saleDescription').val());
+            formData.append('saleAvailable', $('#saleAvailable').is(':checked'));
+
+            $.ajax({
+                url: "createVehicleSaleAdvert",
+                type: 'POST',
+                data: formData,
+                success: function (data) {
+                    $('#saleDescription').val("");
+                    $('#userMail').val("");
+                    $('#userPhone').val("");
+                    $('#vehiclePrice').val("");
+                    $('#vehicleId').val("");
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+
+        }
+    </script>
+}
+
 <div class="row">
     <h1>Jármű eladás</h1>
 
@@ -12,24 +55,35 @@
             <option value="@vehicle.chassis_number">@vehicle.make @vehicle.model</option>
         }
     </datalist>
-    <input autoComplete="on" name="vehicle" id="vehicle" list="vehicles" class="form-control" required />
+    <input autoComplete="on" name="vehicleId" id="vehicleId" list="vehicles" class="form-control" required />
 
     <label for="vehiclePrice">Ár</label>
-    <input type="number" class="form-control" id="vehicle_price" />
+    <input type="number" class="form-control" name="vehiclePrice" id="vehiclePrice" />
 
     <label for="userPhone">Elérhetőség (telefon)</label>
-    <input type="text" class="form-control" id="vehicle_price" />
+    <input type="text" class="form-control" name="userPhone" id="userPhone" />
 
     <label for="userMail">Elérhetőség (E-Mail)</label>
-    <input type="text" class="form-control" id="vehicle_price" />
+    <input type="text" class="form-control" name="userMail" id="userMail" />
 
     <label for="saleStartDate">Hirdetés megkezdésének dátuma</label>
-    <input type="datetime-local" class="form-control" id="saleStartDate" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+    <input type="datetime-local" class="form-control" name="saleStartDate" id="saleStartDate" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
     
     <label for="saleDescription">Leírás</label>
-    <textarea id="saleDescription" class="form-control">
+    <textarea id="saleDescription" class="form-control" name="saleDescription"></textarea>
 
-    </textarea>
+    <div>
+        <input type="checkbox" id="saleAvailable" name="saleAvailable" checked />
+        <label for="saleAvailable">Hirdetés elérhető</label>
+    </div>
 
-    <button onclick="" class="btn btn-success">Hirdetés feladása</button>
+    <div>
+        <label for="saleImages">Fényképek feltöltése</label>
+        <input type="file" name="saleImages" id="saleImages" class="form-control" multiple />
+    </div>
+    <div>
+        <input type="checkbox" id="acceptRules" />
+        <label for="acceptRules">A hirdetés közzétételével elfogadom a <a href="#">felhasználói feltételeket</a></label>
+    </div>
+    <button class="btn btn-success" onclick="saleVehicle();">Hirdetés feladása</button>
 </div>

@@ -91,6 +91,8 @@ namespace AutoPortal.Controllers
             try { _SQL.dealers.Any(); tables.Add("Dealer", true);} catch { tables.Add("Dealer", false);}
             try { _SQL.reviews.Any(); tables.Add("Review", true);} catch { tables.Add("Review", false);}
             try { _SQL.mileageStands.Any(); tables.Add("MileageStand", true);} catch { tables.Add("MileageStand", false);}
+            try { _SQL.vehicleSales.Any(); tables.Add("VehicleSale", true);} catch { tables.Add("VehicleSale", false);}
+            try { _SQL.tokens.Any(); tables.Add("Token", true);} catch { tables.Add("Token", false);}
 
             return tables;
         }

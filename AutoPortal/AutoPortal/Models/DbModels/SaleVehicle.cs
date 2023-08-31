@@ -18,7 +18,7 @@ namespace AutoPortal.Models.DbModels
         [Required]
         public string email { get; set; }
         [Required]
-        public DateTime accouncement_date { get; set; }
+        public DateTime announcement_date { get; set; }
         [Required]
         public string description { get; set; }
         [Required]

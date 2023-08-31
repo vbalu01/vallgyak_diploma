@@ -20,6 +20,7 @@ namespace AutoPortal.Controllers
     {
         protected SQL _SQL { get; private set; }
         protected IToastNotification _Notification { get; private set; }
+        protected IWebHostEnvironment _Environment;
         protected IConfiguration _Configuration { get; private set; }
         protected JsonResponse resp;
         protected int loginId { get; private set; }
@@ -35,6 +36,16 @@ namespace AutoPortal.Controllers
             this._Notification = notification;
             this.resp = new JsonResponse();
             resp.Success = true;
+        }
+
+        public BaseController(IConfiguration configuration, SQL sql, IToastNotification notification, IWebHostEnvironment environment)
+        {
+            this._Configuration = configuration;
+            this._SQL = sql;
+            this._Notification = notification;
+            this.resp = new JsonResponse();
+            resp.Success = true;
+            _Environment = environment;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden API hívás előtt lefut

@@ -6,13 +6,14 @@ using AutoPortal.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NToastNotify;
+using System.Net;
 
 namespace AutoPortal.Controllers
 {
     [Authorize]
     public class UserController : BaseController
     {
-        public UserController(IConfiguration config, SQL sql, IToastNotification notification) : base(config, sql, notification)
+        public UserController(IConfiguration config, SQL sql, IToastNotification notification, IWebHostEnvironment environment) : base(config, sql, notification, environment)
         {
         }
 
@@ -94,6 +95,12 @@ namespace AutoPortal.Controllers
                 vehicles.Add(_SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id));
             }
             ViewBag.vehicles = vehicles;
+            return View();
+        }
+
+        public IActionResult myVehicleSales()
+        {
+
             return View();
         }
 
@@ -289,6 +296,65 @@ namespace AutoPortal.Controllers
             _SQL.SaveChanges();
             _Notification.AddSuccessToastMessage("Sikerese törlés!");
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> createVehicleSaleAdvert(string vehicleId, int? vehiclePrice, string userPhone, string userMail, DateTime? saleStartDate, string saleDescription, bool? saleAvailable) //Nem szép, de legalább működik ez a szar-fos
+        {
+            if (string.IsNullOrEmpty(vehicleId) || vehiclePrice == null || vehiclePrice < 1 || string.IsNullOrEmpty(userPhone) || string.IsNullOrEmpty(userMail) || string.IsNullOrEmpty(saleDescription) || saleStartDate == null || saleAvailable == null)
+            {
+                _Notification.AddErrorToastMessage("Minden adatot ki kell tölteni!");
+                return BadRequest("Minden adatot ki kell tölteni!");
+            }
+            Vehicle v = _SQL.vehicles.SingleOrDefault(vh => vh.chassis_number == vehicleId);
+            if (v == null)
+            {
+                _Notification.AddErrorToastMessage("A keresett jármű nem található!");
+                return NotFound("A keresett jármű nem található!");
+            }
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == vehicleId && vp.target_type == loginType && vp.target_id == loginId && vp.permission == eVehiclePermissions.OWNER))
+            {
+                _Notification.AddErrorToastMessage("Nincs jogosultsága ehhez a művelethez!");
+                return Forbid("Nincs jogosultsága ehhez a művelethez!");
+            }
+            if (_SQL.vehicleSales.Any(s => s.vehicle_id == vehicleId))
+            {
+                _Notification.AddErrorToastMessage("A jármű már eladásra lett kínálva!");
+                return Conflict("A jármű már eladásra lett kínálva!");
+            }
+            SaleVehicle sv = new SaleVehicle()
+            {
+                transaction_id = Guid.NewGuid(),
+                vehicle_id = vehicleId,
+                announcement_date = (DateTime)saleStartDate,
+                description = saleDescription,
+                email = userMail,
+                phone = userPhone,
+                vehicle_cost = (int)vehiclePrice,
+                active = true
+            };
+            _SQL.vehicleSales.Add(sv);
+            _SQL.SaveChanges();
+
+            var filePath = _Environment.WebRootPath + "/Images/SaleImages/";
+            Directory.CreateDirectory(filePath + "/" + sv.transaction_id.ToString() + "/");
+            filePath += "/" + sv.transaction_id.ToString() + "/";
+            int i = 0;
+            foreach (IFormFile formFile in Request.Form.Files)
+            {
+                if (formFile.Length > 0 && (Path.GetExtension(formFile.FileName) == ".png" || Path.GetExtension(formFile.FileName) == ".jpg" || Path.GetExtension(formFile.FileName) == ".jpeg"))
+                {
+                    using (var stream = System.IO.File.Create(filePath + +i + Path.GetExtension(formFile.FileName)))
+                    {
+                        await formFile.CopyToAsync(stream);
+                        i++;
+                    }
+                }
+                
+            }
+
+            _Notification.AddSuccessToastMessage("A jármű sikeresen eladásra lett kínálva!");
+            return Ok("A jármű sikeresen eladásra kínálva!");
         }
         #endregion
     }
