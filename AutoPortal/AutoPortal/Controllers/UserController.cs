@@ -4,9 +4,11 @@ using AutoPortal.Models.DbModels;
 using AutoPortal.Models.RequestModels;
 using AutoPortal.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NToastNotify;
 using System.Net;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AutoPortal.Controllers
 {
@@ -100,7 +102,22 @@ namespace AutoPortal.Controllers
 
         public IActionResult myVehicleSales()
         {
+            List<VehiclePermission> userVehicles = _SQL.vehiclePermissions.Where(vp => vp.target_id == loginId && vp.target_type == loginType).ToList();
+            List<VehicleSaleModel> vehicles = new();
 
+            foreach (VehiclePermission vp in userVehicles)
+            {
+                
+                if (_SQL.vehicleSales.Any(vs=>vs.vehicle_id == vp.vehicle_id))
+                {
+                    vehicles.Add(new VehicleSaleModel() {
+                        Vehicle = _SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id),
+                        SaleVehicle = _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id),
+                        images = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id).transaction_id + "/").Select(f => Path.GetFileName(f)).ToList()
+                });
+                }
+            }
+            ViewBag.vehicles = vehicles;
             return View();
         }
 
@@ -299,7 +316,7 @@ namespace AutoPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> createVehicleSaleAdvert(string vehicleId, int? vehiclePrice, string userPhone, string userMail, DateTime? saleStartDate, string saleDescription, bool? saleAvailable) //Nem szép, de legalább működik ez a szar-fos
+        public async Task<IActionResult> createVehicleSaleAdvert(string vehicleId, int? vehiclePrice, string userPhone, string userMail, DateTime? saleStartDate, string saleDescription, bool? saleAvailable) //Nem szép, de legalább működik
         {
             if (string.IsNullOrEmpty(vehicleId) || vehiclePrice == null || vehiclePrice < 1 || string.IsNullOrEmpty(userPhone) || string.IsNullOrEmpty(userMail) || string.IsNullOrEmpty(saleDescription) || saleStartDate == null || saleAvailable == null)
             {
@@ -355,6 +372,183 @@ namespace AutoPortal.Controllers
 
             _Notification.AddSuccessToastMessage("A jármű sikeresen eladásra lett kínálva!");
             return Ok("A jármű sikeresen eladásra kínálva!");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteSaleImage(string image, Guid transactionId)
+        {
+            SaleVehicle sv = _SQL.vehicleSales.SingleOrDefault(s => s.transaction_id == transactionId);
+            if(sv == null) {
+                _Notification.AddErrorToastMessage("A keresett tranzakció nem található!");
+                return BadRequest("A keresett tranzakció nem található!");
+            }
+            if (string.IsNullOrWhiteSpace(image)) {
+                _Notification.AddErrorToastMessage("Hibás kép!");
+                return BadRequest("Hibás kép!");
+            }
+
+            if(!_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType)) {
+                _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
+                return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
+            }
+
+            if(!System.IO.File.Exists(_Environment.WebRootPath + image)){
+                _Notification.AddErrorToastMessage("A keresett kép nem található!");
+                return NotFound("A keresett kép nem található!");
+            }
+            else {
+                System.IO.File.Delete(_Environment.WebRootPath + image);
+
+                List<string> files = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/"+transactionId).ToList();
+                int index = 0;
+                if(files.Count > 0) { 
+                    foreach(string file in files) {
+                        string extension = Path.GetExtension("/Images/SaleImages/" + transactionId + "/" + file);
+                        System.IO.File.Move(file, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/" + index + extension);
+                        index++;
+                    }
+                }
+
+                _Notification.AddSuccessToastMessage("Kép sikeresen törölve!");
+                return Ok();
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> saveImagePosition(string image, Guid transactionId, int position)
+        {
+            SaleVehicle sv = _SQL.vehicleSales.SingleOrDefault(s => s.transaction_id == transactionId);
+            if (sv == null)
+            {
+                _Notification.AddErrorToastMessage("A keresett tranzakció nem található!");
+                return BadRequest("A keresett tranzakció nem található!");
+            }
+            if (string.IsNullOrWhiteSpace(image))
+            {
+                _Notification.AddErrorToastMessage("Hibás kép!");
+                return BadRequest("Hibás kép!");
+            }
+
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType))
+            {
+                _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
+                return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
+            }
+
+            if (!System.IO.File.Exists(_Environment.WebRootPath + image))
+            {
+                _Notification.AddErrorToastMessage("A keresett kép nem található!");
+                return NotFound("A keresett kép nem található!");
+            }
+            else
+            {
+                var files = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/");
+
+                if (files.Any(tmp=>Path.GetFileNameWithoutExtension(tmp) == position.ToString()))
+                {
+                    string oldextension = Path.GetExtension(files.Single(tmp => Path.GetFileNameWithoutExtension(tmp) == position.ToString()));
+                    System.IO.File.Move(files.Single(tmp => Path.GetFileNameWithoutExtension(tmp) == position.ToString()), _Environment.WebRootPath + "/Images/SaleImages/"+ transactionId + "tmp.file");
+
+                    string oldPosition = Path.GetFileNameWithoutExtension(_Environment.WebRootPath + image);
+                    System.IO.File.Move(_Environment.WebRootPath + image, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId+ "/" + position + Path.GetExtension(_Environment.WebRootPath + image));
+
+                    System.IO.File.Move(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "tmp.file", _Environment.WebRootPath + "/Images/SaleImages/" + transactionId+ "/" +oldPosition +oldextension);
+
+                }
+                else {
+                    System.IO.File.Move(_Environment.WebRootPath + image, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/" + position + Path.GetExtension(_Environment.WebRootPath + image));
+                }
+                _Notification.AddSuccessToastMessage("Kép sikeresen törölve!");
+                return Ok();
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> updateVehicleSale(Guid transactionId, int? vehiclePrice, string userPhone, string userMail, DateTime? saleStartDate, string saleDescription, bool? saleAvailable)
+        {
+            SaleVehicle sv = _SQL.vehicleSales.SingleOrDefault(s => s.transaction_id == transactionId);
+            if (sv == null)
+            {
+                _Notification.AddErrorToastMessage("A keresett tranzakció nem található!");
+                return BadRequest("A keresett tranzakció nem található!");
+            }
+
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType))
+            {
+                _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
+                return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
+            }
+
+            if(vehiclePrice != null && sv.vehicle_cost != vehiclePrice) {
+                sv.vehicle_cost = (int)vehiclePrice;
+            }
+            if(!string.IsNullOrWhiteSpace(userPhone) && userPhone != sv.phone) { 
+                sv.phone = userPhone;
+            }
+            if(!string.IsNullOrWhiteSpace(userMail) && userMail != sv.email) { 
+                sv.email = userMail;
+            }
+
+            if(saleStartDate != null && saleStartDate != sv.announcement_date) {
+                sv.announcement_date = (DateTime)saleStartDate;
+            }
+            if (!string.IsNullOrWhiteSpace(saleDescription) && saleDescription != sv.description) { 
+                sv.description = saleDescription;
+            }
+            if(saleAvailable != null && saleAvailable != sv.active) {
+                sv.active = (bool)saleAvailable;
+            }
+
+            _SQL.vehicleSales.Update(sv);
+            _SQL.SaveChangesAsync();
+
+            var filePath = _Environment.WebRootPath + "/Images/SaleImages/";
+            filePath += "/" + transactionId.ToString() + "/";
+            if (Request.Form.Files.Count > 0)
+            {
+                int i = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/").Length;
+                foreach (IFormFile formFile in Request.Form.Files)
+                {
+                    if (formFile.Length > 0 && (Path.GetExtension(formFile.FileName) == ".png" || Path.GetExtension(formFile.FileName) == ".jpg" || Path.GetExtension(formFile.FileName) == ".jpeg"))
+                    {
+                        using (var stream = System.IO.File.Create(filePath + +i + Path.GetExtension(formFile.FileName)))
+                        {
+                            await formFile.CopyToAsync(stream);
+                            i++;
+                        }
+                    }
+
+                }
+            }
+            _Notification.AddSuccessToastMessage("A módosítások sikeresen érvényesítve lettek!");
+            return Ok("A módosítások sikeresen érvényesítve lettek!");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> removeSaleTransaction(Guid transactionId)
+        {
+            SaleVehicle sv = _SQL.vehicleSales.SingleOrDefault(s => s.transaction_id == transactionId);
+            if (sv == null)
+            {
+                _Notification.AddErrorToastMessage("A keresett tranzakció nem található!");
+                return BadRequest("A keresett tranzakció nem található!");
+            }
+
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType))
+            {
+                _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
+                return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
+            }
+
+            _SQL.vehicleSales.Remove(sv);
+            _SQL.SaveChanges();
+
+            var filePath = _Environment.WebRootPath + "/Images/SaleImages/" + transactionId.ToString();
+
+            Directory.Delete(filePath, true);
+
+            _Notification.AddSuccessToastMessage("Sikeres tranzakció törlés!");
+            return Ok();
         }
         #endregion
     }

@@ -1,7 +1,268 @@
-﻿@{
+﻿@using AutoPortal.Models.ResponseModels;
+@{
     ViewData["Title"] = "Eladó járműveim";
 }
 
+@section meta{
+    
+}
+
+@section CSS{
+    <style>
+        /*Kép választó csúszka*/
+        .slide {
+            width: auto;
+            height: 100px;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            white-space: nowrap;
+        }
+
+        .viewerimg {
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .viewerimgimg:hover {
+            opacity: 0.7;
+        }
+
+        #image-viewer {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 75%;
+        }
+
+        .modal-content { 
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        #image-viewer .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 45px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        #image-viewer .close:hover,
+        #image-viewer .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        $(".images img").click(function () {
+            $("#full-image").attr("src", $(this).attr("src"));
+            $("#full-image").data("transaction", $(this).data("transaction"))
+            $("#labelImgActual").val($(this).data("position"));
+            $("#labelImgActual").attr({
+                "max": $('#saleImages_' + $(this).data("transaction")).data("imagescount"),
+                "min": 1
+            });
+            console.log($('#saleImages_' + $(this).data("transaction")).data("imagescount"));
+            $("#labelImgCount").text($('#saleImages_' + $(this).data("transaction")).data("imagescount"));
+            $('#image-viewer').show();
+        });
+
+        $("#image-viewer .close").click(function () {
+            $('#image-viewer').hide();
+        });
+
+        function deleteImage(){
+            $.ajax({
+                type: "POST",
+                url: "deleteSaleImage",
+                data: {
+                    'image': $("#full-image").attr("src"),
+                    'transactionId': $('#full-image').data('transaction')
+                },
+                success: function (data) {
+                    setTimeout(refreshPage, 1000);
+                }
+            });
+        }
+
+        function saveImagePosition() {
+            console.log($("#full-image").attr("src"));
+
+            $.ajax({
+                type: "POST",
+                url: "saveImagePosition",
+                data: {
+                    'image': $("#full-image").attr("src"),
+                    'transactionId': $('#full-image').data('transaction'),
+                    'position': $('#labelImgActual').val() -1
+                },
+                success: function (data) {
+                    setTimeout(refreshPage, 1000);
+                }
+            });
+        }
+
+        async function downloadImage() {
+            let imageSrc = $("#full-image").attr("src");
+
+            const response = await fetch(imageSrc);
+
+            const blobImage = await response.blob();
+
+            const href = URL.createObjectURL(blobImage);
+
+            const anchorElement = document.createElement('a');
+            anchorElement.href = href;
+            anchorElement.download = imageSrc;
+
+            document.body.appendChild(anchorElement);
+            anchorElement.click();
+
+            document.body.removeChild(anchorElement);
+            window.URL.revokeObjectURL(href);
+        }
+
+        function refreshPage() {
+            window.location.href = window.location.href;
+        }
+
+        function uploadImage(transactionId){
+            $('#uploadImageInput_'+transactionId).click();
+        }
+
+        $(document).ready(function(){
+            $('input[type=file]').change(function (e) {
+                var fileUpload = $(this).get(0);
+                var files = fileUpload.files;
+                $('#uploadingFileAmount_' + $(this).data('transaction')).text(files.length);
+            });
+        });
+
+        function saveModify(transactionId){
+            var formData = new FormData();
+            var fileUpload = $('#uploadImageInput_' + transactionId).get(0);
+            var files = fileUpload.files;
+
+            for (var i = 0; i < files.length; i++) {
+                formData.append(files[i].name, files[i]);
+            }
+
+            formData.append("transactionId", transactionId);
+            formData.append("vehiclePrice", $('#salePrice_' + transactionId).val());
+            formData.append("userPhone", $('#saleUserPhone_' + transactionId).val());
+            formData.append("userMail", $('#saleUserMail_' + transactionId).val());
+            formData.append("saleStartDate", $('#saleStartDate_' + transactionId).val());
+            formData.append("saleDescription", $('#saleDescription_' + transactionId).val());
+            formData.append("saleAvailable", $('#saleAvailable_' + transactionId).is(':checked'));
+
+            $.ajax({
+            url: "updateVehicleSale",
+                type: 'POST',
+                data: formData,
+                success: function (data) {
+                    refreshPage();
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        }
+
+        function removeSaleTransaction(transactionId){
+            $.ajax({
+                type: "POST",
+                url: "removeSaleTransaction",
+                data: {
+                    'transactionId': transactionId
+                },
+                success: function (data) {
+                    setTimeout(refreshPage, 1000);
+                }
+            });
+        }
+    </script>
+}
+
 <div class="row">
-    <h1>Eladó járműveim</h1>
+    <h1>Eladásra kínált járműveim</h1>
+
+    <div id="image-viewer">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="full-image" data-transaction="0">
+        <div class="row" style="text-align:center;">
+            <p style="color:white; font-size:14px;">Pozíció: <input type="number" id="labelImgActual" value="" min="" max="">/<label id="labelImgCount"></label></p>
+        </div>
+        <div class="row" style="background-color:transparent;border-radius:10px; width:60%; margin-left:20%; margin-top: 1%; min-height:7%; max-height:10%;">
+            <button class="bi bi-save btn btn-warning" style="margin-left: 25%; max-width:15%;margin-right:2%;" onclick="saveImagePosition();"></button>
+            <button class="bi bi-download btn btn-success" style="max-width:15%;margin-right:2%;" onclick="downloadImage();"></button>
+            <button class="bi bi-trash btn btn-danger" style="max-width:15%;margin-right:2%;" onclick="deleteImage();"></button>
+        </div>
+    </div>
+
+    <div class="col-12">
+        @foreach (VehicleSaleModel row in ViewBag.vehicles)
+        {
+            <input type="file" style="visibility:hidden;" id="uploadImageInput_@row.SaleVehicle.transaction_id" data-transaction="@row.SaleVehicle.transaction_id" multiple />
+            <div class="row col-12" id="saleDiv_@row.SaleVehicle.transaction_id">
+                <h3>@row.Vehicle.make - @row.Vehicle.model @row.Vehicle.modeltype</h3>
+                <p style="color:lightslategrey;font-size:14px;">Alvázszám: <i>@row.Vehicle.chassis_number</i></p>
+                
+                <div class="row">
+                    <div class="col-6" style="min-width:100px;">
+                        <p>Vételár: <input type="number" class="form-control" id="salePrice_@row.SaleVehicle.transaction_id" value="@row.SaleVehicle.vehicle_cost"></p>
+                        <p>Elérhetőség (telefon): <input type="text" class="form-control" id="saleUserPhone_@row.SaleVehicle.transaction_id" value="@row.SaleVehicle.phone"></p>
+                        <p>Elérhetőség (e-mail): <input type="text" class="form-control" id="saleUserMail_@row.SaleVehicle.transaction_id" value="@row.SaleVehicle.email"></p>
+                        <p>Kezdő dátum: <input type="datetime-local" class="form-control" id="saleStartDate_@row.SaleVehicle.transaction_id" value="@row.SaleVehicle.announcement_date.ToString("yyyy-MM-ddTHH:mm")" /></p>
+                    </div>
+                    <div class="col-6">
+                        <p>Leírás: <textarea class="form-control" style="width:100%;" id="saleDescription_@row.SaleVehicle.transaction_id">@row.SaleVehicle.description</textarea></p>
+                    </div>
+                </div>
+
+                
+
+                <hr />
+                <div class="slide col-6 images" id="saleImages_@row.SaleVehicle.transaction_id" data-imagescount="@row.images.Count">
+                    @{
+                        int i = 1;
+                    }
+                    @foreach (string img in row.images)
+                    {
+                        <img src="~/Images/SaleImages/@row.SaleVehicle.transaction_id/@img" style="max-width:200px; max-height:100px;" class="viewerimg" data-transaction="@row.SaleVehicle.transaction_id" data-position="@i" />
+                        { i++; }
+                    }
+                    <button class="bi bi-upload" onclick="uploadImage('@row.SaleVehicle.transaction_id');"></button>
+                </div>
+            </div>
+            <div>
+                <input type="checkbox" id="saleAvailable_@row.SaleVehicle.transaction_id" @if (row.SaleVehicle.active) { Write("checked"); }/>
+                <label for="">Elérhető</label>
+            </div>
+            <p>Feltöltésre váró képek: <label id="uploadingFileAmount_@row.SaleVehicle.transaction_id">0</label></p>
+            <button class="btn btn-success" onclick="saveModify('@row.SaleVehicle.transaction_id');">Módosítások mentése</button>
+            <button class="btn btn-danger bi bi-trash" onclick="removeSaleTransaction('@row.SaleVehicle.transaction_id');">Hirdetés törlése</button>
+            <hr />
+        }
+    </div>
 </div>
