@@ -1,0 +1,13 @@
+Szervizhez Márka több-többhöz + kapcsolat típus(Márka/szakszerviz)
+Elfelejtett jelszó
+Értékelés skála + szöveges
+Külső profil szerviz + kereskedő
+Járművekhez kereskedői jogviszony
+Tulajdonjog átadás
+Admin: Gyár kezelés, eladó jármű kezelés, köremail, értékelés moderálás, járműadat módosítás
+Szerviz: Jármű műszaki adat módosítás, szerviz fénykép csatolás
+Kereskedő: Hirdetés kiemelés, értékelés alapú rendezés, felhasználó jármű eladás jogviszonnyal
+Gyárak: saját jármű lekérés, saját jármű tulajdonjog átadás
+Eladó jármű keresés
+Eladáshoz előéleti oldal
+Design
