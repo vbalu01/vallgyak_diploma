@@ -44,5 +44,18 @@ namespace AutoPortal.Libs
             };
             return await SendMail(m);
         }
+
+        public async static Task<bool> SendNewPasswordMail(string email, Token t, string host)
+        {
+            MailModel m = new()
+            {
+                subject = "AutoPortal - Elfelejtett jelszó",
+                from = "noreply@autoportal.hu",
+                isHtml = true,
+                to = email,
+                body = $"<p><strong>Tisztelt felhasználónk!</strong></p>\r\n\r\n<p>Az új jelszavának megadásához kattintson <a href=\"http://{host}/Token/ForgotPassword?token={t.token}\">ide</a>, vagy másolja be a böngészőbe az alábbi linket: </p>\r\n\r\n<p><a href=\"http://{host}/Token/ForgotPassword?token={t.token}\">http://{host}/Token/ForgotPassword?token={t.token}</a></p>\r\n\r\n<p><strong>Üdvözlettel: az AutoPortal csapata</strong></p>\r\n"
+            };
+            return await SendMail(m);
+        }
     }
 }

@@ -98,6 +98,10 @@ namespace AutoPortal.Controllers
                 }
 
             }
+            else
+            {
+                this.loginType = eVehicleTargetTypes.NONE;
+            }
             base.OnActionExecuting(context);
         }
 

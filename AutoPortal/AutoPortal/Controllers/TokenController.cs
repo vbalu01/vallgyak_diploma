@@ -121,5 +121,51 @@ namespace AutoPortal.Controllers
             this._Notification.AddSuccessToastMessage("Sikeres megerősítés!");
             return Redirect("/Auth/Login");
         }
+
+        [HttpGet]
+        public IActionResult ForgotPassword(string token)
+        {
+            if (token == null)
+            {
+                this._Notification.AddErrorToastMessage("Hibás adatok!");
+                return Redirect("/Auth/AskNewPassword");
+            }
+            if (this.loginType != eVehicleTargetTypes.NONE)
+            {
+                _Notification.AddErrorToastMessage("A felhasználó be van jelentkezve!");
+                return Redirect("/Home/");
+            }
+
+            Token t = this._SQL.tokens.SingleOrDefault(tt => tt.token == token);
+            if (t == null)
+            {
+                this._Notification.AddErrorToastMessage("Hibás kulcs!");
+                return Redirect("/Auth/AskNewPassword");
+            }
+
+            if (t.token_type != eTokenType.ASK_NEW_PASSWORD)
+            {
+                this._Notification.AddErrorToastMessage("Hibás kulcs típus!");
+                return Redirect("/Auth/AskNewPassword");
+            }
+
+            if (t.expire <= DateTime.Now)
+            {
+                this._Notification.AddErrorToastMessage("A kulcs már lejárt!");
+                return Redirect("/Auth/AskNewPassword");
+            }
+
+            if (!t.available)
+            {
+                this._Notification.AddErrorToastMessage("A kulcs nem elérhető!");
+                return Redirect("/Auth/AskNewPassword");
+            }
+
+            TempData["userType"] = t.target_type;
+            TempData["userId"] = t.target_id;
+            TempData["token"] = token;
+
+            return Redirect("/Auth/ForgotPassword");
+        }
     }
 }

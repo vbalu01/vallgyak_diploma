@@ -1,5 +1,4 @@
 Szervizhez Márka több-többhöz + kapcsolat típus(Márka/szakszerviz)
-Elfelejtett jelszó
 Értékelés skála + szöveges
 Külső profil szerviz + kereskedő
 Járművekhez kereskedői jogviszony

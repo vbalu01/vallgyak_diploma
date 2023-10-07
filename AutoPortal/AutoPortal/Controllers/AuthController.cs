@@ -14,6 +14,7 @@ using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using AutoPortal.Models.AppModels;
+using Newtonsoft.Json.Linq;
 
 namespace AutoPortal.Controllers
 {
@@ -32,6 +33,35 @@ namespace AutoPortal.Controllers
         {
             return View();
         }
+
+        public IActionResult AskNewPassword()
+        {
+            if(this.loginType != eVehicleTargetTypes.NONE)
+            {
+                _Notification.AddErrorToastMessage("A felhasználó be van jelentkezve!");
+                return Redirect("/Home/");
+            }
+            return View();
+        }
+
+        public IActionResult ForgotPassword()
+        {
+            if (this.loginType != eVehicleTargetTypes.NONE)
+            {
+                _Notification.AddErrorToastMessage("A felhasználó be van jelentkezve!");
+                return Redirect("/Home/");
+            }
+            if (TempData["token"] != null && TempData["userId"] != null && TempData["userType"] != null)
+            {
+                return View();
+            }
+            else
+            {
+                this._Notification.AddErrorToastMessage("Hiba lépett fel! - Elfelejtett Jelszó");
+                return View("Login");
+            }
+        }
+
         #endregion
 
         #region Register
@@ -195,11 +225,11 @@ namespace AutoPortal.Controllers
 
                 if (PasswordManager.AreEqual(password, user.password))
                 {
-                    /*
+                    
                     if (!user.status.HasFlag(eAccountStatus.EMAIL_CONFIRM)) {
                         this._Notification.AddErrorToastMessage("A felhasználó nem elérhető!");
                         return View();
-                    }*/
+                    }
 
                     if (user.status.HasFlag(eAccountStatus.BANNED))
                     {
@@ -350,6 +380,181 @@ namespace AutoPortal.Controllers
             return Redirect("/Auth/Login");
         }
 
+        #endregion
+
+        #region AskNewPassword
+
+        [HttpPost]
+        public async Task<IActionResult> AskNewPassword(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                this._Notification.AddErrorToastMessage("A megadott E-Mail cím érvénytelen!");
+                return View();
+            }
+            eVehicleTargetTypes targetType = getLoginMethod(email);
+            if(targetType == eVehicleTargetTypes.NONE)
+            {
+                this._Notification.AddErrorToastMessage("Ezzel az e-mail címmel nem található felhasználó!");
+                return View();
+            }
+            else if(targetType == eVehicleTargetTypes.FACTORY)
+            {
+                this._Notification.AddErrorToastMessage("Gyártói művelet letiltva!");
+                return View();
+            }
+            else
+            {
+                int targetId = -1;
+                switch (targetType)
+                {
+                    case eVehicleTargetTypes.USER:
+                        targetId = _SQL.users.Single(u => u.email == email).id; 
+                        break;
+                    case eVehicleTargetTypes.DEALER:
+                        targetId = _SQL.dealers.Single(u => u.email == email).id;
+                        break;
+                    case eVehicleTargetTypes.SERVICE:
+                        targetId = _SQL.services.Single(u => u.email == email).id;
+                        break;
+                }
+
+                Token t;
+
+                if(_SQL.tokens.Any(tt=>tt.target_type == targetType && tt.target_id == (int)targetId && tt.token_type == eTokenType.ASK_NEW_PASSWORD))
+                {
+                    t = _SQL.tokens.Single(tt => tt.target_type == targetType && tt.target_id == (int)targetId && tt.token_type == eTokenType.ASK_NEW_PASSWORD);
+                    if(t.expire <= DateTime.Now.AddHours(1)) //Lejárt, vagy 1 órán belül lejár
+                    {
+                        t.expire = DateTime.Now.AddHours(1);
+                        this._SQL.tokens.Update(t);
+                    }
+                }
+                else
+                {
+                    t = new Token()
+                    {
+                        target_id = targetId,
+                        target_type = targetType,
+                        token_type = eTokenType.ASK_NEW_PASSWORD,
+                        available = true,
+                        expire = DateTime.Now.AddDays(1),
+                        token = Functions.ReplaceSpecials(Convert.ToBase64String(Guid.NewGuid().ToByteArray())) + "t" + (int)targetType + "i" +targetId
+                    };
+
+                    this._SQL.tokens.Add(t);
+                }
+
+                this._SQL.SaveChanges();
+
+                _Notification.AddSuccessToastMessage("Az új jelszó megadásához szükséges információkat elküldtük az email címére!");
+                MailSender.SendNewPasswordMail(email, t, this.Request.Host.ToString());
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordModel password)
+        {
+            if(loginType != eVehicleTargetTypes.NONE)
+            {
+                _Notification.AddErrorToastMessage("A felhasználó be van jelentkezve!");
+                return Redirect("/Home/");
+            }
+            if (string.IsNullOrEmpty(password.newPassword) || string.IsNullOrEmpty(password.newPasswordRepeat))
+            {
+                this._Notification.AddErrorToastMessage("Minden mezőt megfelelően ki kell tölteni!");
+                return BadRequest("Minden mezőt megfelelően ki kell tölteni!");
+            }
+            else if (password.newPassword != password.newPasswordRepeat)
+            {
+                this._Notification.AddErrorToastMessage("A jelszavak nem egyeznek!");
+                return BadRequest("A jelszavak nem egyeznek!");
+            }
+            else if (password.newPassword.Length < 6)
+            {
+                this._Notification.AddErrorToastMessage("A jelszavak hossza min. 6 karakter!");
+                return BadRequest("A jelszavak hossza min. 6 karakter!");
+            }
+            else
+            {
+                Token t = this._SQL.tokens.SingleOrDefault(tt => tt.token == password.token.ToString() && tt.token_type == eTokenType.ASK_NEW_PASSWORD);
+                if(t == null)
+                {
+                    this._Notification.AddErrorToastMessage("A token érvénytelen!");
+                    return BadRequest("A token érvénytelen!");
+                }
+
+                if(t.expire <= DateTime.Now)
+                {
+                    this._Notification.AddErrorToastMessage("A token lejárt!");
+                    return BadRequest("A token lejárt!");
+                }
+
+                switch (password.userType)
+                {
+                    case eVehicleTargetTypes.DEALER:
+                        Dealer d = _SQL.dealers.SingleOrDefault(de => de.id == password.userId);
+                        if (d != null)
+                        {
+                            d.password = PasswordManager.GenerateHash(password.newPassword);
+                            _SQL.dealers.Update(d);
+                            _SQL.tokens.Remove(t);
+                            _SQL.SaveChanges();
+                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+                            return Ok();
+                        }
+                        else
+                        {
+                            this._Notification.AddErrorToastMessage("A keresett szerviz nem érhető el!");
+                            return BadRequest("A keresett szerviz nem érhető el!");
+                        }
+                        break;
+                    case eVehicleTargetTypes.USER:
+                        User u = _SQL.users.SingleOrDefault(usr => usr.id == password.userId);
+                        if (u != null)
+                        {
+                            u.password = PasswordManager.GenerateHash(password.newPassword);
+                            _SQL.users.Update(u);
+                            _SQL.tokens.Remove(t);
+                            _SQL.SaveChanges();
+                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+                            return Ok();
+                        }
+                        else
+                        {
+                            this._Notification.AddErrorToastMessage("A keresett szerviz nem érhető el!");
+                            return BadRequest("A keresett szerviz nem érhető el!");
+                        }
+                        break;
+
+                    case eVehicleTargetTypes.SERVICE:
+                        Service s = _SQL.services.SingleOrDefault(se => se.id == password.userId);
+                        if(s != null)
+                        {
+                            s.password = PasswordManager.GenerateHash(password.newPassword);
+                            _SQL.services.Update(s);
+                            _SQL.tokens.Remove(t);
+                            _SQL.SaveChanges();
+                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+                            return Ok();
+                        }
+                        else
+                        {
+                            this._Notification.AddErrorToastMessage("A keresett szerviz nem érhető el!");
+                            return BadRequest("A keresett szerviz nem érhető el!");
+                        }
+                        break;
+
+                    case eVehicleTargetTypes.FACTORY: //Bár ilyen nem is történhetne?!
+                        this._Notification.AddErrorToastMessage("Tiltott gyár művelet!");
+                        return BadRequest("Tiltott gyár művelet!");
+                        break;
+                }
+                _Notification.AddErrorToastMessage("Hiba lépett fel!");
+                return BadRequest("Hiba lépett fel!");
+            }
+        }
         #endregion
     }
 }
