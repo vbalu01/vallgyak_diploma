@@ -1,0 +1,22 @@
+﻿@using AutoPortal.Models.DbModels
+@using Microsoft.IdentityModel.Tokens
+@{
+    ViewData["Title"] = "Kereskedő keresése";
+}
+
+<h1>Kereskedő keresés</h1>
+
+@if (!((List<Dealer>)ViewBag.Dealers).IsNullOrEmpty())
+{
+    <div>
+        @foreach (var item in ViewBag.Dealers)
+        {
+            <div class="row">
+                <h2><a href="dealerPublicProfile?dealerId=@item.id">@item.name</a></h2>
+                <p>@item.country @item.city @item.address</p>
+            </div>
+            <hr />
+        }
+    </div>
+    
+}

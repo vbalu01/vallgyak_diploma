@@ -6,6 +6,7 @@ using AutoPortal.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using NToastNotify;
 using System.Net;
 using static System.Net.Mime.MediaTypeNames;
@@ -118,6 +119,30 @@ namespace AutoPortal.Controllers
                 }
             }
             ViewBag.vehicles = vehicles;
+            return View();
+        }
+
+        public IActionResult findService()
+        {
+            ViewBag.Services = _SQL.services.Where(d => d.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && !d.status.HasFlag(eAccountStatus.BANNED) && !d.status.HasFlag(eAccountStatus.DISABLED)).ToList();
+            return View();
+        }
+
+        public IActionResult findDealer()
+        {
+            ViewBag.Dealers = _SQL.dealers.Where(d=>d.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && !d.status.HasFlag(eAccountStatus.BANNED) && !d.status.HasFlag(eAccountStatus.DISABLED)).ToList();
+            return View();
+        }
+
+        public IActionResult dealerPublicProfile(int dealerId)
+        {
+            ViewBag.Dealer = _SQL.dealers.SingleOrDefault(d => d.id == dealerId);
+            return View();
+        }
+        
+        public IActionResult servicePublicProfile(int serviceId)
+        {
+            ViewBag.Service = _SQL.services.SingleOrDefault(s=>s.id == serviceId);
             return View();
         }
 

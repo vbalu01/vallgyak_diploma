@@ -5,6 +5,7 @@
         NONE = 0,
         OWNER = 1,
         SUBOWNER = 2,
-        DRIVER = 3
+        DRIVER = 3,
+        DEALER = 4
     }
 }

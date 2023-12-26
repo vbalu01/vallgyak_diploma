@@ -241,6 +241,12 @@ namespace AutoPortal.Controllers
                     break;
             }
 
+            if(uType != eVehicleTargetTypes.DEALER && perm == eVehiclePermissions.DEALER)
+            {
+                _Notification.AddErrorToastMessage("Kereskedői jogosultság csak kereskedői fióknak adható!");
+                return BadRequest("Kereskedői jogosultság csak kereskedői fióknak adható!");
+            }
+
             if (_SQL.vehiclePermissions.Any(vp => vp.target_type == uType && vp.target_id == uid && vp.vehicle_id == vehId))
             {
                 if (perm == eVehiclePermissions.NONE)

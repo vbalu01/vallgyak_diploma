@@ -48,6 +48,7 @@ namespace AutoPortal.Controllers
             _Environment = environment;
         }
 
+        
         public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden API hívás előtt lefut
         {
             var descriptor = context.ActionDescriptor as ControllerActionDescriptor;

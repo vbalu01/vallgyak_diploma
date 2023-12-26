@@ -84,12 +84,14 @@
                         if (!document.getElementById("permTable_" + userMail)) {
                             let optionsTag = "";
                             if(value == 1)
-                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3">Sofőr</option><option value="0">Jogosultság megszűntetése</option>';
+                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3">Sofőr</option><option value="4">kereskedő</option><option value="0">Jogosultság megszűntetése</option>';
                             if(value == 2)
-                                optionsTag = '<option value="1">Tulaj</option><option value="2" selected>Üzembentartó</option><option value="3">Sofőr</option><option value="0">Jogosultság megszűntetése</option>';
+                                optionsTag = '<option value="1">Tulaj</option><option value="2" selected>Üzembentartó</option><option value="3">Sofőr</option><option value="4">kereskedő</option><option value="0">Jogosultság megszűntetése</option>';
                             if(value == 3)
-                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3" selected>Sofőr</option><option value="0">Jogosultság megszűntetése</option>';
-                            console.log(optionsTag);
+                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3" selected>Sofőr</option><option value="4">kereskedő</option><option value="0">Jogosultság megszűntetése</option>';
+                            if (value == 4)
+                                optionsTag = '<option value="1" selected>Tulaj</option><option value="2">Üzembentartó</option><option value="3">Sofőr</option><option value="4" selected>kereskedő</option><option value="0">Jogosultság megszűntetése</option>';
+                                console.log(optionsTag);
                             $('#permTableBody').append(`<tr id="permTable_` + userMail + `"><td>`+userMail+`</td><td><select class="form-control" onchange="changeUserVehiclePerm('`+userMail+`', this.value);">` +
                             (optionsTag) + `</select></td></tr>`);
                         }
@@ -476,6 +478,7 @@
                             <option value="1">Tulaj</option>
                             <option value="2">Üzembentartó</option>
                             <option value="3">Sofőr</option>
+                            <option value="4">Kereskedő</option>
                             <option value="0" selected>Nincs</option>
                         </select>
                         <button class="btn btn-success" onclick="changeUserVehiclePermBtb();">Jogosultság felvétele</button>
