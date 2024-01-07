@@ -1,5 +1,135 @@
-﻿@{
+﻿@using AutoPortal.Models.DbModels
+@{
     ViewData["Title"] = ViewBag.Service.name;
 }
 
-<h1>@ViewBag.Service.name</h1>
+@section Scripts{
+	<script type="text/javascript">
+		const stars = document.querySelectorAll('.rating .star')
+		const rating = document.querySelector('.rating input')
+
+		stars.forEach((item, idx) => {
+			item.addEventListener('click', function () {
+				let click = 0
+				rating.value = idx + 1
+
+				stars.forEach(i => {
+					i.classList.replace('bi-star-fill', 'bi-star')
+					i.classList.remove('active')
+				})
+				for (let i = 0; i < stars.length; i++) {
+					if (i <= idx) {
+						stars[i].classList.replace('bi-star', 'bi-star-fill')
+						stars[i].classList.add('active')
+					} else {
+						stars[i].style.setProperty('--i', click)
+						click++
+					}
+				}
+			})
+		})
+	</script>
+}
+
+@section CSS{
+	<link rel="stylesheet" href="~/css/rating.css" />
+}
+
+<h1>@ViewBag.Service.name - Adatlap</h1>
+<br />
+<div>
+	<h2>Elérhetőségek</h2>
+	<div class="row">
+		<table class="table table-bordered" style="margin-left: auto; margin-right: auto; max-width:100%; padding-left:5%;padding-right:5%; width:auto; white-space:nowrap;">
+			<tbody>
+				<tr>
+					<td><b>Cím</b></td>
+					<td>@ViewBag.Service.country @ViewBag.Service.city @ViewBag.Service.address</td>
+				</tr>
+				<tr>
+					<td><b>Telefon</b></td>
+					<td>@ViewBag.Service.phone</td>
+				</tr>
+				<tr>
+					<td><b>E-Mail</b></td>
+					<td>@ViewBag.Service.email</td>
+				</tr>
+				<tr>
+					<td><b>Weboldal</b></td>
+					<td>@ViewBag.Service.website</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<br />
+	<h2>Rólunk:</h2>
+	<p>@ViewBag.Service.description</p>
+</div>
+<hr />
+<div>
+    <h2>Vélemények</h2>
+	<br />
+    <div>
+		<form method="post" asp-controller="User" asp-action="AddReview">
+			<h3>Vélemény írása</h3>
+			<div class="rating">
+				<input type="number" name="rating" @if (ViewBag.UsersReview != null) { Write("value="+ViewBag.UsersReview.rating); } hidden required>
+				<i class='bi @if(ViewBag.UsersReview != null && ViewBag.UsersReview.rating >= 1) {Write("bi-star-fill");}else{Write("bi-star");} star' style="--i: 0;"></i>
+				<i class='bi @if(ViewBag.UsersReview != null && ViewBag.UsersReview.rating >= 2) {Write("bi-star-fill");}else{Write("bi-star");} star' style="--i: 1;"></i>
+				<i class='bi @if(ViewBag.UsersReview != null && ViewBag.UsersReview.rating >= 3) {Write("bi-star-fill");}else{Write("bi-star");} star' style="--i: 2;"></i>
+				<i class='bi @if(ViewBag.UsersReview != null && ViewBag.UsersReview.rating >= 4) {Write("bi-star-fill");}else{Write("bi-star");} star' style="--i: 3;"></i>
+				<i class='bi @if(ViewBag.UsersReview != null && ViewBag.UsersReview.rating >= 5) {Write("bi-star-fill");}else{Write("bi-star");} star' style="--i: 4;"></i>
+			</div>
+
+			<textarea name="review" cols="50" rows="10" placeholder="Vélemény...">@if (ViewBag.UsersReview != null && !string.IsNullOrEmpty(ViewBag.UsersReview.description)) { Write(ViewBag.UsersReview.description); }</textarea>
+			<input type="hidden" name="target_id" value="@ViewBag.Service.id" />
+			<input type="hidden" name="target_type" value="4" />
+			<br /><button type="submit" class="btn btn-lg btn-success" style="margin-top:3%;">Értékelés</button>
+			@if (ViewBag.UsersReview != null)
+			{
+				<button type="button" class="btn btn-lg btn-danger" onclick="$('#deleteReviewForm').submit(); return;" style="margin-top:3%;"><i class='bi bi-trash' style="margin-right:5px;"></i>Értékelés törlése</button>
+			}
+		</form>
+
+		@if (ViewBag.UsersReview != null)
+		{
+			<form asp-controller="User" asp-action="RemoveReview" id="deleteReviewForm">
+				<input type="hidden" name="reviewId" value="@ViewBag.UsersReview.id" />
+			</form>
+		}
+    </div>
+
+	<div>
+		<h3>Rólunk írták... <lablel style="color:gray;font-size:16px; margin-left:5px;">(Átlag: @{Write(((List<Review>)ViewBag.Reviews).Average(i=>i.rating));})</lablel></h3>
+		<div style="overflow-y: scroll; max-height:50%;">
+			@if(ViewBag.Reviews != null && ((List<Review>)ViewBag.Reviews).Count > 0)
+			{
+				@foreach (Review r in ViewBag.Reviews)
+				{
+					<div style="border: 1px solid grey; padding:5px; user-select: none;">
+						<p>
+							<b>@r.writerName</b> - @r.date.ToString("yyyy.MM.dd HH:mm") @if (r.edited)
+							{
+								<label style="color:gray">(edited)</label>
+							}
+							@for (int i = 1; i <= r.rating; i++)
+							{
+								<i class='bi bi-star-fill' style="color:orange; cursor:default;"></i>
+							}
+							@for (int i = 1; i <= 5 - r.rating; i++)
+							{
+								<i class='bi bi-star' style="color:orange; cursor:default;"></i>
+							}
+						</p>
+						<p>@r.description</p>
+					</div>
+					<hr />
+				}
+			}
+			else
+			{
+				<p class="text-danger">Még nem érkezett értékelés.</p>
+			}
+		</div>
+	</div>
+</div>

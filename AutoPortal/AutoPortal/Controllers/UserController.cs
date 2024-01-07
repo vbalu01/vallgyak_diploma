@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NToastNotify;
+using System.Collections.Generic;
 using System.Net;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -137,13 +138,27 @@ namespace AutoPortal.Controllers
         public IActionResult dealerPublicProfile(int dealerId)
         {
             ViewBag.Dealer = _SQL.dealers.SingleOrDefault(d => d.id == dealerId);
+            List<Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.DEALER && r.target_id == dealerId).ToList();
+            reviews.ForEach(r => {
+                r.LoadReviewWriter();
+            });
+            ViewBag.Reviews = reviews;
+            ViewBag.usersReview = _SQL.reviews.SingleOrDefault(r => r.target_id == dealerId && r.target_type == eVehicleTargetTypes.DEALER && r.source_type == loginType && r.source_id == loginId);
+            
             return View();
         }
         
         public IActionResult servicePublicProfile(int serviceId)
         {
             ViewBag.Service = _SQL.services.SingleOrDefault(s=>s.id == serviceId);
-            return View();
+			List <Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.SERVICE && r.target_id == serviceId).ToList();
+			reviews.ForEach(r => {
+				r.LoadReviewWriter();
+			});
+			ViewBag.Reviews = reviews;
+			ViewBag.UsersReview = _SQL.reviews.SingleOrDefault(r => r.target_id == serviceId && r.target_type == eVehicleTargetTypes.SERVICE && r.source_type == loginType && r.source_id == loginId);
+
+			return View();
         }
 
         #endregion
@@ -575,6 +590,112 @@ namespace AutoPortal.Controllers
             _Notification.AddSuccessToastMessage("Sikeres tranzakció törlés!");
             return Ok();
         }
-        #endregion
-    }
+
+        [HttpPost]
+        public async Task<IActionResult> AddReview(int rating, int target_id, eVehicleTargetTypes target_type, string review)
+        {
+            if(target_type != eVehicleTargetTypes.SERVICE && target_type != eVehicleTargetTypes.DEALER)
+            {
+                _Notification.AddErrorToastMessage("Hibás értékelés: célcsoport");
+				return Redirect("/");
+			}
+
+            switch (target_type)
+            {
+                case eVehicleTargetTypes.DEALER:
+                    if (!_SQL.dealers.Any(d => d.id == target_id)) {
+                        _Notification.AddErrorToastMessage("Kereskedő nem található!");
+						return Redirect("/");
+					}
+                break;
+
+                case eVehicleTargetTypes.SERVICE:
+					if (!_SQL.services.Any(s => s.id == target_id))
+					{
+						_Notification.AddErrorToastMessage("Szerviz nem található!");
+						return Redirect("/");
+					}
+				break;
+            }
+
+			if (rating > 5 || rating < 1)
+			{
+				_Notification.AddErrorToastMessage("Hibás értékelés: csillag");
+				switch (target_type)
+				{
+					case eVehicleTargetTypes.DEALER:
+						return dealerPublicProfile(target_id);
+					case eVehicleTargetTypes.SERVICE:
+						return servicePublicProfile(target_id);
+					default:
+						return Redirect("/");
+				}
+			}
+
+			if (_SQL.reviews.Any(r=>r.target_id == target_id && r.target_type == target_type && r.source_type == loginType && r.source_id == loginId))//Módosítás
+            {
+                Review rev = _SQL.reviews.Single(r => r.target_id == target_id && r.target_type == target_type && r.source_type == loginType && r.source_id == loginId);
+				rev.edited = true;
+				rev.description = review;
+				rev.rating = rating;
+
+                _SQL.reviews.Update(rev);
+                await _SQL.SaveChangesAsync();
+				_Notification.AddSuccessToastMessage("Sikeres véleménymódosítás");
+			}
+            else //Hozzáad
+            {
+				_SQL.reviews.Add(new Review() { date = DateTime.Now, description = review, edited = false, id = Guid.NewGuid(), rating = rating, source_id = loginId, source_type = loginType, target_id = target_id, target_type = target_type });
+                await _SQL.SaveChangesAsync();
+				_Notification.AddSuccessToastMessage("Sikeres véleményírás");
+			}
+            switch (target_type)
+            {
+                case eVehicleTargetTypes.DEALER:
+					return Redirect("dealerPublicProfile?dealerId=" + target_id);
+				case eVehicleTargetTypes.SERVICE:
+                    return Redirect("servicePublicProfile?serviceId=" + target_id);
+                default:
+                    return Redirect("/");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveReview(Guid reviewId)
+        {
+            if(!_SQL.reviews.Any(r=>r.id == reviewId))
+            {
+				_Notification.AddErrorToastMessage("A vélemény nem található!");
+                return Redirect("/");
+			}
+
+            Review rev = _SQL.reviews.Single(r => r.id == reviewId);
+
+            eVehicleTargetTypes redirectType = rev.target_type;
+            int redirectId = rev.target_id;
+
+            if(rev.source_id == loginId && rev.source_type == loginType)
+            {
+                _SQL.reviews.Remove(rev);
+                await _SQL.SaveChangesAsync();
+                _Notification.AddSuccessToastMessage("Vélemény sikeresen törölve!");
+            }
+            else
+            {
+				_Notification.AddErrorToastMessage("Nincs jogosultság törölni ezt a véleményt!");
+			}
+
+			switch (redirectType)
+			{
+				case eVehicleTargetTypes.DEALER:
+					return Redirect("dealerPublicProfile?dealerId=" + redirectId);
+				case eVehicleTargetTypes.SERVICE:
+					return Redirect("servicePublicProfile?serviceId=" + redirectId);
+				default:
+					return Redirect("/");
+			}
+
+		}
+	#endregion
+	}
 }
