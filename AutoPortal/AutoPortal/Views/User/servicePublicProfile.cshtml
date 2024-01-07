@@ -100,7 +100,7 @@
     </div>
 
 	<div>
-		<h3>Rólunk írták... <lablel style="color:gray;font-size:16px; margin-left:5px;">(Átlag: @{Write(((List<Review>)ViewBag.Reviews).Average(i=>i.rating));})</lablel></h3>
+		<h3>Rólunk írták... <lablel style="color:gray;font-size:16px; margin-left:5px;">(Átlag: @{if(ViewBag.Reviews != null){Write(((List<Review>)ViewBag.Reviews).Average(i=>i.rating));}else{Write("-");}})</lablel></h3>
 		<div style="overflow-y: scroll; max-height:50%;">
 			@if(ViewBag.Reviews != null && ((List<Review>)ViewBag.Reviews).Count > 0)
 			{
