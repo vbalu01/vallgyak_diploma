@@ -24,6 +24,7 @@ namespace AutoPortal.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.Mail = MailSettingsModel.defaultSender;
             return View();
         }
         

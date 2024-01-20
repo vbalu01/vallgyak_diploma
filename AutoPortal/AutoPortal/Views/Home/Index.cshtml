@@ -2,7 +2,29 @@
     ViewData["Title"] = "Főoldal";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div>
+    <h1 class="display-4 text-center">Üdvözöljük az AutoPortal hivatalos oldalán!</h1>
+    <br />
+    <div>
+        <h2>Miért érdemes minket választani?</h2>
+        <p>Alkalmazásunk célja, hogy elősegítse a tudatos gépjárműhasználatot, valamint egy egységes platformot kínáljon mindazok számára, akik nyomon szeretnék követni az autózási szokásaikat.</p>
+        <p>Szolgáltatásaink egyaránt elérhető magánszemélyek, és vállalatok számára is.</p>
+        <p>Az alkalmazásunk lehetőséget biztosít például:</p>
+        <div>
+            <ul>
+                <li>Gépjármű rögzítésére a rendszerbe</li>
+                <li>Szervizesemények nyomonkövetésére</li>
+                <li>Rendszeres, és rendkívüli kiadások rögzítésére</li>
+                <li>Futásteljesítmény nyomonkövetésére</li>
+                <li>Használati jogviszony alapjáni jogosultságkezelésre</li>
+                <li>Adás-Vétel megkönnyítésére</li>
+            </ul>
+        </div>
+        <p>És még rengeteg további szolgáltatást kínálunk jelenlegi, és leendő felhasználóink számára.</p>
+        @if (!this.Context.User.Identity.IsAuthenticated)
+        {
+            <p>Annak érdekében, hogy kihasználhassa az alkalmazásunk nyújtotta minden lehetőséget, kérjük <a asp-controller="Auth" asp-action="Login">jelentkezzen</a> be, vagy <a asp-controller="Auth" asp-action="Register">regisztráljon</a>.</p>
+        }
+        <p>Amennyiben kérdése lenne, kérjük keressen minket a(z) @ViewBag.Mail címen.</p>
+    </div>
 </div>
