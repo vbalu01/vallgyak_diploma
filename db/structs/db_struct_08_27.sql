@@ -191,7 +191,8 @@ CREATE TABLE `portal`.`saleVehicles` (
   `email` varchar(255) NOT NULL,
   `announcement_date` datetime NOT NULL,
   `description` varchar(255) NOT NULL,
-  `active` bool NOT NULL
+  `active` bool NOT NULL,
+  `dealerId` int NOT NULL DEFAULT 0
 );
 
 CREATE TABLE `portal`.`mileageStands` (

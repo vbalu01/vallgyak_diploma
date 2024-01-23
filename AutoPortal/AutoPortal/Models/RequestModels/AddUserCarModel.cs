@@ -25,6 +25,8 @@ namespace AutoPortal.Models.RequestModels
         [Required]
         public string transmission { get; set; }
         [Required]
+        public int? numOfGears { get; set; }
+        [Required]
         public string drive { get; set; }
         public int? engine_ccm { get; set; }
         [Required]

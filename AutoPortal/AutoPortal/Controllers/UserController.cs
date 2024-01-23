@@ -67,8 +67,41 @@ namespace AutoPortal.Controllers
             ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
             ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.RecordedDate).ToList();
             ViewBag.ServiceEvents = _SQL.serviceEvents.Where(tmp => tmp.vehicle_id == vehicleId).ToList();
-
             ViewBag.vehicleData = new UserVehicle() { p = vp.permission, v = v };
+
+
+            List<(string, eVehiclePermissions)> vehiclePermissions = new();
+
+            List<VehiclePermission> tmpPerm = _SQL.vehiclePermissions.Where(tmp => tmp.vehicle_id == vehicleId).ToList();
+
+            foreach (VehiclePermission tvp in tmpPerm)
+            {
+                string mail = "";
+                if (tvp.target_type == eVehicleTargetTypes.DEALER)
+                {
+                    mail = _SQL.dealers.Single(tp => tp.id == tvp.target_id).email;
+                }
+                else if (tvp.target_type == eVehicleTargetTypes.SERVICE)
+                {
+                    mail = _SQL.services.Single(tp => tp.id == tvp.target_id).email;
+                }
+                else if (tvp.target_type == eVehicleTargetTypes.FACTORY)
+                {
+                    mail = _SQL.factories.Single(tp => tp.id == tvp.target_id).email;
+                }
+                else if (tvp.target_type == eVehicleTargetTypes.USER)
+                {
+                    mail = _SQL.users.Single(tp => tp.id == tvp.target_id).email;
+                }
+                else if (tvp.target_type == eVehicleTargetTypes.NONE)
+                {
+                    mail = "?";
+                }
+                vehiclePermissions.Add((mail, tvp.permission));
+            }
+            ViewBag.VehiclePermissions = vehiclePermissions;
+
+            
             return View();
         }
 
@@ -93,7 +126,7 @@ namespace AutoPortal.Controllers
         public IActionResult createVehicleSale()
         {
             List<Vehicle> vehicles = new();
-            List<VehiclePermission> uv = _SQL.vehiclePermissions.Where(p=>p.target_type == loginType && p.target_id == loginId).ToList();
+            List<VehiclePermission> uv = _SQL.vehiclePermissions.Where(p=>p.target_type == loginType && p.target_id == loginId && p.permission == eVehiclePermissions.OWNER).ToList();
             foreach(VehiclePermission vp in uv)
             {
                 vehicles.Add(_SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id));
@@ -104,7 +137,7 @@ namespace AutoPortal.Controllers
 
         public IActionResult myVehicleSales()
         {
-            List<VehiclePermission> userVehicles = _SQL.vehiclePermissions.Where(vp => vp.target_id == loginId && vp.target_type == loginType).ToList();
+            List<VehiclePermission> userVehicles = _SQL.vehiclePermissions.Where(vp => vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER).ToList();
             List<VehicleSaleModel> vehicles = new();
 
             foreach (VehiclePermission vp in userVehicles)
@@ -202,7 +235,7 @@ namespace AutoPortal.Controllers
                 }
 
 
-                VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(v => v.target_type == loginType && v.target_id == loginId);
+                VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(v => v.target_type == loginType && v.target_id == loginId && v.vehicle_id == m.vehicle_id);
 
                 if(vp == null || vp.permission == eVehiclePermissions.NONE) {
                     _Notification.AddErrorToastMessage("Nincs jogosultsága a járműhöz!");
@@ -232,7 +265,7 @@ namespace AutoPortal.Controllers
                 }
 
 
-                VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(v => v.target_type == loginType && v.target_id == loginId);
+                VehiclePermission vp = _SQL.vehiclePermissions.SingleOrDefault(v => v.target_type == loginType && v.target_id == loginId && v.vehicle_id == m.vehicle_id);
 
                 if (vp == null || (!vp.permission.HasFlag(eVehiclePermissions.OWNER) && !vp.permission.HasFlag(eVehiclePermissions.SUBOWNER)))
                 {
@@ -379,6 +412,23 @@ namespace AutoPortal.Controllers
                 _Notification.AddErrorToastMessage("A jármű már eladásra lett kínálva!");
                 return Conflict("A jármű már eladásra lett kínálva!");
             }
+
+            List<string> vIds = _SQL.vehiclePermissions.Where(vp=> vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER).Select(vp => vp.vehicle_id).ToList();
+
+            int count = 0;
+
+            foreach(string id in vIds)
+            {
+                if (_SQL.vehicleSales.Any(vs => vs.vehicle_id == id && vs.dealerId == 0))
+                    count++;
+            }
+
+            if(count >= 2)
+            {
+                _Notification.AddWarningToastMessage("Nem kínálhat eladásra több járművet egyidejűleg!");
+                return Conflict("Nem kínálhat eladásra több járművet egyidejűleg!");
+            }
+
             SaleVehicle sv = new SaleVehicle()
             {
                 transaction_id = Guid.NewGuid(),
@@ -388,7 +438,8 @@ namespace AutoPortal.Controllers
                 email = userMail,
                 phone = userPhone,
                 vehicle_cost = (int)vehiclePrice,
-                active = true
+                active = true,
+                dealerId = 0
             };
             _SQL.vehicleSales.Add(sv);
             _SQL.SaveChanges();
@@ -487,18 +538,16 @@ namespace AutoPortal.Controllers
                 if (files.Any(tmp=>Path.GetFileNameWithoutExtension(tmp) == position.ToString()))
                 {
                     string oldextension = Path.GetExtension(files.Single(tmp => Path.GetFileNameWithoutExtension(tmp) == position.ToString()));
-                    System.IO.File.Move(files.Single(tmp => Path.GetFileNameWithoutExtension(tmp) == position.ToString()), _Environment.WebRootPath + "/Images/SaleImages/"+ transactionId + "tmp.file");
-
+                    System.IO.File.Move(files.Single(tmp => Path.GetFileNameWithoutExtension(tmp) == position.ToString()), _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "tmp.file");
                     string oldPosition = Path.GetFileNameWithoutExtension(_Environment.WebRootPath + image);
-                    System.IO.File.Move(_Environment.WebRootPath + image, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId+ "/" + position + Path.GetExtension(_Environment.WebRootPath + image));
+                    System.IO.File.Move(_Environment.WebRootPath + image, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/" + position + Path.GetExtension(_Environment.WebRootPath + image));
 
-                    System.IO.File.Move(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "tmp.file", _Environment.WebRootPath + "/Images/SaleImages/" + transactionId+ "/" +oldPosition +oldextension);
-
-                }
+                    System.IO.File.Move(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "tmp.file", _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/" + oldPosition + oldextension);
+            }
                 else {
                     System.IO.File.Move(_Environment.WebRootPath + image, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/" + position + Path.GetExtension(_Environment.WebRootPath + image));
                 }
-                _Notification.AddSuccessToastMessage("Kép sikeresen törölve!");
+                _Notification.AddSuccessToastMessage("Kép sikeresen mozgatva!");
                 return Ok();
             }
         }
@@ -546,7 +595,7 @@ namespace AutoPortal.Controllers
             filePath += "/" + transactionId.ToString() + "/";
             if (Request.Form.Files.Count > 0)
             {
-                int i = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/").Length;
+                int i = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/").Length+1;
                 foreach (IFormFile formFile in Request.Form.Files)
                 {
                     if (formFile.Length > 0 && (Path.GetExtension(formFile.FileName) == ".png" || Path.GetExtension(formFile.FileName) == ".jpg" || Path.GetExtension(formFile.FileName) == ".jpeg"))
@@ -696,6 +745,206 @@ namespace AutoPortal.Controllers
 			}
 
 		}
-	#endregion
-	}
+
+        [HttpPost]
+        public async Task<IActionResult> updateVehiclePerm(string targerMail, string vehId, eVehiclePermissions perm)
+        {
+            if (!_SQL.vehicles.Any(v => v.chassis_number == vehId)) //Nem a létezik a jármű
+            {
+                _Notification.AddErrorToastMessage("A keresett jármű nem található!");
+                return NotFound("A keresett jármű nem található!");
+            }
+
+            if(!_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == vehId && vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER))
+            {
+                _Notification.AddWarningToastMessage("A következő művelethez nincs jogosultsága!");
+                return BadRequest("A következő művelethez nincs jogosultsága!");
+            }
+
+            if (_SQL.users.Any(u => u.email == targerMail))
+            {
+                int id = _SQL.users.SingleOrDefault(tmp => tmp.email == targerMail).id;
+                if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.USER && tmp.target_id == id))
+                {
+                    VehiclePermission vp = _SQL.vehiclePermissions.Single(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.USER && tmp.target_id == id);
+                    if (vp.permission == perm)
+                    {
+                        _Notification.AddInfoToastMessage("Nem történt módosítás.");
+                        return Ok("Nem történt módosítás.");
+                    }
+                    else
+                    {
+                        if (perm != eVehiclePermissions.NONE)
+                        {
+                            vp.permission = perm;
+                            _SQL.vehiclePermissions.Update(vp);
+                        }
+                        else
+                            _SQL.vehiclePermissions.Remove(vp);
+
+                        _SQL.SaveChanges();
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        return Ok("Sikeres módosítás!");
+                    }
+                }
+                else
+                {
+                    if (perm != eVehiclePermissions.NONE)
+                    {
+                        _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.USER, vehicle_id = vehId });
+                        _SQL.SaveChanges();
+                    }
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    return Ok("Jogosultság rögzítve!");
+                }
+            }
+            else if (_SQL.services.Any(u => u.email == targerMail))
+            {
+                int id = _SQL.services.SingleOrDefault(tmp => tmp.email == targerMail).id;
+                if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.SERVICE && tmp.target_id == id))
+                {
+                    VehiclePermission vp = _SQL.vehiclePermissions.Single(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.SERVICE && tmp.target_id == id);
+                    if (vp.permission == perm)
+                    {
+                        _Notification.AddInfoToastMessage("Nem történt módosítás.");
+                        return Ok("Nem történt módosítás.");
+                    }
+                    else
+                    {
+                        if (perm != eVehiclePermissions.NONE)
+                        {
+                            vp.permission = perm;
+                            _SQL.vehiclePermissions.Update(vp);
+                        }
+                        else
+                            _SQL.vehiclePermissions.Remove(vp);
+
+                        _SQL.SaveChanges();
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        return Ok("Sikeres módosítás!");
+                    }
+                }
+                else
+                {
+                    if (perm != eVehiclePermissions.NONE)
+                    {
+                        _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.SERVICE, vehicle_id = vehId });
+                        _SQL.SaveChanges();
+                    }
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    return Ok("Jogosultság rögzítve!");
+                }
+            }
+            else if (_SQL.dealers.Any(u => u.email == targerMail))
+            {
+                int id = _SQL.dealers.SingleOrDefault(tmp => tmp.email == targerMail).id;
+                if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.DEALER && tmp.target_id == id))
+                {
+                    VehiclePermission vp = _SQL.vehiclePermissions.Single(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.DEALER && tmp.target_id == id);
+                    if (vp.permission == perm)
+                    {
+                        _Notification.AddInfoToastMessage("Nem történt módosítás.");
+                        return Ok("Nem történt módosítás.");
+                    }
+                    else
+                    {
+                        if (perm != eVehiclePermissions.NONE)
+                        {
+                            vp.permission = perm;
+                            _SQL.vehiclePermissions.Update(vp);
+                        }
+                        else
+                            _SQL.vehiclePermissions.Remove(vp);
+                        _SQL.SaveChanges();
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        return Ok("Sikeres módosítás!");
+                    }
+                }
+                else
+                {
+                    if (perm != eVehiclePermissions.NONE)
+                    {
+                        _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.DEALER, vehicle_id = vehId });
+                        _SQL.SaveChanges();
+                    }
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    return Ok("Jogosultság rögzítve!");
+                }
+            }
+            else if (_SQL.factories.Any(u => u.email == targerMail))
+            {
+                int id = _SQL.factories.SingleOrDefault(tmp => tmp.email == targerMail).id;
+                if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.FACTORY && tmp.target_id == id))
+                {
+                    VehiclePermission vp = _SQL.vehiclePermissions.Single(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.FACTORY && tmp.target_id == id);
+                    if (vp.permission == perm)
+                    {
+                        _Notification.AddInfoToastMessage("Nem történt módosítás.");
+                        return Ok("Nem történt módosítás.");
+                    }
+                    else
+                    {
+                        if (perm != eVehiclePermissions.NONE)
+                        {
+                            vp.permission = perm;
+                            _SQL.vehiclePermissions.Update(vp);
+                        }
+                        else
+                            _SQL.vehiclePermissions.Remove(vp);
+                        _SQL.SaveChanges();
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        return Ok("Sikeres módosítás!");
+                    }
+                }
+                else
+                {
+                    if (perm != eVehiclePermissions.NONE)
+                    {
+                        _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.FACTORY, vehicle_id = vehId });
+                        _SQL.SaveChanges();
+                    }
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    return Ok("Jogosultság rögzítve!");
+                }
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett felhasználó nem található!");
+                return NotFound("A keresett felhasználó nem található!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> addCurrentMileage(string vehId, int? currentMileageStand)
+        {
+            if(!_SQL.vehicles.Any(v=>v.chassis_number == vehId))
+            {
+                _Notification.AddErrorToastMessage("A keresett jármű nem található!");
+                return Redirect("/");
+            }
+            if(!_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == vehId && vp.target_id == loginId && vp.target_type == loginType && vp.permission!=eVehiclePermissions.NONE && vp.permission != eVehiclePermissions.DEALER))
+            {
+                _Notification.AddErrorToastMessage("Nincs jogosultság a művelethez!");
+                return BadRequest("Nincs jogosultság a művelethez!");
+            }
+
+            if(currentMileageStand == null)
+            {
+                _Notification.AddErrorToastMessage("Hibás adatbevitel!");
+                return BadRequest("Hibás adatbevitel!");
+            }
+
+            _SQL.mileageStands.Add(new MileageStand { 
+                id = Guid.NewGuid(),
+                vehicle_id = vehId,
+                date = DateTime.Now,
+                mileage = Convert.ToInt32(currentMileageStand)
+            });
+
+            await _SQL.SaveChangesAsync();
+
+            return Redirect("manageVehicle?vehicleId="+vehId);
+        }
+        #endregion
+    }
 }

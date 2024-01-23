@@ -188,6 +188,7 @@ Table portal.saleVehicles{
   announcement_date datetime [NOT NULL]
   description varchar [NOT NULL]
   active bool [NOT NULL]
+  dealerId int [NOT NULL]
 }
 
 Table portal.mileageStands{

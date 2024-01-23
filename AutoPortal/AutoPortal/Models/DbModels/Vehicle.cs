@@ -66,6 +66,7 @@ namespace AutoPortal.Models.DbModels
             this.modeltype = m.modelType;
             this.fuel = Convert.ToInt32(m.fuel);
             this.transmission = Convert.ToInt32(m.transmission);
+            this.num_of_gears = Convert.ToInt32(m.numOfGears);
             this.drive = Convert.ToInt32(m.drive);
             this.engine_ccm = Convert.ToInt32(m.engine_ccm);
             this.performance = Convert.ToInt32(m.performance);
