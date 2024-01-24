@@ -21,6 +21,7 @@ namespace AutoPortal.Controllers
             [HttpGet]
         public IActionResult factoryManagement()
         {
+            ViewBag.Factories = _SQL.factories.ToList();
             return View();
         }
 

@@ -14,7 +14,7 @@
                 </div>
                 <div class="form-group">
                     <label for="email">Gyár neve</label>
-                    <input type="text" name="email" id="email" class="form-control" required />
+                    <input type="text" name="email" id="email" class="form-control" style="margin-bottom:2%;" required />
                 </div>
                 <div class="form-group">
                     <select class="form-control>" name="enabled" id="enabled">
@@ -22,12 +22,44 @@
                         <option selected value="1">Elérhető</option>
                     </select>
                 </div>
-                <button class="btn btn-success">Gyár felvétele</button>
+                <button class="btn btn-success" style="margin-top:2%;">Gyár felvétele</button>
             </form>
         </section>
 
         <section class="row">
             <h2>Regisztrált gépjárműgyárak</h2>
         </section>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Azonosító</th>
+                    <th>Email</th>
+                    <th>Státusz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in ViewBag.Factories)
+                {
+                    <tr>
+                        <td>@item.id</td>
+                        <td>@item.email</td>
+                        <td>
+                            <select class="form-control>" name="enabled" id="enabled">
+                                @if (item.enabled)
+                                {
+                                    <option value="0">Nem elérhető</option>
+                                    <option value="1" selected>Elérhető</option>
+                                }
+                                else
+                                {
+                                    <option value="0" selected>Nem elérhető</option>
+                                    <option value="1">Elérhető</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>

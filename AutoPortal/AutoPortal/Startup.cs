@@ -1,8 +1,13 @@
 ﻿using AutoPortal.Libs;
 using AutoPortal.Models.AppModels;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.Text;
 
 namespace AutoPortal
 {
@@ -50,7 +55,18 @@ namespace AutoPortal
                 x.LogoutPath = "/Auth/Logout";
                 x.LogoutPath = "/Auth/Register";
                 x.AccessDeniedPath = "/Auth/AccessDenied";
-            });
+            }).AddJwtBearer(jwt =>
+            {
+                jwt.RequireHttpsMetadata = false;
+                jwt.SaveToken = true;
+                jwt.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Startup.TokenKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            }); ;
             services.AddAuthorization(a => a.AddPolicy("User", policy => policy.RequireClaim(ClaimTypes.Role, "User")));
             services.AddAuthorization(a => a.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin")));
 

@@ -4,20 +4,23 @@ using AutoPortal.Models.AppModels;
 using AutoPortal.Models.DbModels;
 using AutoPortal.Models.RequestModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace AutoPortal.Controllers
 {
-    [Route("/api")]
+    [Route("/api/factory")]
     [ApiController]
-    //[Authorize("Factory")]
-    public class ApiController : ControllerBase
+    [Authorize]
+    public class ApiFactoryController : ControllerBase
     {
         private JsonResponse response;
 
-        public ApiController() {
+        public ApiFactoryController() {
             response = new();
         }
 
@@ -28,13 +31,13 @@ namespace AutoPortal.Controllers
         }
 
         [HttpPost("addBrandNewVehicle")]
-        public IActionResult addBrandNewVehicle([FromBody] AddBrandNewCarModel m) { 
+        public async Task<IActionResult> addBrandNewVehicle([FromBody] AddBrandNewCarModel m) { 
             if(ModelState.IsValid) {
                 Vehicle v = new Vehicle(m);
                 using(SQL mysql = new SQL())
                 {
                     mysql.vehicles.Add(v);
-                    mysql.SaveChanges();
+                    await mysql.SaveChangesAsync();
                     mysql.vehiclePermissions.Add(new VehiclePermission() {
                         permission = eVehiclePermissions.OWNER, 
                         target_id = m.ownerId,
@@ -50,6 +53,7 @@ namespace AutoPortal.Controllers
                     });
                     response.Success= true;
                     response.Message = v.chassis_number;
+                    await mysql.SaveChangesAsync();
                     return Ok(response);
                 }
             }
@@ -60,4 +64,90 @@ namespace AutoPortal.Controllers
             }
         }
     }
+
+    [Route("/api/auth")]
+    [ApiController]
+    [AllowAnonymous]
+    public class ApiAuthController : ControllerBase
+    {
+        private JsonResponse response;
+
+        public ApiAuthController()
+        {
+            response = new();
+            response.Success = false;
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(string email, string password)
+        {
+            using (SQL mysql = new SQL())
+            {
+                if(mysql.factories.Any(f=>f.email == email))
+                {
+                    Factory f = mysql.factories.Single(f => f.email == email);
+                    if (PasswordManager.AreEqual(password, f.password))
+                    {
+                        if (f.status.HasFlag(eAccountStatus.BANNED))
+                        {
+                            response.Message = "Factory banned by an administrator";
+                            return Forbid(JsonConvert.SerializeObject(response));
+                        }
+                        response.Message = _GenerateToken(f);
+                        response.Success = true;
+                        return Ok(JsonConvert.SerializeObject(response));
+                    }
+                    else
+                    {
+                        response.Message = "Bad username or password";
+                        return BadRequest(JsonConvert.SerializeObject(response));
+                    }
+                }
+                else
+                {
+                    response.Message = "Bad username or password";
+                    return BadRequest(JsonConvert.SerializeObject(response));
+                }
+            }
+        }
+
+        [HttpPost("loginTest")]
+        public async Task<IActionResult> LoginTest(string email, string name)
+        {
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Startup.TokenKey));
+            var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+            var tokenOptions = new JwtSecurityToken(
+                issuer: "https://localhost:7208/",
+                audience: "https://localhost:7208/",
+                claims: new List<Claim>() { new Claim(ClaimTypes.Name, name ?? string.Empty) },
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: signinCredentials
+            );
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+            return Ok(new { Token = tokenString });
+        }
+
+        private string _GenerateToken(Factory f)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(Startup.TokenKey);
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Email, f.email),
+                new Claim(ClaimTypes.Name, f.name),
+                new Claim("factoryId", f.id.ToString())
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims.ToArray()),
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+    }
+
 }
