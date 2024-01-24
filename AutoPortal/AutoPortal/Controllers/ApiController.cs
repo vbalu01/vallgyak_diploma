@@ -117,10 +117,8 @@ namespace AutoPortal.Controllers
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Startup.TokenKey));
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var tokenOptions = new JwtSecurityToken(
-                issuer: "https://localhost:7208/",
-                audience: "https://localhost:7208/",
                 claims: new List<Claim>() { new Claim(ClaimTypes.Name, name ?? string.Empty) },
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.Now.AddDays(1),
                 signingCredentials: signinCredentials
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
