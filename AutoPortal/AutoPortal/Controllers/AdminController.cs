@@ -182,7 +182,7 @@ namespace AutoPortal.Controllers
                     
 
                     _SQL.SaveChanges();
-                    _Notification.AddSuccessToastMessage("Módosítások mentése sikeres!");
+                    _Notification.AddSuccessToastMessage("Módosítások mentése sikeres!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Módosítások sikeresen elmentve!");
                 }
                 else {
@@ -255,7 +255,7 @@ namespace AutoPortal.Controllers
                     VehiclePermission toRemove = _SQL.vehiclePermissions.Single(vp => vp.target_type == uType && vp.target_id == uid && vp.vehicle_id == vehId);
                     _SQL.vehiclePermissions.Remove(toRemove);
                     _SQL.SaveChanges();
-                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Sikeres módosítás!");
                 }
                 else
@@ -264,7 +264,7 @@ namespace AutoPortal.Controllers
                     toUpdate.permission = perm;
                     _SQL.vehiclePermissions.Update(toUpdate);
                     _SQL.SaveChanges();
-                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Sikeres módosítás");
                 }
             }
@@ -279,7 +279,7 @@ namespace AutoPortal.Controllers
                 {
                     _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = uid, target_type = uType, vehicle_id = vehId });
                     _SQL.SaveChanges();
-                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Sikeres módosítás");
                 }
             }
@@ -315,7 +315,7 @@ namespace AutoPortal.Controllers
                             _SQL.vehiclePermissions.Remove(vp);
                         
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -325,7 +325,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.USER, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -351,7 +351,7 @@ namespace AutoPortal.Controllers
                             _SQL.vehiclePermissions.Remove(vp);
 
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -362,7 +362,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.SERVICE, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -387,7 +387,7 @@ namespace AutoPortal.Controllers
                         else
                             _SQL.vehiclePermissions.Remove(vp);
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -398,7 +398,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.DEALER, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -423,7 +423,7 @@ namespace AutoPortal.Controllers
                         else
                             _SQL.vehiclePermissions.Remove(vp);
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -434,7 +434,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.FACTORY, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -506,7 +506,7 @@ namespace AutoPortal.Controllers
                     _SQL.services.Update(u);
                     _SQL.SaveChanges();
 
-                    _Notification.AddSuccessToastMessage("Módosítások mentése sikeres!");
+                    _Notification.AddSuccessToastMessage("Módosítások mentése sikeres!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Módosítások sikeresen elmentve!");
                 }
                 else
@@ -534,7 +534,7 @@ namespace AutoPortal.Controllers
                 Refuel refu = _SQL.refuels.Single(rf => rf.id == Guid.Parse(fuelingId));
                 _SQL.refuels.Remove(refu);
                 _SQL.SaveChanges();
-                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                _Notification.AddSuccessToastMessage("Sikeres törlés!", new ToastrOptions() { Title = "Siker" });
                 return Ok("Sikeres törlés!");
             }
             else
@@ -552,12 +552,12 @@ namespace AutoPortal.Controllers
                 ServiceEvent sev = _SQL.serviceEvents.Single(se => se.id == Guid.Parse(serviceEventId));
                 _SQL.serviceEvents.Remove(sev);
                 _SQL.SaveChanges();
-                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                _Notification.AddSuccessToastMessage("Sikeres törlés!", new ToastrOptions() { Title = "Siker" });
                 return Ok("Sikeres törlés!");
             }
             else
             {
-                _Notification.AddSuccessToastMessage("A keresett szerviz nem található!");
+                _Notification.AddSuccessToastMessage("A keresett szerviz nem található!", new ToastrOptions() { Title = "Siker" });
                 return NotFound("A keresett szerviz nem található!");
             }
         }
@@ -570,7 +570,7 @@ namespace AutoPortal.Controllers
                 MileageStand mst = _SQL.mileageStands.Single(ms => ms.id == Guid.Parse(mileageId));
                 _SQL.mileageStands.Remove(mst);
                 _SQL.SaveChanges();
-                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                _Notification.AddSuccessToastMessage("Sikeres törlés!", new ToastrOptions() { Title = "Siker" });
                 return Ok("Sikeres törlés!");
             }
             else
@@ -588,7 +588,7 @@ namespace AutoPortal.Controllers
                 OtherCost otc = _SQL.otherCosts.Single(oc => oc.id == Guid.Parse(costId));
                 _SQL.otherCosts.Remove(otc);
                 _SQL.SaveChanges();
-                _Notification.AddSuccessToastMessage("Sikeres törlés!");
+                _Notification.AddSuccessToastMessage("Sikeres törlés!", new ToastrOptions() { Title = "Siker" });
                 return Ok("Sikeres törlés!");
             }
             else
@@ -641,7 +641,7 @@ namespace AutoPortal.Controllers
 
                 _SQL.SaveChanges();
 
-                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!", new ToastrOptions() { Title = "Siker" });
                 return Ok("Sikeres rögzítés!");
             }
             else
@@ -666,7 +666,7 @@ namespace AutoPortal.Controllers
                 await _SQL.otherCosts.AddAsync(oc);
                 await _SQL.SaveChangesAsync();
 
-                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
             }
             _Notification.AddErrorToastMessage("Hiányos adatok!");
@@ -688,7 +688,7 @@ namespace AutoPortal.Controllers
                 await _SQL.refuels.AddAsync(rf);
                 await _SQL.SaveChangesAsync();
 
-                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
             }
             _Notification.AddErrorToastMessage("Hiányos adatok!");

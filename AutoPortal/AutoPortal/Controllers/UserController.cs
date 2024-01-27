@@ -203,7 +203,7 @@ namespace AutoPortal.Controllers
         {
             if (ModelState.IsValid) {
                 if (_SQL.vehicles.Any(v => v.chassis_number == m.chassis_number)) { //Már rögzítve lett a jármű
-                    _Notification.AddWarningToastMessage("A megadott alvázszám már szerepel a rendszerben!\nKérjük vegye fel a kapcsolatot velünk.");
+                    _Notification.AddWarningToastMessage("A megadott alvázszám már szerepel a rendszerben!\nKérjük vegye fel a kapcsolatot velünk.", new ToastrOptions() { Title = "Figyelmeztetés" });
                     return Conflict();
                 }
 
@@ -214,7 +214,7 @@ namespace AutoPortal.Controllers
                 _SQL.vehiclePermissions.Add(new VehiclePermission { vehicle_id = v.chassis_number, target_id = loginId, target_type = loginType, permission = eVehiclePermissions.OWNER });
                 await _SQL.SaveChangesAsync();
 
-                _Notification.AddSuccessToastMessage("Jármű sikeresen rögzítve!");
+                _Notification.AddSuccessToastMessage("Jármű sikeresen rögzítve!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
 
             }
@@ -246,7 +246,7 @@ namespace AutoPortal.Controllers
                 await _SQL.refuels.AddAsync(rf);
                 await _SQL.SaveChangesAsync();
 
-                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
             }
             _Notification.AddErrorToastMessage("Hiányos adatok!");
@@ -277,7 +277,7 @@ namespace AutoPortal.Controllers
                 await _SQL.otherCosts.AddAsync(oc);
                 await _SQL.SaveChangesAsync();
 
-                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
             }
             _Notification.AddErrorToastMessage("Hiányos adatok!");
@@ -332,7 +332,7 @@ namespace AutoPortal.Controllers
 
                 _SQL.SaveChanges();
 
-                _Notification.AddSuccessToastMessage("Sikeres rögzítés!");
+                _Notification.AddSuccessToastMessage("Sikeres rögzítés!", new ToastrOptions() { Title = "Siker" });
                 return View();
             }
             else{
@@ -384,7 +384,7 @@ namespace AutoPortal.Controllers
             ServiceEvent se = _SQL.serviceEvents.Single(e => e.id == Guid.Parse(serviceEventId));
             _SQL.serviceEvents.Remove(se);
             _SQL.SaveChanges();
-            _Notification.AddSuccessToastMessage("Sikerese törlés!");
+            _Notification.AddSuccessToastMessage("Sikerese törlés!", new ToastrOptions() { Title = "Siker" });
             return Ok();
         }
 
@@ -425,7 +425,7 @@ namespace AutoPortal.Controllers
 
             if(count >= 2)
             {
-                _Notification.AddWarningToastMessage("Nem kínálhat eladásra több járművet egyidejűleg!");
+                _Notification.AddWarningToastMessage("Nem kínálhat eladásra több járművet egyidejűleg!", new ToastrOptions() { Title = "Figyelmeztetés" });
                 return Conflict("Nem kínálhat eladásra több járművet egyidejűleg!");
             }
 
@@ -461,7 +461,7 @@ namespace AutoPortal.Controllers
                 
             }
 
-            _Notification.AddSuccessToastMessage("A jármű sikeresen eladásra lett kínálva!");
+            _Notification.AddSuccessToastMessage("A jármű sikeresen eladásra lett kínálva!", new ToastrOptions() { Title = "Siker" });
             return Ok("A jármű sikeresen eladásra kínálva!");
         }
 
@@ -500,7 +500,7 @@ namespace AutoPortal.Controllers
                     }
                 }
 
-                _Notification.AddSuccessToastMessage("Kép sikeresen törölve!");
+                _Notification.AddSuccessToastMessage("Kép sikeresen törölve!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
             }
         }
@@ -547,7 +547,7 @@ namespace AutoPortal.Controllers
                 else {
                     System.IO.File.Move(_Environment.WebRootPath + image, _Environment.WebRootPath + "/Images/SaleImages/" + transactionId + "/" + position + Path.GetExtension(_Environment.WebRootPath + image));
                 }
-                _Notification.AddSuccessToastMessage("Kép sikeresen mozgatva!");
+                _Notification.AddSuccessToastMessage("Kép sikeresen mozgatva!", new ToastrOptions() { Title = "Siker" });
                 return Ok();
             }
         }
@@ -609,7 +609,7 @@ namespace AutoPortal.Controllers
 
                 }
             }
-            _Notification.AddSuccessToastMessage("A módosítások sikeresen érvényesítve lettek!");
+            _Notification.AddSuccessToastMessage("A módosítások sikeresen érvényesítve lettek!", new ToastrOptions() { Title = "Siker" });
             return Ok("A módosítások sikeresen érvényesítve lettek!");
         }
 
@@ -636,7 +636,7 @@ namespace AutoPortal.Controllers
 
             Directory.Delete(filePath, true);
 
-            _Notification.AddSuccessToastMessage("Sikeres tranzakció törlés!");
+            _Notification.AddSuccessToastMessage("Sikeres tranzakció törlés!", new ToastrOptions() { Title = "Siker" });
             return Ok();
         }
 
@@ -690,13 +690,13 @@ namespace AutoPortal.Controllers
 
                 _SQL.reviews.Update(rev);
                 await _SQL.SaveChangesAsync();
-				_Notification.AddSuccessToastMessage("Sikeres véleménymódosítás");
+				_Notification.AddSuccessToastMessage("Sikeres véleménymódosítás", new ToastrOptions() { Title = "Siker" });
 			}
             else //Hozzáad
             {
 				_SQL.reviews.Add(new Review() { date = DateTime.Now, description = review, edited = false, id = Guid.NewGuid(), rating = rating, source_id = loginId, source_type = loginType, target_id = target_id, target_type = target_type });
                 await _SQL.SaveChangesAsync();
-				_Notification.AddSuccessToastMessage("Sikeres véleményírás");
+				_Notification.AddSuccessToastMessage("Sikeres véleményírás", new ToastrOptions() { Title = "Siker" });
 			}
             switch (target_type)
             {
@@ -727,7 +727,7 @@ namespace AutoPortal.Controllers
             {
                 _SQL.reviews.Remove(rev);
                 await _SQL.SaveChangesAsync();
-                _Notification.AddSuccessToastMessage("Vélemény sikeresen törölve!");
+                _Notification.AddSuccessToastMessage("Vélemény sikeresen törölve!", new ToastrOptions() { Title = "Siker" });
             }
             else
             {
@@ -757,7 +757,7 @@ namespace AutoPortal.Controllers
 
             if(!_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == vehId && vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER))
             {
-                _Notification.AddWarningToastMessage("A következő művelethez nincs jogosultsága!");
+                _Notification.AddWarningToastMessage("A következő művelethez nincs jogosultsága!", new ToastrOptions() { Title = "Figyelmeztetés" });
                 return BadRequest("A következő művelethez nincs jogosultsága!");
             }
 
@@ -783,7 +783,7 @@ namespace AutoPortal.Controllers
                             _SQL.vehiclePermissions.Remove(vp);
 
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -794,7 +794,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.USER, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -820,7 +820,7 @@ namespace AutoPortal.Controllers
                             _SQL.vehiclePermissions.Remove(vp);
 
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -831,7 +831,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.SERVICE, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -856,7 +856,7 @@ namespace AutoPortal.Controllers
                         else
                             _SQL.vehiclePermissions.Remove(vp);
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -867,7 +867,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.DEALER, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }
@@ -892,7 +892,7 @@ namespace AutoPortal.Controllers
                         else
                             _SQL.vehiclePermissions.Remove(vp);
                         _SQL.SaveChanges();
-                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                         return Ok("Sikeres módosítás!");
                     }
                 }
@@ -903,7 +903,7 @@ namespace AutoPortal.Controllers
                         _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = perm, target_id = id, target_type = eVehicleTargetTypes.FACTORY, vehicle_id = vehId });
                         _SQL.SaveChanges();
                     }
-                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!");
+                    _Notification.AddSuccessToastMessage("Jogosultság rögzítve!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Jogosultság rögzítve!");
                 }
             }

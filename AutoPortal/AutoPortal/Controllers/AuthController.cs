@@ -113,7 +113,7 @@ namespace AutoPortal.Controllers
 
             MailSender.SendSuccessRegisterMail(u, t, this.Request.Host.ToString());
 
-            _Notification.AddSuccessToastMessage("Sikeres regisztráció!");
+            _Notification.AddSuccessToastMessage("Sikeres regisztráció!", new ToastrOptions() { Title = "Siker" });
             resp.Message = "Register success!";
             return Ok(resp.ToString());
         }
@@ -194,7 +194,7 @@ namespace AutoPortal.Controllers
 
                 MailSender.SendSuccessRegisterMail(regId, t, this.Request.Host.ToString());
 
-                _Notification.AddSuccessToastMessage("Sikeres regisztráció!");
+                _Notification.AddSuccessToastMessage("Sikeres regisztráció!", new ToastrOptions() { Title = "Siker" });
                 resp.Message = "Register success!";
                 return Ok(resp.ToString());
             }
@@ -218,7 +218,7 @@ namespace AutoPortal.Controllers
                 return View();
             }
             else if(loginType == eVehicleTargetTypes.FACTORY) { //Gyártói bejelentkezés
-                _Notification.AddWarningToastMessage("Gyártói bejelentkezés csak API-n keresztül engedélyezett!");
+                _Notification.AddWarningToastMessage("Gyártói bejelentkezés csak API-n keresztül engedélyezett!", new ToastrOptions() { Title = "Figyelmeztetés" });
                 return View();
             } else if (loginType == eVehicleTargetTypes.USER) { //Felhasználói bejelentkezés
                 User user = await this._SQL.users.SingleAsync(u => u.email == email);
@@ -242,7 +242,7 @@ namespace AutoPortal.Controllers
                     {
                         IsPersistent = true
                     });
-                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
+                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!", new ToastrOptions() { Title = "Siker" });
                     return Redirect("/Home");
                 }
                 else
@@ -261,7 +261,7 @@ namespace AutoPortal.Controllers
                     }
 
                     if (!service.status.HasFlag(eAccountStatus.EMAIL_CONFIRM)) {
-                        this._Notification.AddWarningToastMessage("Bejelentkezéshez E-mail megerősítés szükséges!");
+                        this._Notification.AddWarningToastMessage("Bejelentkezéshez E-mail megerősítés szükséges!", new ToastrOptions() { Title = "Figyelmeztetés" });
                         return View();
                     }
 
@@ -270,7 +270,7 @@ namespace AutoPortal.Controllers
                     {
                         IsPersistent = true
                     });
-                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
+                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!", new ToastrOptions() { Title = "Siker" });
                     return Redirect("/Home");
                 }
                 else
@@ -291,7 +291,7 @@ namespace AutoPortal.Controllers
 
                     if (!dealer.status.HasFlag(eAccountStatus.EMAIL_CONFIRM))
                     {
-                        this._Notification.AddWarningToastMessage("Bejelentkezéshez E-mail megerősítés szükséges!");
+                        this._Notification.AddWarningToastMessage("Bejelentkezéshez E-mail megerősítés szükséges!", new ToastrOptions() { Title = "Figyelmeztetés" });
                         return View();
                     }
 
@@ -300,7 +300,7 @@ namespace AutoPortal.Controllers
                     {
                         IsPersistent = true
                     });
-                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!");
+                    this._Notification.AddSuccessToastMessage("A bejelentkezés sikeres!", new ToastrOptions() { Title = "Siker" });
                     return Redirect("/Home");
                 }
                 else
@@ -447,7 +447,7 @@ namespace AutoPortal.Controllers
 
                 this._SQL.SaveChanges();
 
-                _Notification.AddSuccessToastMessage("Az új jelszó megadásához szükséges információkat elküldtük az email címére!");
+                _Notification.AddSuccessToastMessage("Az új jelszó megadásához szükséges információkat elküldtük az email címére!", new ToastrOptions() { Title = "Siker" });
                 MailSender.SendNewPasswordMail(email, t, this.Request.Host.ToString());
             }
             return View();
@@ -501,7 +501,7 @@ namespace AutoPortal.Controllers
                             _SQL.dealers.Update(d);
                             _SQL.tokens.Remove(t);
                             _SQL.SaveChanges();
-                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!", new ToastrOptions() { Title = "Siker" });
                             return Ok();
                         }
                         else
@@ -518,7 +518,7 @@ namespace AutoPortal.Controllers
                             _SQL.users.Update(u);
                             _SQL.tokens.Remove(t);
                             _SQL.SaveChanges();
-                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!", new ToastrOptions() { Title = "Siker" });
                             return Ok();
                         }
                         else
@@ -536,7 +536,7 @@ namespace AutoPortal.Controllers
                             _SQL.services.Update(s);
                             _SQL.tokens.Remove(t);
                             _SQL.SaveChanges();
-                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+                            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!", new ToastrOptions() { Title = "Siker" });
                             return Ok();
                         }
                         else

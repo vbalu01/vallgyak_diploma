@@ -110,7 +110,7 @@ namespace AutoPortal.Controllers
                 if (change) {
                     _SQL.users.Update(user);
                     _SQL.SaveChanges();
-                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
                     return Ok("Sikeres módosítás!");
                 }
                 else {
@@ -150,7 +150,7 @@ namespace AutoPortal.Controllers
 
             _SQL.users.Update(user);
             _SQL.SaveChanges();
-            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!", new ToastrOptions() { Title = "Siker" });
             return Ok("Sikeres jelszó módosítás!");
         }
 
@@ -216,7 +216,7 @@ namespace AutoPortal.Controllers
                 return BadRequest("Hibás fiók!");
             }
             _SQL.SaveChanges();
-            _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+            _Notification.AddSuccessToastMessage("Sikeres módosítás!", new ToastrOptions() { Title = "Siker" });
             return Ok("Sikeres módosítás!");
         }
 
@@ -261,7 +261,7 @@ namespace AutoPortal.Controllers
                 return BadRequest("Hibás fiók!");
             }
             _SQL.SaveChanges();
-            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!");
+            _Notification.AddSuccessToastMessage("Sikeres jelszó módosítás!", new ToastrOptions() { Title = "Siker" });
             return Ok("Sikeres jelszó módosítás!");
         }
     }

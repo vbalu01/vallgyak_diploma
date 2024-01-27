@@ -56,7 +56,7 @@ namespace AutoPortal.Controllers
             bool res = await MailSender.SendMail(m);
 
             if (res) {
-                _Notification.AddSuccessToastMessage("Email sikeresen elküldve!");
+                _Notification.AddSuccessToastMessage("Email sikeresen elküldve!", new ToastrOptions() { Title = "Siker" });
                 return Ok("Sikeres levél küldés!");
             }
             else {

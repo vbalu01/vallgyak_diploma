@@ -3,6 +3,7 @@ using AutoPortal.Models;
 using AutoPortal.Models.AppModels;
 using AutoPortal.Models.DbModels;
 using AutoPortal.Models.RequestModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -15,19 +16,37 @@ namespace AutoPortal.Controllers
 {
     [Route("/api/factory")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ApiFactoryController : ControllerBase
     {
         private JsonResponse response;
-
+        private int loginId;
         public ApiFactoryController() {
             response = new();
+            this.loginId = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "factoryId").Value);
         }
 
         [HttpGet("test")]
         public string test() {
             response.Message = "Szia";
             return JsonConvert.SerializeObject(response);
+        }
+
+        public async Task<IActionResult> getVehicles()
+        {
+            List<VehiclePermission> vehiclePermissions = new List<VehiclePermission>();
+            List<Vehicle> vehicles = new List<Vehicle>();
+            using(SQL mysql = new SQL())
+            {
+                vehiclePermissions = mysql.vehiclePermissions.Where(vp => vp.permission == eVehiclePermissions.OWNER && vp.target_type == eVehicleTargetTypes.FACTORY && vp.target_id == loginId).ToList();
+                foreach(var item in vehiclePermissions)
+                {
+                    vehicles.Add(mysql.vehicles.Single(v => v.chassis_number == item.vehicle_id));
+                }
+            }
+            response.Success = true;
+            response.Message = JsonConvert.SerializeObject(vehicles);
+            return Ok(response);
         }
 
         [HttpPost("addBrandNewVehicle")]
@@ -109,20 +128,6 @@ namespace AutoPortal.Controllers
                     return BadRequest(JsonConvert.SerializeObject(response));
                 }
             }
-        }
-
-        [HttpPost("loginTest")]
-        public async Task<IActionResult> LoginTest(string email, string name)
-        {
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Startup.TokenKey));
-            var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-            var tokenOptions = new JwtSecurityToken(
-                claims: new List<Claim>() { new Claim(ClaimTypes.Name, name ?? string.Empty) },
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: signinCredentials
-            );
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-            return Ok(new { Token = tokenString });
         }
 
         private string _GenerateToken(Factory f)

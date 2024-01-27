@@ -118,7 +118,7 @@ namespace AutoPortal.Controllers
 
             this._SQL.SaveChangesAsync();
 
-            this._Notification.AddSuccessToastMessage("Sikeres megerősítés!");
+            this._Notification.AddSuccessToastMessage("Sikeres megerősítés!", new ToastrOptions() { Title = "Siker" });
             return Redirect("/Auth/Login");
         }
 
