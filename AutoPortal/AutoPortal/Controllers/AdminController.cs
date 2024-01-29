@@ -6,6 +6,7 @@ using AutoPortal.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using NToastNotify;
 using System.Security.Claims;
 
@@ -524,6 +525,84 @@ namespace AutoPortal.Controllers
         }
         #endregion
 
+        #region DealerRegion
+        [HttpGet]
+        public async Task<IActionResult> getDealerData(int dealerId)
+        {
+            dynamic returnModel = new System.Dynamic.ExpandoObject();
+            Dealer findDealer = _SQL.dealers.SingleOrDefault(u => u.id == dealerId);
+
+            if (findDealer == null)
+            {
+                _Notification.AddErrorToastMessage("A keresett kereskedő nem található!");
+                return BadRequest();
+            }
+
+            List<UserVehicle> vehicles = new List<UserVehicle>();
+            foreach (var item in _SQL.vehiclePermissions.Where(i => i.target_type == eVehicleTargetTypes.DEALER && i.target_id == dealerId))
+            {
+                using (SQL mysql = new SQL())
+                {
+                    vehicles.Add(new UserVehicle { p = item.permission, v = mysql.vehicles.SingleOrDefault(vh => vh.chassis_number == item.vehicle_id) });
+                }
+            }
+
+            findDealer.password = null;
+
+            returnModel.Dealer = findDealer;
+            returnModel.DealerVehicles = vehicles;
+
+            return Ok(returnModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> updateDealerData([FromBody] AdminUpdateDealerDataModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if (_SQL.dealers.Any(u => u.id == m.id))
+                {
+                    Dealer u = _SQL.dealers.Single(usr => usr.id == m.id);
+                    if (u.email != m.email)
+                        u.email = m.email;
+                    if (u.name != m.name)
+                        u.name = m.name;
+                    if (u.status != m.status)
+                        u.status = m.status;
+                    if (u.phone != m.phone)
+                        u.phone = m.phone;
+                    if (u.description != m.description)
+                        u.description = m.description;
+                    if (u.country != m.country)
+                        u.country = m.country;
+                    if (u.city != m.city)
+                        u.city = m.city;
+                    if (u.address != m.address)
+                        u.address = m.address;
+                    if (u.website != m.website)
+                        u.website = m.website;
+
+                    _SQL.dealers.Update(u);
+                    _SQL.SaveChanges();
+
+                    _Notification.AddSuccessToastMessage("Módosítások mentése sikeres!", new ToastrOptions() { Title = "Siker" });
+                    return Ok("Módosítások sikeresen elmentve!");
+                }
+                else
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen mentés: Kereskedő nem található!");
+                    return NotFound("A kereskedő nem található!");
+                }
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("Módosítás sikertelen: Helytelen adatok!");
+                return BadRequest("Hibás adatok!");
+            }
+
+        }
+        #endregion
+
         #region vehicleRegion
 
         [HttpPost]
@@ -693,6 +772,129 @@ namespace AutoPortal.Controllers
             }
             _Notification.AddErrorToastMessage("Hiányos adatok!");
             return BadRequest();
+        }
+
+        #endregion
+
+        #region FACTORY_REGION
+
+        [HttpPost]
+        public async Task<IActionResult> registerFactory(string email, string name, eAccountStatus? status)
+        {
+            if(!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(name) && status != null)
+            {
+                if(_SQL.users.Any(u => u.email == email) || _SQL.services.Any(s => s.email == email) || _SQL.dealers.Any(d => d.email == email) || _SQL.factories.Any(f => f.email == email))
+                {
+                    _Notification.AddErrorToastMessage("Az email cím már használatban van!");
+                    return BadRequest("Az email cím már használatban van!");
+                }
+
+                string randomPassword = PasswordManager.GenerateRandomPassword();
+
+                Factory f = new Factory()
+                {
+                    email = email,
+                    name = name,
+                    status = (eAccountStatus)status,
+                    password = PasswordManager.GenerateHash(randomPassword)
+                };
+                _SQL.factories.Add(f);
+                await _SQL.SaveChangesAsync();
+                await MailSender.SendFactoryRegisterMail(email, name, randomPassword);
+                _Notification.AddSuccessToastMessage("Gyártó rögzítés sikeres!", new ToastrOptions { Title = "Siker" });
+                f.password = null;
+                return Ok(JsonConvert.SerializeObject(f));
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("Hibás adatok!");
+                return BadRequest("Hibás adatok!");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> getFactoryData(int factoryId)
+        {
+            dynamic returnModel = new System.Dynamic.ExpandoObject();
+            Factory findFactory = _SQL.factories.SingleOrDefault(u => u.id == factoryId);
+
+            if (factoryId == null)
+            {
+                _Notification.AddErrorToastMessage("A keresett gyártó nem található!");
+                return BadRequest();
+            }
+
+            List<UserVehicle> vehicles = new List<UserVehicle>();
+            foreach (var item in _SQL.vehiclePermissions.Where(i => i.target_type == eVehicleTargetTypes.FACTORY && i.target_id == factoryId))
+            {
+                using (SQL mysql = new SQL())
+                {
+                    vehicles.Add(new UserVehicle { p = item.permission, v = mysql.vehicles.SingleOrDefault(vh => vh.chassis_number == item.vehicle_id) });
+                }
+            }
+
+            findFactory.password = null;
+
+            returnModel.Factory = findFactory;
+            returnModel.FactoryVehicles = vehicles;
+
+            return Ok(returnModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> updateFactoryData([FromBody] AdminUpdateFactoryDataModel m)
+        {
+            if (ModelState.IsValid)
+            {
+                if (_SQL.factories.Any(u => u.id == m.id))
+                {
+                    Factory u = _SQL.factories.Single(usr => usr.id == m.id);
+                    if (u.email != m.email)
+                        u.email = m.email;
+                    if (u.name != m.name)
+                        u.name = m.name;
+                    if (u.status != m.status)
+                        u.status = m.status;
+
+                    _SQL.factories.Update(u);
+                    _SQL.SaveChanges();
+
+                    _Notification.AddSuccessToastMessage("Módosítások mentése sikeres!", new ToastrOptions() { Title = "Siker" });
+                    return Ok("Módosítások sikeresen elmentve!");
+                }
+                else
+                {
+                    _Notification.AddErrorToastMessage("Sikertelen mentés: gyár nem található!");
+                    return NotFound("A gyár nem található!");
+                }
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("Módosítás sikertelen: Helytelen adatok!");
+                return BadRequest("Hibás adatok!");
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> askNewFactoryPassword(int factoryId)
+        {
+            if(_SQL.factories.Any(f=>f.id == factoryId))
+            {
+                string newPwd = PasswordManager.GenerateRandomPassword();
+                Factory f = _SQL.factories.Single(f => f.id == factoryId);
+                f.password = PasswordManager.GenerateHash(newPwd);
+                _SQL.factories.Update(f);
+                await _SQL.SaveChangesAsync();
+                await MailSender.SendAdminNewFactoryPwdMail(f.email, f.name, newPwd);
+                _Notification.AddSuccessToastMessage("Sikeres új jelszó igénylés!", new ToastrOptions() { Title = "Siker" });
+                return Ok("Sikeres új jelszó igénylés!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A gyár nem található!");
+                return BadRequest("A gyár nem található!");
+            }
         }
 
         #endregion

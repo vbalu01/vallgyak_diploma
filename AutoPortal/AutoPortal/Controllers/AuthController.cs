@@ -89,7 +89,7 @@ namespace AutoPortal.Controllers
                 return BadRequest(base.resp.ToString());
             }
             
-            if(_SQL.users.Any(u=>u.email == m.email)) {
+            if(_SQL.users.Any(u => u.email == m.email) || _SQL.services.Any(s => s.email == m.email) || _SQL.dealers.Any(d => d.email == m.email) || _SQL.factories.Any(f => f.email == m.email)) {
                 resp.Success = false;
                 resp.Message = "Email already taken.";
                 _Notification.AddErrorToastMessage("Az Email már használatban van!");
@@ -111,7 +111,7 @@ namespace AutoPortal.Controllers
             _SQL.tokens.Add(t);
             _SQL.SaveChanges();
 
-            MailSender.SendSuccessRegisterMail(u, t, this.Request.Host.ToString());
+            await MailSender.SendSuccessRegisterMail(u, t, this.Request.Host.ToString());
 
             _Notification.AddSuccessToastMessage("Sikeres regisztráció!", new ToastrOptions() { Title = "Siker" });
             resp.Message = "Register success!";
@@ -147,7 +147,7 @@ namespace AutoPortal.Controllers
                     return BadRequest(base.resp.ToString());
                 }
 
-                if (_SQL.users.Any(u => u.email == m.email) || _SQL.services.Any(s=>s.email == m.email) || _SQL.dealers.Any(d=>d.email == m.email))
+                if (_SQL.users.Any(u => u.email == m.email) || _SQL.services.Any(s=>s.email == m.email) || _SQL.dealers.Any(d=>d.email == m.email) || _SQL.factories.Any(f=>f.email == m.email))
                 {
                     resp.Success = false;
                     resp.Message = "Email already taken.";
@@ -192,7 +192,7 @@ namespace AutoPortal.Controllers
                 _SQL.tokens.Add(t);
                 _SQL.SaveChanges();
 
-                MailSender.SendSuccessRegisterMail(regId, t, this.Request.Host.ToString());
+                await MailSender.SendSuccessRegisterMail(regId, t, this.Request.Host.ToString());
 
                 _Notification.AddSuccessToastMessage("Sikeres regisztráció!", new ToastrOptions() { Title = "Siker" });
                 resp.Message = "Register success!";

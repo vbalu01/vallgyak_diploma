@@ -24,7 +24,7 @@ namespace AutoPortal.Libs
             }; 
             try {
                 Functions.WriteLog("SendMail: " + JsonConvert.SerializeObject(m));
-                client.Send(message);
+                client.SendAsync(message, null);
                 return true;
             }catch (Exception ex) {
                 Functions.WriteErrorLog(ex.Message);
@@ -54,6 +54,32 @@ namespace AutoPortal.Libs
                 isHtml = true,
                 to = email,
                 body = $"<p><strong>Tisztelt felhasználónk!</strong></p>\r\n\r\n<p>Az új jelszavának megadásához kattintson <a href=\"http://{host}/Token/ForgotPassword?token={t.token}\">ide</a>, vagy másolja be a böngészőbe az alábbi linket: </p>\r\n\r\n<p><a href=\"http://{host}/Token/ForgotPassword?token={t.token}\">http://{host}/Token/ForgotPassword?token={t.token}</a></p>\r\n\r\n<p><strong>Üdvözlettel: az AutoPortal csapata</strong></p>\r\n"
+            };
+            return await SendMail(m);
+        }
+
+        public async static Task<bool> SendFactoryRegisterMail(string email, string name, string password)
+        {
+            MailModel m = new()
+            {
+                subject = "AutoPortal - Gyártó regisztráció",
+                from = "noreply@autoportal.hu",
+                isHtml = true,
+                to = email,
+                body = $"<p><strong>Tisztelt {name}!</strong></p>\r\n\r\n<p>Gyártó regisztráció történt a megadott email címre: {email}. Az API-ba történő belépéshez szükséges jelszava a következő: <b>{password}. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>"
+            };
+            return await SendMail(m);
+        }
+
+        public async static Task<bool> SendAdminNewFactoryPwdMail(string email, string name, string password)
+        {
+            MailModel m = new()
+            {
+                subject = "AutoPortal - Új jelszó igénylés",
+                from = "noreply@autoportal.hu",
+                isHtml = true,
+                to = email,
+                body = $"<p><strong>Tisztelt {name}!</strong></p>\r\n\r\n<p>Admin általi gyártó jelszó módosítás történt a megadott email címen: {email}. Az API-ba történő belépéshez szükséges új jelszava a következő: <b>{password}. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>"
             };
             return await SendMail(m);
         }

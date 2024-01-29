@@ -42,3 +42,11 @@ SendMail: {"from":"noreply@autoportal.hu","to":"vhbal2001@gmail.com","subject":"
 ~~~~~~~~~~2024-01-21 18:11:25::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
 SendMail: {"from":"noreply@autoportal.hu","to":"vhbal2001@gmail.com","subject":"AutoPortal - Elfelejtett jelszó","body":"<p><strong>Tisztelt felhasználónk!</strong></p>\r\n\r\n<p>Az új jelszavának megadásához kattintson <a href=\"http://localhost:4288/Token/ForgotPassword?token=GNpR4eN9NUK7rKD4axGPigzt1i7\">ide</a>, vagy másolja be a böngészőbe az alábbi linket: </p>\r\n\r\n<p><a href=\"http://localhost:4288/Token/ForgotPassword?token=GNpR4eN9NUK7rKD4axGPigzt1i7\">http://localhost:4288/Token/ForgotPassword?token=GNpR4eN9NUK7rKD4axGPigzt1i7</a></p>\r\n\r\n<p><strong>Üdvözlettel: az AutoPortal csapata</strong></p>\r\n","isHtml":true}
 ~~~~~~~~~~2024-01-21 18:11:25~~~~~~~~~~
+
+~~~~~~~~~~2024-01-29 18:07:28::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"AutoPortal - Szerviz regisztráció","body":"<p><strong>Tisztelt Gyár1!</strong></p>\r\n\r\n<p>Szerviz regisztráció történt a megadott email címre: baxybalu@gmail.com. Az API-ba történő belépéshez szükséges jelszava a következő: <b>U47rAT8f.</b><label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlette: Az AutoPortal csapata</p>","isHtml":true}
+~~~~~~~~~~2024-01-29 18:07:28~~~~~~~~~~
+
+~~~~~~~~~~2024-01-29 18:56:20::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"AutoPortal - Szerviz regisztráció","body":"<p><strong>Tisztelt Gyár1!</strong></p>\r\n\r\n<p>Admin általi gyártó jelszó módosítás történt a megadott email címen: baxybalu@gmail.com. Az API-ba történő belépéshez szükséges új jelszava a következő: <b>0i2E2C6o. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>","isHtml":true}
+~~~~~~~~~~2024-01-29 18:56:20~~~~~~~~~~

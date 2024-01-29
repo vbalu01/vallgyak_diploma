@@ -2,6 +2,166 @@
     ViewData["Title"] = "Kereskedő kezelés";
 }
 
+@section Scripts {
+    <script>
+        var userStatus = {
+            None: 0,
+            EMAIL_CONFIRM: 1, //Email megerősítve
+            ADMIN_CONFIRM: 2, //Admin visszaigazolás
+            BANNED: 4, //Admin által tiltva
+            DISABLED: 8 //Tulaj által tiltva
+        }
+
+        function saveModify(id) {
+            let userStatus = 0;
+
+            if ($('#dealerStatus1').prop('checked')) {
+                userStatus += 1;
+            }
+            if ($('#dealerStatus2').prop('checked')) {
+                userStatus += 2;
+            }
+            if ($('#dealerStatus4').prop('checked')) {
+                userStatus += 4;
+            }
+            if ($('#dealerStatus8').prop('checked')) {
+                userStatus += 8;
+            }
+
+            let dealerEmail = $('#dealermail').val();
+            let dealerName = $('#dealername').val();
+            let dealerPhone = $('#dealerphone').val();
+            let dealerCountry = $('#dealercountry').val();
+            let dealerCity = $('#dealercity').val();
+            let dealerAddress = $('#dealeraddress').val();
+            let dealerWebsite = $('#dealerweb').val();
+            let dealerDescription = $('#dealerdescription').val();
+
+            $.ajax({
+                type: "POST",
+                url: "updateDealerData",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'id': id,
+                    'email': dealerEmail,
+                    'name': dealerName,
+                    'phone': dealerPhone,
+                    'country': dealerCountry,
+                    'city': dealerCity,
+                    'address': dealerAddress,
+                    'website': dealerWebsite,
+                    'description': dealerDescription,
+                    'status': userStatus
+                }),
+                success: function (data) {
+                    alert(data);
+                }
+            });
+        }
+
+        function changeDealerVehiclePerm(perm, vehId, uid) {
+
+            $.ajax({
+                type: "POST",
+                url: "updateUserVehiclePerm",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'perm': perm,
+                    'vehId': vehId,
+                    'uType': 3,
+                    'uid': uid
+                },
+                success: function (data) {
+                    if (perm == 0) {
+                        $('#vehicleTableRow_' + vehId).remove();
+                    }
+                }
+            });
+        }
+
+        function openDealerModal(id) {
+            $.ajax({
+                type: "GET",
+                url: "getDealerData",
+                dataType: "json",
+                contentType: "application/json",
+                data: {
+                    'dealerId': id
+                },
+                success: function (data) {
+                    $("#dealerModalContent").html("");
+
+                    $("#dealerModalContent").append('<h3>Felhasználói adatok</h3>' +
+                        '<label for="dealermail">E-mail</label>' +
+                        '<input type="text" id="dealermail" class="form-control" value="' + data.Dealer.email + '"/>' +
+                        '<label for="dealername">Név</label>' +
+                        '<input type="text" id="dealername" class="form-control" value="' + data.Dealer.name + '" />' +
+                        '<label for="dealerphone">Telefon</label><input type="text" id="dealerphone" value="' + data.Dealer.phone + '" class="form-control" />' +
+                        '<label for="dealercountry">Ország</label><input type="text" id="dealercountry" value="' + data.Dealer.country + '" class="form-control" />' +
+                        '<label for="dealercity">Település</label><input type="text" id="dealercity" value="' + data.Dealer.city + '" class="form-control" />' +
+                        '<label for="dealeraddress">Cím</label><input type="text" id="dealeraddress" value="' + data.Dealer.address + '" class="form-control" />' +
+                        '<label for="dealerweb">Weboldal</label><input type="text" id="dealerweb" value="' + data.Dealer.website + '" class="form-control" />' +
+                        '<label for="dealerdescription">Leírás</label><textarea type="text" id="dealerdescription" class="form-control">' + data.Dealer.description + '</textarea>' +
+                        '<h3>Státusz: </h3>' +
+                        '<input type="checkbox" id="dealerStatus1" />' +
+                        '<label for="dealerStatus1">Email megerősítés</label><br>' +
+                        '<input type="checkbox" id="dealerStatus2" />' +
+                        '<label for="dealerStatus2">Admin jóváhagyás</label><br>' +
+                        '<input type="checkbox" id="dealerStatus4" />' +
+                        '<label for="dealerStatus4">Zárolva (Admin)</label><br>' +
+                        '<input type="checkbox" id="dealerStatus8" />' +
+                        '<label for="dealerStatus8">Elrejtve (Felhasználó)</label><br>' +
+                        '<button class="btn btn-success bi bi-check2" style="margin-top: 2%;" onclick="saveModify(' + id + ')"> Módosítások Mentése</button>' +
+                        '<h3>Járművek:</h3>' +
+                        '<table class="table table-stripped">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Alvázszám</th>' +
+                        '<th>Márka</th>' +
+                        '<th>Modell</th>' +
+                        '<th>Rendszám</th>' +
+                        '<th>Jogviszony</th>' +
+                        '<th>Művelet</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody id="dealerVehTableBody"></tbody></table>');
+
+                    data.DealerVehicles.forEach(function (currentVehicle) {
+
+                        $("#dealerVehTableBody").append(`<tr id="vehicleTableRow_` + currentVehicle.v.chassis_number + `"><td><a href="vehicleHandler?vehicleId=` + currentVehicle.v.chassis_number + `" target="_blank">` + currentVehicle.v.chassis_number + `</a></td><td>` + currentVehicle.v.make + `</td><td>` + currentVehicle.v.model + `</td>` +
+                            `<td>` + currentVehicle.v.license + `</td><td><select id="dealerVehiclePerm_` + currentVehicle.v.chassis_number + `" onchange="changeDealerVehiclePerm(this.value, '` + currentVehicle.v.chassis_number + `', ` + id + `)"><option value="1">Tulaj</option>` +
+                            `<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeDealerVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
+                        $('#dealerVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
+                    });
+
+                    if (data.Dealer.status & userStatus.EMAIL_CONFIRM) {
+                        $('#dealerStatus1').prop('checked', true);
+                    }
+                    if (data.Dealer.status & userStatus.ADMIN_CONFIRM) {
+                        $('#dealerStatus2').prop('checked', true);
+                    }
+                    if (data.Dealer.status & userStatus.BANNED) {
+                        $('#dealerStatus4').prop('checked', true);
+                    }
+                    if (data.Dealer.status & userStatus.DISABLED) {
+                        $('#dealerStatus8').prop('checked', true);
+                    }
+
+                    $("#dealerModal").show();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.modal-close').click(function () {
+                $("#dealerModal").hide();
+            });
+        });
+    </script>
+}
+
 <div class="row col-12">
     <h1>Kereskedő kezelés</h1>
     <div class="row col-12">
@@ -10,11 +170,75 @@
                 <tr>
                     <th>ID</th>
                     <th>E-Mail</th>
-                    <th>Telefon</th>
-                    <th>Ország/Település</th>
                     <th>Név</th>
+                    <th>Ország/Település</th>
+                    <th>Telefon</th>
+                    <th>Művelet</th>
                 </tr>
             </thead>
+            <tbody>
+                @foreach (var item in ViewBag.Dealers)
+                {
+                    <tr>
+                        <td>@item.id</td>
+                        <td>@item.email</td>
+                        <td>@item.name</td>
+                        <td>@item.city, @item.country </td>
+                        <td>@item.phone</td>
+                        <td><button class="btn btn-success" onclick="openDealerModal(@item.id)">Kezelés</button></td>
+                    </tr>
+                }
+            </tbody>
         </table>
+
+        <div id="dealerModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div id="dealerModalContent">
+                    <h3>Szerviz adatok</h3>
+                    <label for="dealermail">E-mail</label>
+                    <input type="text" id="dealermail" class="form-control" />
+                    <label for="dealername">Név</label>
+                    <input type="text" id="dealername" class="form-control" />
+                    <label for="dealerphone">Telefon</label>
+                    <input type="text" id="dealerphone" class="form-control" />
+                    <label for="dealercountry">Ország</label>
+                    <input type="text" id="dealercountry" class="form-control" />
+                    <label for="dealercity">Település</label>
+                    <input type="text" id="dealercity" class="form-control" />
+                    <label for="dealeraddress">Cím</label>
+                    <input type="text" id="dealeraddress" class="form-control" />
+                    <label for="dealerweb">Weboldal</label>
+                    <input type="text" id="dealerweb" class="form-control" />
+                    <label for="dealerdescription">Leírás</label>
+                    <textarea id="dealerdescription" class="form-control"></textarea>
+                    <p>Státusz: </p>
+                    <input type="checkbox" id="dealerStatus1" />
+                    <label for="dealerStatus1">Email megerősítés</label><br>
+                    <input type="checkbox" id="dealerStatus2" />
+                    <label for="dealerStatus1">Admin jóváhagyás</label><br>
+                    <input type="checkbox" id="dealerStatus4" />
+                    <label for="dealerStatus1">Zárolva (Admin)</label><br>
+                    <input type="checkbox" id="dealerStatus8" />
+                    <label for="dealerStatus1">Elrejtve (Felhasználó)</label><br>
+                    <p>Járművek:</p>
+                    <table class="table table-stripped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Márka</th>
+                                <th>Modell</th>
+                                <th>Rendszám</th>
+                                <th>Alvázszám</th>
+                                <th>Jogviszony</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

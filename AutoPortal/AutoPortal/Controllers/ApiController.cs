@@ -6,6 +6,7 @@ using AutoPortal.Models.RequestModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,13 +18,17 @@ namespace AutoPortal.Controllers
     [Route("/api/factory")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ApiFactoryController : ControllerBase
+    public class ApiFactoryController : Controller
     {
         private JsonResponse response;
         private int loginId;
         public ApiFactoryController() {
             response = new();
+        }
+        public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden API hívás előtt lefut
+        {
             this.loginId = Convert.ToInt32(this.HttpContext.User.Claims.SingleOrDefault(c => c.Type == "factoryId").Value);
+            base.OnActionExecuting(context);
         }
 
         [HttpGet("test")]
@@ -32,6 +37,7 @@ namespace AutoPortal.Controllers
             return JsonConvert.SerializeObject(response);
         }
 
+        [HttpGet("getVehicles")]
         public async Task<IActionResult> getVehicles()
         {
             List<VehiclePermission> vehiclePermissions = new List<VehiclePermission>();

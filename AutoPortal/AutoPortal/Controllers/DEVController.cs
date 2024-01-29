@@ -96,5 +96,18 @@ namespace AutoPortal.Controllers
 
             return tables;
         }
+
+        [HttpGet]
+        public async Task<IActionResult> NofifySuccess(string notify)
+        {
+            _Notification.AddSuccessToastMessage(notify, new ToastrOptions() { Title = "Siker" });
+            return Redirect("/");
+        }
+        [HttpGet]
+        public async Task<IActionResult> NofifyWarning(string notify)
+        {
+            _Notification.AddWarningToastMessage(notify, new ToastrOptions() { Title = "Figyelmeztetés" });
+            return Redirect("/");
+        }
     }
 }

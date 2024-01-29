@@ -37,5 +37,20 @@ namespace AutoPortal.Libs
             return newHashedPin.Equals(hashedInput);
 
         }
+
+        public static string GenerateRandomPassword(int? length = 0)
+        {
+            const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            Random rand = new Random();
+            StringBuilder pwdBuilder = new();
+            if(!length.HasValue || length == null || length == 0) {
+                length = rand.Next(8, 14);
+            }
+            for (int i = 0; i < length; i++)
+            {
+                pwdBuilder.Append(chars[rand.Next(chars.Length)]);
+            }
+            return pwdBuilder.ToString();
+        }
     }
 }

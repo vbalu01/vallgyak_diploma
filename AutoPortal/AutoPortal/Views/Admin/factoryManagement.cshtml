@@ -2,6 +2,181 @@
     ViewData["Title"] = "Gépjárműgyár regisztráció";
 }
 
+@section Scripts{
+    <script>
+        var userStatus = {
+            None: 0,
+            EMAIL_CONFIRM: 1, //Email megerősítve
+            ADMIN_CONFIRM: 2, //Admin visszaigazolás
+            BANNED: 4, //Admin által tiltva
+            DISABLED: 8 //Tulaj által tiltva
+        }
+
+        function registerFactory(){
+            $.ajax({
+                type: "POST",
+                url: "registerFactory",
+                //contentType: "application/json",
+                //dataType: "json",
+                data: {
+                    'email': $('#email').val(),
+                    'name': $('#name').val(),
+                    'status': $('#enabledSb').find(":selected").val()
+                },
+                success: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+
+        function changeFactoryVehiclePerm(perm, vehId, uid) {
+
+            $.ajax({
+                type: "POST",
+                url: "updateUserVehiclePerm",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'perm': perm,
+                    'vehId': vehId,
+                    'uType': 2,
+                    'uid': uid
+                },
+                success: function (data) {
+                    if (perm == 0) {
+                        $('#vehicleTableRow_' + vehId).remove();
+                    }
+                }
+            });
+        }
+
+        function saveModify(id) {
+            let userStatus = 0;
+
+            if ($('#factoryStatus1').prop('checked')) {
+                userStatus += 1;
+            }
+            if ($('#factoryStatus2').prop('checked')) {
+                userStatus += 2;
+            }
+            if ($('#factoryStatus4').prop('checked')) {
+                userStatus += 4;
+            }
+            if ($('#factoryStatus8').prop('checked')) {
+                userStatus += 8;
+            }
+
+            let factoryEmail = $('#factorymail').val();
+            let factoryName = $('#factoryname').val();
+
+            $.ajax({
+                type: "POST",
+                url: "updateFactoryData",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'id': id,
+                    'email': factoryEmail,
+                    'name': factoryName,
+                    'status': userStatus
+                }),
+                success: function (data) {
+                    alert(data);
+                }
+            });
+        }
+
+        function askNewPassword(id) {
+            $.ajax({
+                type: "POST",
+                url: "askNewFactoryPassword",
+                //dataType: "json",
+                //contentType: "application/json",
+                data: {
+                    'factoryId': id
+                },
+                success: function (data) {
+                    //alert(data);
+                }
+            });
+        }
+
+        function openFactoryModal(id) {
+            $.ajax({
+                type: "GET",
+                url: "getFactoryData",
+                dataType: "json",
+                contentType: "application/json",
+                data: {
+                    'factoryId': id
+                },
+                success: function (data) {
+                    $("#factoryModalContent").html("");
+
+                    $("#factoryModalContent").append('<h3>Felhasználói adatok</h3>' +
+                        '<label for="factorymail">E-mail</label>' +
+                        '<input type="text" id="factorymail" class="form-control" value="' + data.Factory.email + '"/>' +
+                        '<label for="factoryname">Név</label>' +
+                        '<input type="text" id="factoryname" class="form-control" value="' + data.Factory.name + '" />' +
+                        '<h3>Státusz: </h3>' +
+                        '<input type="checkbox" id="factoryStatus1" />' +
+                        '<label for="factoryStatus1">Email megerősítés</label><br>' +
+                        '<input type="checkbox" id="factoryStatus2" />' +
+                        '<label for="factoryStatus2">Admin jóváhagyás</label><br>' +
+                        '<input type="checkbox" id="factoryStatus4" />' +
+                        '<label for="factoryStatus4">Zárolva (Admin)</label><br>' +
+                        '<input type="checkbox" id="factoryStatus8" />' +
+                        '<label for="factoryStatus8">Elrejtve (Felhasználó)</label><br>' +
+                        '<button class="btn btn-success bi bi-check2" style="margin-top: 2%;" onclick="saveModify(' + id + ')"> Módosítások Mentése</button>' +
+                        '<button class="btn btn-warning bi bi-exclamation-circle" style="margin-top: 2%;margin-left:1%;" onclick="askNewPassword(' + id + ')"> Új jelszó küldése</button>' +
+                        '<h3>Járművek:</h3>' +
+                        '<table class="table table-stripped">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Alvázszám</th>' +
+                        '<th>Márka</th>' +
+                        '<th>Modell</th>' +
+                        '<th>Rendszám</th>' +
+                        '<th>Jogviszony</th>' +
+                        '<th>Művelet</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody id="factoryVehTableBody"></tbody></table>');
+
+                    data.FactoryVehicles.forEach(function (currentVehicle) {
+
+                        $("#factoryVehTableBody").append(`<tr id="vehicleTableRow_` + currentVehicle.v.chassis_number + `"><td><a href="vehicleHandler?vehicleId=` + currentVehicle.v.chassis_number + `" target="_blank">` + currentVehicle.v.chassis_number + `</a></td><td>` + currentVehicle.v.make + `</td><td>` + currentVehicle.v.model + `</td>` +
+                            `<td>` + currentVehicle.v.license + `</td><td><select id="factoryVehiclePerm_` + currentVehicle.v.chassis_number + `" onchange="changeFactoryVehiclePerm(this.value, '` + currentVehicle.v.chassis_number + `', ` + id + `)"><option value="1">Tulaj</option>` +
+                            `<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeFactoryVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
+                        $('#factoryVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
+                    });
+
+                    if (data.Factory.status & userStatus.EMAIL_CONFIRM) {
+                        $('#factoryStatus1').prop('checked', true);
+                    }
+                    if (data.Factory.status & userStatus.ADMIN_CONFIRM) {
+                        $('#factoryStatus2').prop('checked', true);
+                    }
+                    if (data.Factory.status & userStatus.BANNED) {
+                        $('#factoryStatus4').prop('checked', true);
+                    }
+                    if (data.Factory.status & userStatus.DISABLED) {
+                        $('#factoryStatus8').prop('checked', true);
+                    }
+
+                    $("#factoryModal").show();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.modal-close').click(function () {
+                $("#factoryModal").hide();
+            });
+        });
+    </script>
+}
+
 <div class="row">
     <div class="col-12">
         <h1>Gépjárműgyár Kezelés</h1>
@@ -13,16 +188,16 @@
                     <input type="text" name="email" id="email" class="form-control" required />
                 </div>
                 <div class="form-group">
-                    <label for="email">Gyár neve</label>
-                    <input type="text" name="email" id="email" class="form-control" style="margin-bottom:2%;" required />
+                    <label for="name">Gyár neve</label>
+                    <input type="text" name="name" id="name" class="form-control" style="margin-bottom:2%;" required />
                 </div>
                 <div class="form-group">
-                    <select class="form-control>" name="enabled" id="enabled">
-                        <option value="0">Nem elérhető</option>
-                        <option selected value="1">Elérhető</option>
+                    <select class="form-control>" name="enabledSb" id="enabledSb">
+                        <option value="7">Nem elérhető</option>
+                        <option selected value="3">Elérhető</option>
                     </select>
                 </div>
-                <button class="btn btn-success" style="margin-top:2%;">Gyár felvétele</button>
+                <button class="btn btn-success" style="margin-top:2%;" onclick="registerFactory();">Gyár felvétele</button>
             </form>
         </section>
 
@@ -34,7 +209,7 @@
                 <tr>
                     <th>Azonosító</th>
                     <th>Email</th>
-                    <th>Státusz</th>
+                    <th>Művelet</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,23 +218,47 @@
                     <tr>
                         <td>@item.id</td>
                         <td>@item.email</td>
-                        <td>
-                            <select class="form-control>" name="enabled" id="enabled">
-                                @if (item.enabled)
-                                {
-                                    <option value="0">Nem elérhető</option>
-                                    <option value="1" selected>Elérhető</option>
-                                }
-                                else
-                                {
-                                    <option value="0" selected>Nem elérhető</option>
-                                    <option value="1">Elérhető</option>
-                                }
-                            </select>
-                        </td>
+                        <td><button class="btn btn-success" onclick="openFactoryModal(@item.id)">Kezelés</button></td>
                     </tr>
                 }
             </tbody>
         </table>
+
+        <div id="factoryModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span>
+                <div id="factoryModalContent">
+                    <h3>Gyár adatok</h3>
+                    <label for="factorymail">E-mail</label>
+                    <input type="text" id="factorymail" class="form-control" />
+                    <label for="factoryname">Név</label>
+                    <input type="text" id="factoryname" class="form-control" />
+                    <p>Státusz: </p>
+                    <input type="checkbox" id="factoryStatus1" />
+                    <label for="factoryStatus1">Email megerősítés</label><br>
+                    <input type="checkbox" id="factoryStatus2" />
+                    <label for="factoryStatus1">Admin jóváhagyás</label><br>
+                    <input type="checkbox" id="factoryStatus4" />
+                    <label for="factoryStatus1">Zárolva (Admin)</label><br>
+                    <input type="checkbox" id="factoryStatus8" />
+                    <label for="factoryStatus1">Elrejtve (Felhasználó)</label><br>
+                    <p>Járművek:</p>
+                    <table class="table table-stripped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Márka</th>
+                                <th>Modell</th>
+                                <th>Rendszám</th>
+                                <th>Alvázszám</th>
+                                <th>Jogviszony</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
