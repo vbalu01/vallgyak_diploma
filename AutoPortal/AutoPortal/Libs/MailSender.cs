@@ -83,5 +83,18 @@ namespace AutoPortal.Libs
             };
             return await SendMail(m);
         }
+
+        public async static Task<bool> SendNewFactoryPwdMail(string email, string name, string password)
+        {
+            MailModel m = new()
+            {
+                subject = "AutoPortal - Új jelszó igénylés",
+                from = "noreply@autoportal.hu",
+                isHtml = true,
+                to = email,
+                body = $"<p><strong>Tisztelt {name}!</strong></p>\r\n\r\n<p>Gyártói jelszó módosítás történt a megadott email címen: {email}. Az API-ba történő belépéshez szükséges új jelszava a következő: <b>{password}. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>"
+            };
+            return await SendMail(m);
+        }
     }
 }

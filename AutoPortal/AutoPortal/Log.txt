@@ -50,3 +50,11 @@ SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"A
 ~~~~~~~~~~2024-01-29 18:56:20::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
 SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"AutoPortal - Szerviz regisztráció","body":"<p><strong>Tisztelt Gyár1!</strong></p>\r\n\r\n<p>Admin általi gyártó jelszó módosítás történt a megadott email címen: baxybalu@gmail.com. Az API-ba történő belépéshez szükséges új jelszava a következő: <b>0i2E2C6o. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>","isHtml":true}
 ~~~~~~~~~~2024-01-29 18:56:20~~~~~~~~~~
+
+~~~~~~~~~~2024-01-30 21:05:42::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"AutoPortal - Új jelszó igénylés","body":"<p><strong>Tisztelt teszt!</strong></p>\r\n\r\n<p>Gyártói jelszó módosítás történt a megadott email címen: baxybalu@gmail.com. Az API-ba történő belépéshez szükséges új jelszava a következő: <b>ge0BwNBmb. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>","isHtml":true}
+~~~~~~~~~~2024-01-30 21:05:42~~~~~~~~~~
+
+~~~~~~~~~~2024-01-30 21:05:53::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"AutoPortal - Új jelszó igénylés","body":"<p><strong>Tisztelt teszt!</strong></p>\r\n\r\n<p>Gyártói jelszó módosítás történt a megadott email címen: baxybalu@gmail.com. Az API-ba történő belépéshez szükséges új jelszava a következő: <b>qRs3HGGKbS. <label style='color:red;'>Kérjük hogy a jelszót az első bejelentkezés után változtassák meg a fejlesztői dokumentációban leírtak szerint.</label></p><p>Üdvözlettel: Az AutoPortal csapata</p>","isHtml":true}
+~~~~~~~~~~2024-01-30 21:05:53~~~~~~~~~~
