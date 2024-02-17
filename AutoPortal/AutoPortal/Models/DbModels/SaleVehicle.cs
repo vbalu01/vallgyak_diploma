@@ -26,4 +26,6 @@ namespace AutoPortal.Models.DbModels
         [Required]
         public int dealerId { get; set; } = 0;
     }
+
+
 }

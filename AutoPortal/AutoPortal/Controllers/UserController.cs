@@ -194,6 +194,66 @@ namespace AutoPortal.Controllers
 			return View();
         }
 
+        public IActionResult saleVehicles(Dictionary<string, string> filters)
+        {
+            List<SaleVehicleModel> sales = SaleVehicleModel.getSaleVehicles();
+
+            if(filters != null && filters.Count > 0)
+            {
+                if (filters.ContainsKey("makeFilter") && !string.IsNullOrWhiteSpace(filters["makeFilter"])) { 
+                    sales = sales.Where(s => s.Vehicle.make.ToLower().Contains(filters["makeFilter"].ToLower())).ToList();
+                    ViewBag.makeFilter = filters["makeFilter"];
+                }
+                if (filters.ContainsKey("modelFilter") && !string.IsNullOrWhiteSpace(filters["modelFilter"])) { 
+                    sales = sales.Where(s => s.Vehicle.model.ToLower().Contains(filters["modelFilter"].ToLower())).ToList();
+                    ViewBag.modelFilter = filters["modelFilter"];
+                }
+                if (filters.ContainsKey("yearFromFilter") && !string.IsNullOrWhiteSpace(filters["yearFromFilter"]) && int.TryParse(filters["yearFromFilter"], out int fromYear) && fromYear != 0) { 
+                    sales = sales.Where(s => s.Vehicle.manufact_year >= fromYear).ToList();
+                    ViewBag.yearFromFilter = fromYear;
+                }
+                if (filters.ContainsKey("yearToFilter") && !string.IsNullOrWhiteSpace(filters["yearToFilter"]) && int.TryParse(filters["yearToFilter"], out int toYear) && toYear != 0) { 
+                    sales = sales.Where(s => s.Vehicle.manufact_year <= toYear).ToList();
+                    ViewBag.yearToFilter = toYear;
+                }
+                if (filters.ContainsKey("priceFromFilter") && !string.IsNullOrWhiteSpace(filters["priceFromFilter"]) && int.TryParse(filters["priceFromFilter"], out int fromPrice) && fromPrice != 0 && fromPrice <= 2000) { 
+                    sales = sales.Where(s => s.Sale.vehicle_cost >= fromPrice*1000000).ToList(); //*1.000.000 => Felületen millióban kell megadni (pl 1 = 1millió), max 2000 => max 2 milliárd, nem lehet túlcsordulás
+                    ViewBag.priceFromFilter = fromPrice;
+                }
+                if (filters.ContainsKey("priceToFilter") && !string.IsNullOrWhiteSpace(filters["priceToFilter"]) && int.TryParse(filters["priceToFilter"], out int toPrice) && toPrice != 0 && toPrice <= 2000) { 
+                    sales = sales.Where(s => s.Sale.vehicle_cost <= toPrice*1000000).ToList(); //*1.000.000 => Felületen millióban kell megadni (pl 1 = 1millió), max 2000 => max 2 milliárd, nem lehet túlcsordulás
+                    ViewBag.priceToFilter = toPrice;
+                }
+                if (filters.ContainsKey("fuelFilter") && !string.IsNullOrWhiteSpace(filters["fuelFilter"]) && int.TryParse(filters["fuelFilter"], out int fuelFilter) && fuelFilter != 0)
+                {
+                    sales = sales.Where(s => s.Vehicle.fuel == fuelFilter).ToList();
+                    ViewBag.fuelFilter = filters["fuelFilter"];
+                }
+                if (filters.ContainsKey("performanceFromFilter") && !string.IsNullOrWhiteSpace(filters["performanceFromFilter"]) && int.TryParse(filters["performanceFromFilter"], out int fromPerformance) && fromPerformance != 0)
+                {
+                    sales = sales.Where(s => s.Vehicle.performance >= fromPerformance).ToList();
+                    ViewBag.performanceFromFilter = fromPerformance;
+                }
+                if (filters.ContainsKey("performanceToFilter") && !string.IsNullOrWhiteSpace(filters["performanceToFilter"]) && int.TryParse(filters["performanceToFilter"], out int toPerformance) && toPerformance != 0) { 
+                    sales = sales.Where(s => s.Vehicle.performance <= toPerformance).ToList();
+                    ViewBag.performanceToFilter = toPerformance;
+                }
+            }
+
+            ViewBag.vehicleSales = sales;
+            ViewBag.makes = _SQL.vehicleMakes.ToList();
+            ViewBag.fuels = _SQL.fuelTypes.ToList();
+            foreach (SaleVehicleModel item in ViewBag.vehicleSales)
+            {
+                var filePath = _Environment.WebRootPath + "/Images/SaleImages/"+item.Sale.transaction_id+"/";
+                try {
+                    item.firstImage = new FileInfo(Directory.GetFiles(filePath).OrderBy(f => f).ToList().FirstOrDefault()).Name; //Kiterjesztéstől függetlenül a 0.kép
+                }catch(Exception ex){} //Lekezelés, ha nem létezik kép
+            }
+
+            return View();
+        }
+
         #endregion
 
 

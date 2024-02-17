@@ -1,0 +1,114 @@
+﻿@using AutoPortal.Models.DbModels
+@{
+    ViewData["Title"] = "Eladó járművek";
+}
+
+@section CSS{
+    <style>
+        /*
+            Scrollbar elrejtése
+        */
+        #saleListDiv {
+            -ms-overflow-style: none; /*Edge, vagy explorer esetén*/
+            scrollbar-width: none; /* Firefox esetén */
+            overflow-y: scroll;
+        }
+
+        #saleListDiv::-webkit-scrollbar {
+            display: none; /* for Chrome, opera, safari esetén */
+        }
+
+        /*
+            Number input nyilak levétele
+        */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { /* Opera, chrome, edge, vagy safari böngészőknél */
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        
+        input[type=number] { /* Firefox böngészőhöz */
+            -moz-appearance: textfield;
+        }
+    </style>
+}
+
+<div class="container">
+    <h1 style="margin-bottom:3%;">Eladó járművek (@{Write(ViewBag.vehicleSales.Count);} találat)</h1>
+    <div class="row">
+        <div class="col-2">
+            <!--Kereső-->
+            <form method="get">
+                <h5>Kereső</h5>
+                <p>Márka</p>
+
+                <datalist id="suggestions_make">
+                    @foreach (var make in ViewBag.makes)
+                    {
+                        <option value="@make.make">@make.make</option>
+                    }
+                </datalist>
+                <input autoComplete="on" name="makeFilter" id="make" list="suggestions_make" class="form-control" value="@if(ViewBag.makeFilter != null) {@ViewBag.makeFilter}else{}" />
+
+                <p>Model</p>
+                <input type="text" name="modelFilter" value="@if(ViewBag.modelFilter != null) {@ViewBag.modelFilter}else{}" class="form-control" />
+                <p>Évjárat -tól -ig</p>
+                <div class="row">
+                    <input type="number" name="yearFromFilter" value="@if(ViewBag.yearFromFilter != null) {@ViewBag.yearFromFilter}else{Write("0");}" class="form-control" style="width:40%; margin-left:5%; margin-right:5%;" min="0" onkeypress="return !(event.charCode == 46)" oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" />
+                    <input type="number" name="yearToFilter" value="@if(ViewBag.yearToFilter != null) {@ViewBag.yearToFilter}else{Write("0");}" class="form-control" style="width:40%; margin-left:5%; margin-right:5%;" min="0" onkeypress="return !(event.charCode == 46)" oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" />
+                </div>
+                <p>Üzemanyag</p>
+                <select name="fuelFilter" class="form-control">
+                    <option value="0">Mindegyik</option>
+                    @foreach (var fuel in ViewBag.fuels)
+                    {
+                        @if (ViewBag.fuelFilter == fuel.id.ToString())
+                        {
+                            <option value="@fuel.id" selected>@fuel.fuel</option>
+                        }
+                        else
+                        {
+                            <option value="@fuel.id">@fuel.fuel</option>
+                        }
+                    }
+                </select>
+                <p>Teljesítmény -tól -ig (LE)</p>
+                <div class="row">
+                    <input type="number" name="performanceFromFilter" value="@if(ViewBag.performanceFromFilter != null) {@ViewBag.performanceFromFilter}else{Write("0");}" class="form-control" style="width:40%; margin-left:5%; margin-right:5%;" min="0" max="2000" onkeypress="return !(event.charCode == 46)" oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" />
+                    <input type="number" name="performanceToFilter" value="@if(ViewBag.performanceToFilter != null) {@ViewBag.performanceToFilter}else{Write("0");}" class="form-control" style="width:40%; margin-left:5%; margin-right:5%;" min="0" max="2000" onkeypress="return !(event.charCode == 46)" oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" />
+                </div>
+                <p>Vételár -tól -ig (millió ft.)</p>
+                <div class="row" style="margin-bottom:5%;">
+                    <input type="number" name="priceFromFilter" value="@if(ViewBag.priceFromFilter != null) {@ViewBag.priceFromFilter}else{Write("0");}" class="form-control" style="width:40%; margin-left:5%; margin-right:5%;" min="0" max="2000" onkeypress="return !(event.charCode == 46)" oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" />
+                    <input type="number" name="priceToFilter" value="@if(ViewBag.priceToFilter != null) {@ViewBag.priceToFilter}else{Write("0");}" class="form-control" style="width:40%; margin-left:5%; margin-right:5%;" min="0" max="2000" onkeypress="return !(event.charCode == 46)" oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" />
+                </div>
+                <button class="btn btn-info" style="width:100%;">Keresés</button>
+            </form>
+        </div>
+
+        <div class="col-10" id="saleListDiv" style="overflow-y:scroll; max-height:75%;">
+            <!--Lista-->
+            @foreach (var item in ViewBag.vehicleSales)
+            {
+                <div class="row" style="max-height:200px;">
+                    <div class="col-4">
+                        @if (item.firstImage != null)
+                        {
+                            <img src="/Images/SaleImages/@item.Sale.transaction_id/@item.firstImage" style="max-height: 175px; max-width:100%;" draggable="false"/>
+                        }else{ //Nincs kép
+                            <img src="/Images/SaleImages/NotFound.png" style="max-height: 175px; max-width:100%;" draggable="false" />
+                        }
+                    </div>
+                    <div class="col-8">
+                        <h4><a href="#">@item.Vehicle.make @item.Vehicle.model @item.Vehicle.modeltype</a></h4>
+                        <p><label><b>Évjárat:</b> @item.Vehicle.manufact_year</label> <label><b>Üzemanyag:</b> @FuelType.findFuelById(item.Vehicle.fuel)</label> <label><b>Teljesítmény: </b>@item.Vehicle.performance (LE)</label></p>
+                        <p><b>Hirdető:</b> @if (item.Sale.dealerId != 0) { Write("Kereskedő"); } else { Write("Magánszemély"); }</p>
+                        <h5>Vételár: @item.Sale.vehicle_cost.ToString("N0")</h5>
+                    </div>
+                </div>
+                <hr />
+            }
+        </div>
+    </div>
+</div>
