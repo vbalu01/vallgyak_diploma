@@ -101,7 +101,7 @@
                         }
                     </div>
                     <div class="col-8">
-                        <h4><a href="#">@item.Vehicle.make @item.Vehicle.model @item.Vehicle.modeltype</a></h4>
+                        <h4><a href="saleVehiclePublicInfo?saleId=@item.Sale.transaction_id" target="_blank">@item.Vehicle.make @item.Vehicle.model @item.Vehicle.modeltype</a></h4>
                         <p><label><b>Évjárat:</b> @item.Vehicle.manufact_year</label> <label><b>Üzemanyag:</b> @FuelType.findFuelById(item.Vehicle.fuel)</label> <label><b>Teljesítmény: </b>@item.Vehicle.performance (LE)</label></p>
                         <p><b>Hirdető:</b> @if (item.Sale.dealerId != 0) { Write("Kereskedő"); } else { Write("Magánszemély"); }</p>
                         <h5>Vételár: @item.Sale.vehicle_cost.ToString("N0")</h5>

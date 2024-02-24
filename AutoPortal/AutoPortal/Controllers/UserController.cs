@@ -61,7 +61,7 @@ namespace AutoPortal.Controllers
             if (vp == null) //Nincs semmilyen jogosultsága a felhasználónak a járműhöz
                 return Forbid();
 
-            List<MileageStandModel> mileageStands = v.getMileageStands();
+            List<MileageStandModel> mileageStands = v.getMileageStands().OrderBy(s=>s.RecordedDate).ToList();
 
             ViewBag.Refuels = Refuel.GetVehicleRefuels(vehicleId);
             ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
@@ -170,7 +170,17 @@ namespace AutoPortal.Controllers
 
         public IActionResult dealerPublicProfile(int dealerId)
         {
+            if(!_SQL.dealers.Any(d => d.id == dealerId))
+            {
+                _Notification.AddErrorToastMessage("A keresett kereskedő nem található!");
+                return Redirect("/");
+            }
             ViewBag.Dealer = _SQL.dealers.SingleOrDefault(d => d.id == dealerId);
+            if(_SQL.dealers.SingleOrDefault(d => d.id == dealerId).status.HasFlag(eAccountStatus.BANNED) || _SQL.dealers.SingleOrDefault(d => d.id == dealerId).status.HasFlag(eAccountStatus.DISABLED))
+            {
+                _Notification.AddInfoToastMessage("A keresett kereskedő pillanatnyilag nem elérhető!");
+                return Redirect("/");
+            }
             List<Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.DEALER && r.target_id == dealerId).ToList();
             reviews.ForEach(r => {
                 r.LoadReviewWriter();
@@ -183,8 +193,18 @@ namespace AutoPortal.Controllers
         
         public IActionResult servicePublicProfile(int serviceId)
         {
+            if (!_SQL.services.Any(d => d.id == serviceId))
+            {
+                _Notification.AddErrorToastMessage("A keresett szerviz nem található!");
+                return Redirect("/");
+            }
             ViewBag.Service = _SQL.services.SingleOrDefault(s=>s.id == serviceId);
-			List <Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.SERVICE && r.target_id == serviceId).ToList();
+            if (_SQL.services.SingleOrDefault(d => d.id == serviceId).status.HasFlag(eAccountStatus.BANNED) || _SQL.dealers.SingleOrDefault(d => d.id == serviceId).status.HasFlag(eAccountStatus.DISABLED))
+            {
+                _Notification.AddInfoToastMessage("A keresett szerviz pillanatnyilag nem elérhető!");
+                return Redirect("/");
+            }
+            List <Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.SERVICE && r.target_id == serviceId).ToList();
 			reviews.ForEach(r => {
 				r.LoadReviewWriter();
 			});
@@ -252,6 +272,35 @@ namespace AutoPortal.Controllers
             }
 
             return View();
+        }
+
+        public IActionResult saleVehiclePublicInfo(Guid saleId)
+        {
+            if(_SQL.vehicleSales.Any(vs=>vs.transaction_id == saleId && vs.active && vs.announcement_date <= DateTime.Now))
+            {
+                SaleVehicleInfoModel svim = new();
+                svim.sale = _SQL.vehicleSales.Single(vs=>vs.transaction_id == saleId);
+                svim.vehicle = _SQL.vehicles.Single(v => v.chassis_number == svim.sale.vehicle_id);
+
+                //Kéepk
+                var filePath = _Environment.WebRootPath + "/Images/SaleImages/" + saleId + "/";
+                foreach(var img in Directory.GetFiles(filePath).OrderBy(f => f).ToList())
+                {
+                    svim.images.Add(new FileInfo(img).Name);
+                }
+                //Szervizek
+                svim.services = _SQL.serviceEvents.Where(s => s.vehicle_id == svim.vehicle.chassis_number).ToList();
+
+                svim.mileages = svim.vehicle.getMileageStands().OrderBy(s => s.RecordedDate).ToList();
+
+                ViewBag.Info = svim;
+                return View();
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett hirdetés nem található!");
+                return Redirect("/");
+            }
         }
 
         #endregion

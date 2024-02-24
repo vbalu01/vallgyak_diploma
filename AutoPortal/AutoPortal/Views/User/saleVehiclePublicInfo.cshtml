@@ -1,0 +1,277 @@
+﻿@using AutoPortal.Libs
+@using AutoPortal.Models.AppModels
+@using AutoPortal.Models.DbModels
+@{
+    ViewData["Title"] = "Eladó " + ViewBag.Info.vehicle.make + " " + ViewBag.Info.vehicle.model + ViewBag.Info.vehicle.modeltype;
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var context = $('#mileageChart')[0].getContext('2d');
+
+            var mileageLineChart = new Chart(context, {
+                type: 'line', //Diagram típus
+                data: {
+                    labels: [
+                        @{
+                            List<MileageStandModel> models = ViewBag.Info.mileages;
+                            foreach (MileageStandModel msm in models)
+                            {
+                                string text = "\"" + msm.RecordedDate.ToString("yyyy-MM-dd") + "\"";
+                                if (msm != models.Last())
+                                    text += ",\n";
+                                WriteLiteral(text);
+                            }
+                        }
+                    ], //X tengely címkék
+                    datasets: [{
+                        label: 'Futás adatok', //Adatsor címkék
+                        data: [
+                            @{
+                                foreach (MileageStandModel m in models)
+                                {
+                                    if (m == models.Last())
+                                        Write(m.MileageStand);
+                                    else
+                                        Write(m.MileageStand + ", ");
+                                }
+                            }
+                        ], //Adatok
+                        backgroundColor: 'rgba(255, 0, 0, 0.6)', //Kitöltés színe
+                        borderColor: 'rgba(255, 0, 0, 1)', //Vonal színe
+                        borderWidth: 2 //Vonal vastagság
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true // Az y tengely minimum értéke 0
+                        }
+                    }
+                }
+            });
+        });
+
+        function showBigImage(src){
+            var bigImg = document.getElementById("bigImg");
+            bigImg.src = src.src;
+            bigImg.parentElement.style.display = "block";
+        }
+    </script>
+}
+
+@section CSS {
+    <style>
+        .tableTitle {
+            font-size: 30px;
+            text-align: center;
+            color: red;
+        }
+
+        .tableLeft {
+            text-align: left;
+        }
+
+        .tableRight {
+            text-align: right;
+        }
+
+        .tableCenter {
+            text-align: center;
+        }
+
+        .imagePreview{
+            max-width: 20%;
+            max-height:100%;
+        }
+
+        .bigImage{
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .bigImageClosebtn {
+            position: absolute;
+            top: -5px;
+            right: 15px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+}
+
+<div>
+    <h1>Eladó @ViewBag.Info.vehicle.make @ViewBag.Info.vehicle.model @ViewBag.Info.vehicle.modeltype</h1>
+    <p><b>Közzétéve:</b> @ViewBag.Info.sale.announcement_date   <i><b>Hirdetés azonosító:</b> @ViewBag.Info.sale.transaction_id</i></p>
+    <!--Jármű adatok-->
+    <h2>Jármű adatok</h2>
+    <div class="col-12">
+        <table style="width:100%;" class="table table-striped">
+            <tbody>
+                <tr><th class="tableTitle" colspan="4">Általános adatok</th></tr>
+                <tr>
+                    <th class="tableLeft">Alvázszám</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.chassis_number</td>
+                    <th class="tableLeft">Rendszám</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.license</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Márka</th>
+                    <td>@ViewBag.Info.vehicle.make</td>
+                    <th class="tableLeft">Model</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.model</td>
+                </tr>
+                <tr>
+                    <th>Típusmegjelölés</th>
+                    <td>@ViewBag.Info.vehicle.modeltype</td>
+                    <th>Évjárat</th>
+                    <td>@ViewBag.Info.vehicle.manufact_year</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Jármű kategória</th>
+                    <td class="tableLeft">@VehicleCategory.findCategoryById(ViewBag.Info.vehicle.category)</td>
+                    <th class="tableLeft">Kivitel</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.body</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Ajtók száma</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.num_of_doors</td>
+                    <th class="tableLeft">Szállítható személyek száma</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.num_of_seats</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Karosszéria tömege</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.weight</td>
+                    <th class="tableLeft">Megengedett legnagyobb össztömeg</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.max_weight</td>
+                </tr>
+
+                <tr><th class="tableTitle" colspan="4">Motor adatok</th></tr>
+                <tr>
+                    <th class="tableLeft">Motorszám</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.engine_number</td>
+                    <th class="tableLeft">Motorkód</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.engine_code</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Üzemanyag</th>
+                    <td class="tableLeft">@FuelType.findFuelById(ViewBag.Info.vehicle.fuel)</td>
+                    <th class="tableLeft">Lökettérfogat</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.engine_ccm</td>
+                </tr>
+                <tr>
+                    <th class="tableLeft">Teljesítmény</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.performance</td>
+                    <th class="tableLeft">Nyomaték</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.torque</td>
+                </tr>
+
+                <tr><th class="tableTitle" colspan="4">Hajtáslánc adatok</th></tr>
+                <tr>
+                    <th class="tableLeft">Váltó típusa</th>
+                    <td class="tableLeft">@TransmissionType.findTransmissionById(ViewBag.Info.vehicle.transmission)</td>
+                    <th class="tableLeft">Váltó fokozatok száma</th>
+                    <td class="tableLeft">@ViewBag.Info.vehicle.num_of_gears</td>
+                </tr>
+                <tr>
+                    <th class="">Meghajtás</th>
+                    <td class="">@DriveType.findDriveTypeById(ViewBag.Info.vehicle.drive)</td>
+                    <th></th>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!--Hirdetés adatok-->
+    <h2 style="margin-top:2%;">Hirdetés adatok</h2>
+    <div>
+        <p><b>Eladó:</b> @if (ViewBag.Info.sale.dealerId != 0) { Write("Kereskedő"); } else { Write("Magánszemély"); }</p>
+        @if (ViewBag.Info.sale.dealerId != 0)
+        {
+            <a href="dealerPublicProfile?dealerId=@ViewBag.Info.sale.dealerId" target="_blank">Kereskedő adatai</a>
+        }
+        <p><b>Hirderő elérhetősége (E-Mail):</b> @ViewBag.Info.sale.email</p>
+        <p><b>Hirderő elérhetősége (Telefon):</b> @if (((string)ViewBag.Info.sale.phone).Length == 9) { Write(Convert.ToInt64(ViewBag.Info.sale.phone).ToString("## ### ####")); } else if (((string)ViewBag.Info.sale.phone).Length == 11) { Write(Convert.ToInt64(ViewBag.Info.sale.phone).ToString("## ## ### ####")); } else { Write(ViewBag.Info.sale.phone); }</p>
+        <h5>Vételár: @ViewBag.Info.sale.vehicle_cost.ToString("N0")</h5>
+        <h4>Leírás</h4>
+        <p>@ViewBag.Info.sale.description</p>
+        <h4>Képek</h4>
+        <div class="row">
+            @if (((List<string>)ViewBag.Info.images).Count == 0)
+            {
+                <p class="text-danger">A hirdetéshez nem található kép!</p>
+            }
+            @foreach (var item in ViewBag.Info.images)
+            {
+                <img src="/Images/SaleImages/@ViewBag.Info.sale.transaction_id/@item" class="imagePreview" onclick="showBigImage(this);" />
+            }
+        </div>
+        <div style="margin-top:1%; position: relative; display: none;">
+            <span onclick="this.parentElement.style.display='none'" class="bigImageClosebtn">&times;</span>
+            <img src="" id="bigImg" class="bigImage" />
+        </div>
+
+    </div>
+    <hr />
+    <!--Esemény adatok-->
+    <h2 style="margin-top:2%;">Jármű információk</h2>
+    <div>
+        <button type="button" class="collapsible">Futás adatok</button>
+        <div class="col-12 content">
+            <h2>Futás adatok</h2>
+            @if (ViewBag.Info.mileages == null || ((List<MileageStandModel>)ViewBag.Info.mileages).Count == 0)
+            {
+                <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
+            }
+            else
+            {
+                <table>
+                    <tr>
+                        <th style="width:60%;">Dátum</th>
+                        <th style="width:40%;">Futásteljesítmény</th>
+                    </tr>
+                    @{
+                        MileageStandModel lastRow = null;
+                    }
+                    @foreach (MileageStandModel row in (List<MileageStandModel>)ViewBag.Info.mileages)
+                    {
+                        <tr>
+                            <td>@row.RecordedDate</td>
+                            <td @if ((lastRow == null || lastRow.MileageStand <= row.MileageStand) && row.MileageStandType == eMileageStandType.USER_RECORDED) { Write("style=color:orange;font-weight:bold;"); } @if (lastRow != null && lastRow.MileageStand > row.MileageStand) { Write("style=color:red;font-weight:bold;"); }>@row.MileageStand @if (row.MileageStandType == eMileageStandType.USER_RECORDED)
+                                {
+                                    <i>(Felhasználó által rögzítve)</i>
+                                }</td>
+                        </tr>
+                        lastRow = row;
+                    }
+                </table>
+                <canvas id="mileageChart"></canvas>
+            }
+        </div>
+
+        <button type="button" class="collapsible">Szerviz adatok</button>
+        <div class="col-12 content">
+            <h2>Korábbi szervizek</h2>
+            @if (ViewBag.Info.services == null || ((List<ServiceEvent>)ViewBag.Info.services).Count == 0)
+            {
+                <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
+            }
+            else
+            {
+                @foreach (ServiceEvent se in ViewBag.Info.services)
+                {
+                    <button type="button" class="collapsible">@se.title</button>
+                    <div class="content">
+                        <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
+                        <p><b>Dátum: </b>@se.date</p>
+                        <p><b>Futásteljesítmény: </b>@se.mileage</p>
+                        <p><b>Szerviz: </b><a target="_blank" href="servicePublicProfile?serviceId=@se.service_id">@Service.GetServiceNameById(se.service_id)</a></p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
