@@ -132,7 +132,7 @@
 
                         $("#dealerVehTableBody").append(`<tr id="vehicleTableRow_` + currentVehicle.v.chassis_number + `"><td><a href="vehicleHandler?vehicleId=` + currentVehicle.v.chassis_number + `" target="_blank">` + currentVehicle.v.chassis_number + `</a></td><td>` + currentVehicle.v.make + `</td><td>` + currentVehicle.v.model + `</td>` +
                             `<td>` + currentVehicle.v.license + `</td><td><select id="dealerVehiclePerm_` + currentVehicle.v.chassis_number + `" onchange="changeDealerVehiclePerm(this.value, '` + currentVehicle.v.chassis_number + `', ` + id + `)"><option value="1">Tulaj</option>` +
-                            `<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeDealerVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
+                            `<option value="2">Üzembentartó</option><option value="3">Sofőr</option><option value="4">Kereskedő</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeDealerVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
                         $('#dealerVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
                     });
 

@@ -125,11 +125,19 @@ namespace AutoPortal.Controllers
 
         public IActionResult createVehicleSale()
         {
-            List<Vehicle> vehicles = new();
-            List<VehiclePermission> uv = _SQL.vehiclePermissions.Where(p=>p.target_type == loginType && p.target_id == loginId && p.permission == eVehiclePermissions.OWNER).ToList();
+            List<Tuple<Vehicle, bool>> vehicles = new();
+            List<VehiclePermission> uv = _SQL.vehiclePermissions.Where(p=>p.target_type == loginType && p.target_id == loginId && p.permission == eVehiclePermissions.OWNER || (loginType==eVehicleTargetTypes.DEALER && p.target_id == loginId && p.target_type == eVehicleTargetTypes.DEALER && p.permission == eVehiclePermissions.DEALER)).ToList();
             foreach(VehiclePermission vp in uv)
             {
-                vehicles.Add(_SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id));
+                if(vp.permission == eVehiclePermissions.DEALER)
+                {
+                    vehicles.Add(Tuple.Create(_SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id), true));
+                }
+                else
+                {
+                    vehicles.Add(Tuple.Create(_SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id), false));
+                }
+                
             }
             ViewBag.vehicles = vehicles;
             return View();
@@ -137,19 +145,34 @@ namespace AutoPortal.Controllers
 
         public IActionResult myVehicleSales()
         {
-            List<VehiclePermission> userVehicles = _SQL.vehiclePermissions.Where(vp => vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER).ToList();
+            List<VehiclePermission> userVehicles = _SQL.vehiclePermissions.Where(vp => (vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER) || (loginType == eVehicleTargetTypes.DEALER && vp.target_id == loginId && vp.target_type == eVehicleTargetTypes.DEALER && vp.permission == eVehiclePermissions.DEALER)).ToList();
             List<VehicleSaleModel> vehicles = new();
 
             foreach (VehiclePermission vp in userVehicles)
             {
-                
-                if (_SQL.vehicleSales.Any(vs=>vs.vehicle_id == vp.vehicle_id))
+                if(loginType == eVehicleTargetTypes.DEALER)
                 {
-                    vehicles.Add(new VehicleSaleModel() {
-                        Vehicle = _SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id),
-                        SaleVehicle = _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id),
-                        images = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id).transaction_id + "/").Select(f => Path.GetFileName(f)).ToList()
-                });
+                    if (_SQL.vehicleSales.Any(vs => vs.vehicle_id == vp.vehicle_id && vs.dealerId == loginId))
+                    {
+                        vehicles.Add(new VehicleSaleModel()
+                        {
+                            Vehicle = _SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id),
+                            SaleVehicle = _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id),
+                            images = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id).transaction_id + "/").Select(f => Path.GetFileName(f)).ToList()
+                        });
+                    }
+                }
+                else
+                {
+                    if (_SQL.vehicleSales.Any(vs => vs.vehicle_id == vp.vehicle_id && vs.dealerId == 0))
+                    {
+                        vehicles.Add(new VehicleSaleModel()
+                        {
+                            Vehicle = _SQL.vehicles.Single(v => v.chassis_number == vp.vehicle_id),
+                            SaleVehicle = _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id),
+                            images = Directory.GetFiles(_Environment.WebRootPath + "/Images/SaleImages/" + _SQL.vehicleSales.Single(vs => vs.vehicle_id == vp.vehicle_id).transaction_id + "/").Select(f => Path.GetFileName(f)).ToList()
+                        });
+                    }
                 }
             }
             ViewBag.vehicles = vehicles;
@@ -511,7 +534,7 @@ namespace AutoPortal.Controllers
                 _Notification.AddErrorToastMessage("A keresett jármű nem található!");
                 return NotFound("A keresett jármű nem található!");
             }
-            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == vehicleId && vp.target_type == loginType && vp.target_id == loginId && vp.permission == eVehiclePermissions.OWNER))
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == vehicleId && vp.target_type == loginType && vp.target_id == loginId && (vp.permission == eVehiclePermissions.OWNER || (loginType == eVehicleTargetTypes.DEALER && vp.permission == eVehiclePermissions.DEALER))))
             {
                 _Notification.AddErrorToastMessage("Nincs jogosultsága ehhez a művelethez!");
                 return Forbid("Nincs jogosultsága ehhez a művelethez!");
@@ -532,7 +555,7 @@ namespace AutoPortal.Controllers
                     count++;
             }
 
-            if(count >= 2)
+            if(count >= 2 && loginType != eVehicleTargetTypes.DEALER)
             {
                 _Notification.AddWarningToastMessage("Nem kínálhat eladásra több járművet egyidejűleg!", new ToastrOptions() { Title = "Figyelmeztetés" });
                 return Conflict("Nem kínálhat eladásra több járművet egyidejűleg!");
@@ -550,6 +573,9 @@ namespace AutoPortal.Controllers
                 active = true,
                 dealerId = 0
             };
+            if(loginType == eVehicleTargetTypes.DEALER)
+                sv.dealerId = loginId;
+
             _SQL.vehicleSales.Add(sv);
             _SQL.SaveChanges();
 
@@ -587,7 +613,7 @@ namespace AutoPortal.Controllers
                 return BadRequest("Hibás kép!");
             }
 
-            if(!_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType)) {
+            if(!_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType) && !(loginType == eVehicleTargetTypes.DEALER && sv.dealerId == loginId)) {
                 _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
                 return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
             }
@@ -629,7 +655,7 @@ namespace AutoPortal.Controllers
                 return BadRequest("Hibás kép!");
             }
 
-            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType))
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType) && !(loginType == eVehicleTargetTypes.DEALER && sv.dealerId == loginId))
             {
                 _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
                 return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
@@ -671,7 +697,7 @@ namespace AutoPortal.Controllers
                 return BadRequest("A keresett tranzakció nem található!");
             }
 
-            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType))
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType) && !(loginType == eVehicleTargetTypes.DEALER && sv.dealerId == loginId))
             {
                 _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
                 return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
@@ -732,7 +758,7 @@ namespace AutoPortal.Controllers
                 return BadRequest("A keresett tranzakció nem található!");
             }
 
-            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType))
+            if (!_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == sv.vehicle_id && vp.permission == eVehiclePermissions.OWNER && vp.target_id == loginId && vp.target_type == loginType) && !(loginType == eVehicleTargetTypes.DEALER && sv.dealerId == loginId))
             {
                 _Notification.AddErrorToastMessage("A felhasználónak nincs jogosultsága a művelethez!");
                 return BadRequest("A felhasználónak nincs jogosultsága a művelethez!");
@@ -757,6 +783,20 @@ namespace AutoPortal.Controllers
                 _Notification.AddErrorToastMessage("Hibás értékelés: célcsoport");
 				return Redirect("/");
 			}
+
+            if(target_id == loginId && target_type == loginType)
+            {
+                _Notification.AddErrorToastMessage("Önmagát értékelni etikátlan, és tilos!");
+                switch (target_type)
+                {
+                    case eVehicleTargetTypes.DEALER:
+                        return Redirect("dealerPublicProfile?dealerId=" + target_id);
+                    case eVehicleTargetTypes.SERVICE:
+                        return Redirect("servicePublicProfile?serviceId=" + target_id);
+                    default:
+                        return Redirect("/");
+                }
+            }
 
             switch (target_type)
             {

@@ -297,6 +297,11 @@ namespace AutoPortal.Controllers
 
             if (_SQL.users.Any(u => u.email == targerMail))
             {
+                if(perm == eVehiclePermissions.DEALER)
+                {
+                    _Notification.AddWarningToastMessage("A megadott fiók nem kereskedői.", new ToastrOptions() { Title = "Figyelmeztetés" });
+                    return BadRequest("A megadott fiók nem kereskedői.");
+                }
                 int id = _SQL.users.SingleOrDefault(tmp=>tmp.email == targerMail).id;
                 if(_SQL.vehiclePermissions.Any(tmp=>tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.USER && tmp.target_id == id)) {
                     VehiclePermission vp = _SQL.vehiclePermissions.Single(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.USER && tmp.target_id == id);
@@ -332,6 +337,11 @@ namespace AutoPortal.Controllers
             }
             else if (_SQL.services.Any(u => u.email == targerMail))
             {
+                if (perm == eVehiclePermissions.DEALER)
+                {
+                    _Notification.AddWarningToastMessage("A megadott fiók nem kereskedői.", new ToastrOptions() { Title = "Figyelmeztetés" });
+                    return BadRequest("A megadott fiók nem kereskedői.");
+                }
                 int id = _SQL.services.SingleOrDefault(tmp => tmp.email == targerMail).id;
                 if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.SERVICE && tmp.target_id == id))
                 {
@@ -405,6 +415,11 @@ namespace AutoPortal.Controllers
             }
             else if (_SQL.factories.Any(u => u.email == targerMail))
             {
+                if (perm == eVehiclePermissions.DEALER)
+                {
+                    _Notification.AddWarningToastMessage("A megadott fiók nem kereskedői.", new ToastrOptions() { Title = "Figyelmeztetés" });
+                    return BadRequest("A megadott fiók nem kereskedői.");
+                }
                 int id = _SQL.factories.SingleOrDefault(tmp => tmp.email == targerMail).id;
                 if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.FACTORY && tmp.target_id == id))
                 {

@@ -300,8 +300,10 @@
     <div class="row col-12" style="padding-bottom:2%;">
         <div class="col-6">
             <h2>Tankolás rögzítése</h2>
-            <div>
-                <fieldset>
+            @if (ViewBag.vehicleData.p != eVehiclePermissions.DEALER)
+            {
+                <div>
+                    <fieldset>
                     <label for="newRefuelCost">Költség</label>
                     <input type="number" oninput="this.value=this.value.replace(/[^0-9]/g,'');" class="form-control" id="newRefuelCost" value="0" title="Költség" />
 
@@ -325,7 +327,12 @@
 
                     <button class="btn btn-success" style="width:100%;" onclick="addNewRefuel();">Tankolás rögzítése</button>
                 </fieldset>
-            </div>
+                </div>
+            }
+            else
+            {
+                <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
+            }
         </div>
 
         <div class="col-6">
@@ -378,6 +385,7 @@
                                                 <option value="1" selected>Tulaj</option>
                                                 <option value="2">Üzembentartó</option>
                                                 <option value="3">Sofőr</option>
+                                                <option value="4">Kereskedő</option>
                                                 <option value="0">Jogosultság megszűntetése</option>
                                             }
                                             @if (item.Item2 == eVehiclePermissions.SUBOWNER)
@@ -385,6 +393,7 @@
                                                 <option value="1">Tulaj</option>
                                                 <option value="2" selected>Üzembentartó</option>
                                                 <option value="3">Sofőr</option>
+                                                <option value="4">Kereskedő</option>
                                                 <option value="0">Jogosultság megszűntetése</option>
                                             }
                                             @if (item.Item2 == eVehiclePermissions.DRIVER)
@@ -392,6 +401,15 @@
                                                 <option value="1">Tulaj</option>
                                                 <option value="2">Üzembentartó</option>
                                                 <option value="3" selected>Sofőr</option>
+                                                <option value="4">Kereskedő</option>
+                                                <option value="0">Jogosultság megszűntetése</option>
+                                            }
+                                            @if (item.Item2 == eVehiclePermissions.DEALER)
+                                            {
+                                                <option value="1">Tulaj</option>
+                                                <option value="2">Üzembentartó</option>
+                                                <option value="3">Sofőr</option>
+                                                <option value="4" selected>Kereskedő</option>
                                                 <option value="0">Jogosultság megszűntetése</option>
                                             }
                                         </select>
@@ -424,11 +442,18 @@
     
         <div class="col-6">
             <h2>Futásteljesítmény rögzítés</h2>
-            <form method="POST" asp-controller="User" asp-action="addCurrentMileage">
-                <input type="number" class="form-control" name="currentMileageStand"/>
+            @if (ViewBag.vehicleData.p != eVehiclePermissions.DEALER)
+            {
+                <form method="POST" asp-controller="User" asp-action="addCurrentMileage">
+                    <input type="number" class="form-control" name="currentMileageStand"/>
                 <input type="hidden" name="vehId" value="@ViewBag.vehicleData.v.chassis_number" />
                 <button class="btn btn-success" style="width:100%;">Futásteljesítmény rögzítése</button>
-            </form>
+                </form>
+            }
+            else
+            {
+                <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
+            }
         </div>
     </div>
     <hr />

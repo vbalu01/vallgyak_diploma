@@ -52,7 +52,7 @@
     <datalist id="vehicles">
         @foreach (var vehicle in ViewBag.vehicles)
         {
-            <option value="@vehicle.chassis_number">@vehicle.make @vehicle.model</option>
+            <option value="@vehicle.Item1.chassis_number">@vehicle.Item1.make @vehicle.Item1.model @if (vehicle.Item2 == true) { Write("(Kereskedő)"); }</option>
         }
     </datalist>
     <input autoComplete="on" name="vehicleId" id="vehicleId" list="vehicles" class="form-control" required />
