@@ -1,0 +1,176 @@
+https://tree.nathanfriend.io/
+
+.
+└── Solution 'AutoPortal'/
+    └── AutoPortal/
+        ├── Dependencies
+        ├── wwwroot/
+        │   ├── css/
+        │   │   └── site.css
+        │   ├── Images/
+        │   │   └── SaleImages/
+        │   │       ├── [TransactionId]/
+        │   │       │   └── *.png, *.jpg, *.jpeg
+        │   │       └── NotFound.png
+        │   ├── js/
+        │   │   ├── dist/
+        │   │   │   └── fancyTable.min.js + LICENSE
+        │   │   └── site.js
+        │   ├── lib/
+        │   │   ├── bootstrap/
+        │   │   │   └── dist/
+        │   │   │       ├── css/
+        │   │   │       │   └── ...
+        │   │   │       ├── js/
+        │   │   │       │   └── bootstrap.js
+        │   │   │       └── LICENSE
+        │   │   ├── jquery/
+        │   │   │   ├── dist/
+        │   │   │   │   └── jquery.js
+        │   │   │   └── LICENSE.txt
+        │   │   ├── jQuery-TE_v1.4.0/
+        │   │   │   ├── license/
+        │   │   │   │   └── ...
+        │   │   │   ├── jquery-te-1.4.0.min.js
+        │   │   │   └── ...
+        │   │   └── ...
+        │   └── favicon.ico
+        ├── Controllers/
+        │   ├── BaseController.cs
+        │   ├── AdminController.cs
+        │   └── ...
+        ├── Libs/
+        │   ├── EnumHelper.cs
+        │   ├── Functions.cs
+        │   ├── Log.cs
+        │   ├── MailSender.cs
+        │   ├── PasswordManager.cs
+        │   ├── SQL.cs
+        │   └── TokenHandler.cs
+        ├── Models/
+        │   ├── AppModels/
+        │   │   ├── eAccountStatus.cs
+        │   │   └── ...
+        │   ├── DbModels/
+        │   │   ├── BodyType.cs
+        │   │   └── ...
+        │   ├── RequestModels/
+        │   │   ├── AddNewCostModel.cs
+        │   │   └── ...
+        │   ├── ResponseModels/
+        │   │   ├── SaleVehicleInfoModel.cs
+        │   │   └── ...
+        │   └── JsonResponse.cs
+        ├── Views/
+        │   ├── Admin/
+        │   │   ├── dealerManagement.cshtml
+        │   │   └── ...
+        │   ├── Auth/
+        │   │   ├── Register.cshtml
+        │   │   └── ...
+        │   ├── DEV/
+        │   │   ├── Index.cshtml
+        │   │   └── MailSend.cshtml
+        │   ├── Home/
+        │   │   ├── Index.cshtml
+        │   │   └── MyProfile.cshtml
+        │   ├── Shared/
+        │   │   ├── _Layout.cshtml
+        │   │   └── Error.cshtml
+        │   ├── User/
+        │   │   ├── addCar.cshtml
+        │   │   └── ...
+        │   ├── _ViewImports.cshtml
+        │   └── _ViewStart.cshtml
+        ├── .editorconfig
+        ├── appsettings.json
+        ├── Log.txt
+        ├── Program.cs
+        └── Startup.cs
+
+Solution 'AutoPortal'
+  AutoPortal
+    Dependencies
+    wwwroot
+      css
+        site.css
+      Images
+        SaleImages
+          [TransactionId]
+            *.png, *.jpg, *.jpeg
+          NotFound.png
+      js
+        dist
+          fancyTable.min.js + LICENSE
+        site.js
+      lib
+        bootstrap
+          dist
+            css
+              ...
+            js
+              bootstrap.js
+            LICENSE
+        jquery
+          dist
+            jquery.js
+          LICENSE.txt
+        jQuery-TE_v1.4.0
+          license
+            ...
+          jquery-te-1.4.0.min.js
+          ...
+        ...
+      favicon.ico
+    Controllers
+      BaseController.cs
+      AdminController.cs
+      ...
+    Libs
+      EnumHelper.cs
+      Functions.cs
+      Log.cs
+      MailSender.cs
+      PasswordManager.cs
+      SQL.cs
+      TokenHandler.cs
+    Models
+      AppModels
+        eAccountStatus.cs
+        ...
+      DbModels
+        BodyType.cs
+        ...
+      RequestModels
+        AddNewCostModel.cs
+        ...
+      ResponseModels
+        SaleVehicleInfoModel.cs
+        ...
+      JsonResponse.cs
+    Views
+      Admin
+        dealerManagement.cshtml
+        ...
+      Auth
+        Register.cshtml
+        ...
+      DEV
+        Index.cshtml
+        MailSend.cshtml
+      Home
+        Index.cshtml
+        MyProfile.cshtml
+      Shared
+        _Layout.cshtml
+        Error.cshtml
+      User
+        addCar.cshtml
+        ...
+      _ViewImports.cshtml
+      _ViewStart.cshtml
+    .editorconfig
+    appsettings.json
+    Log.txt
+    Program.cs
+    Startup.cs
