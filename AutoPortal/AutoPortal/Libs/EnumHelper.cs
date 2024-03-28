@@ -22,6 +22,15 @@ namespace AutoPortal.Libs
             return ((DescriptionAttribute)valueAttributes[0]).Description;
         }
 
+        public static string GetOwnershipTypeString(eVehiclePermissions permission)
+        {
+            var enumType = typeof(eVehiclePermissions);
+            var memberInfos = enumType.GetMember(permission.ToString());
+            var enumValueMemberInfo = memberInfos.FirstOrDefault(m => m.DeclaringType == enumType);
+            var valueAttributes = enumValueMemberInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            return ((DescriptionAttribute)valueAttributes[0]).Description;
+        }
+
         public static List<string> GetStatusStringList(eAccountStatus s)
         {
             List<string> statuses = new();
