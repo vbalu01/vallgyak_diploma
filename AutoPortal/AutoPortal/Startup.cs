@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NToastNotify;
 using System.Security.Claims;
 using System.Text;
 
@@ -71,7 +72,7 @@ namespace AutoPortal
             services.AddAuthorization(a => a.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin")));
 
             #endregion Authorization
-            services.AddMvc().AddNToastNotifyToastr();
+            services.AddMvc().AddNToastNotifyToastr(null, new NToastNotifyOption { DefaultAlertTitle = "Értesítés", DefaultErrorTitle = "Hiba", DefaultInfoTitle = "Információ", DefaultSuccessTitle = "Siker", DefaultWarningTitle="Figyelmeztetés"});
             services.AddControllersWithViews();
 
 
