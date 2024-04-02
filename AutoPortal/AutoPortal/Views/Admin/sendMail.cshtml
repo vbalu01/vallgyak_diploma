@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Körlevél küldés";
+}
+
+@section Scripts{
+    <script src="/lib/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
+    <link href="/lib/jQuery-TE_v.1.4.0/jquery-te-1.4.0.css" rel="stylesheet">
+
+    <script type="text/javascript">
+        function sendMail() {
+            $.ajax({
+                type: "POST",
+                url: "SendAdminMail",
+                data: {
+                    'mailtoCategory': $('#mailtoCategory').val(),
+                    'subject': $('#mailSubject').val(),
+                    'body': $('#mailBody').val()
+                },
+                success: function (data) {
+                    $('#mailSubject').val("");
+                    $('#mailBody').val("");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $(".editor").jqte();
+        });
+    </script>
+}
+
+<div class="row">
+    <h1>Körlevél küldő</h1>
+    <div>
+        <label>Célcsoport</label><br />
+        <select id="mailtoCategory" class="form-control">
+            <option value="1">Felhasználók</option>
+            <option value="2">Szervizek</option>
+            <option value="3">Kereskedők</option>
+            <option value="4">Gyártók</option>
+            <option value="5">Mindenki</option>
+        </select><br />
+        <label>Tárgy</label>
+        <input type="text" id="mailSubject" class="form-control" />
+        <label>Üzenet</label>
+        <textarea class="editor" id="mailBody"></textarea>
+        <button class="btn btn-success" onclick="sendMail();">Küldés</button>
+    </div>
+
+    
+</div>

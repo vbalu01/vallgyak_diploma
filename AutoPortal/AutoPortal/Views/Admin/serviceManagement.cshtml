@@ -65,8 +65,6 @@
             $.ajax({
                 type: "POST",
                 url: "updateUserVehiclePerm",
-                //dataType: "json",
-                //contentType: "application/json",
                 data: {
                     'perm': perm,
                     'vehId': vehId,
@@ -77,6 +75,19 @@
                     if (perm == 0) {
                         $('#vehicleTableRow_' + vehId).remove();
                     }
+                }
+            });
+        }
+
+        function deleteReview(reviewId) {
+            $.ajax({
+                type: "POST",
+                url: "DeleteReview",
+                data: {
+                    'ReviewId': reviewId,
+                },
+                success: function (data) {
+                    $('#reviewDiv_' + reviewId).remove();
                 }
             });
         }
@@ -126,7 +137,7 @@
                         '<th>Művelet</th>' +
                         '</tr>' +
                         '</thead>' +
-                        '<tbody id="serviceVehTableBody"></tbody></table>');
+                        '<tbody id="serviceVehTableBody"></tbody></table><p>Értékelések:</p><div style="overflow-y: scroll; max-height:70%;" id="reviewBodyDiv"></div>');
 
                     data.ServiceVehicles.forEach(function (currentVehicle) {
 
@@ -134,6 +145,11 @@
                             `<td>` + currentVehicle.v.license + `</td><td><select id="serviceVehiclePerm_` + currentVehicle.v.chassis_number + `" onchange="changeServiceVehiclePerm(this.value, '` + currentVehicle.v.chassis_number + `', ` + id + `)"><option value="1">Tulaj</option>` +
                             `<option value="2">Üzembentartó</option><option value="3">Sofőr</option></select></td><td><button class="btn btn-danger bi bi-trash" onclick="changeServiceVehiclePerm(0, '` + currentVehicle.v.chassis_number + `', ` + id + `)"> Jogosultság megvonása</button></td></tr>`);
                         $('#serviceVehiclePerm_' + currentVehicle.v.chassis_number).val(currentVehicle.p);
+                    });
+
+                    data.Reviews.forEach(function (currentReview) {
+                        $("#reviewBodyDiv").append(`<div style="border: 1px solid grey; padding:5px; user-select: none;" id="reviewDiv_` + currentReview.id+ `"><p><b>` + currentReview.writerName + `</b> - ` + currentReview.date + ` <button class="btn btn-danger bi bi-trash" onclick="deleteReview('` + currentReview.id + `')"> </button>` +
+                        `</p><p>` + currentReview.description + `</p></div><hr />`);
                     });
 
                     if (data.Service.status & userStatus.EMAIL_CONFIRM) {

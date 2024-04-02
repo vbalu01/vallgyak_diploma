@@ -63,6 +63,21 @@
             changeUserVehiclePerm(userMail, userPerm);
         }
 
+        function newVehicleOwner() {
+            let vehicle = "@ViewBag.Vehicle.chassis_number";
+            $.ajax({
+                type: "POST",
+                url: "newVehicleOwner",
+                data: {
+                    'vehicleId': vehicle,
+                    'newOwnerMail': $('#newVehicleOwnerMail').val()
+                },
+                success: function (data) {
+                    refreshPage();
+                }
+            });
+        }
+
         function changeUserVehiclePerm(userMail, value){
             let vehicle = "@ViewBag.Vehicle.chassis_number";
             $.ajax({
@@ -494,6 +509,11 @@
                         </select>
                         <button class="btn btn-success" onclick="changeUserVehiclePermBtb();">Jogosultság felvétele</button>
                     </div>
+
+                    <h3 style="margin-top:3%;">Jogi tulajdonosváltás</h3>
+                    <p><label class="text-danger"><b>FIGYELEM!</b></label> A jogi tulajdonosváltás minden jelenlegi jogosultságot töröl a járműről, és a rögzített adatok archiválásra kerülnek!</p>
+                    <input type="text" class="form-control" placeholder="E-Mail" id="newVehicleOwnerMail" />
+                    <button class="btn btn-success" style="width:100%;margin-bottom:1%;" onclick="newVehicleOwner();">Új tulajdonos rögzítése</button>
                 </div>
             </div>
 

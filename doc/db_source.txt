@@ -137,6 +137,7 @@ Table portal.serviceEvents{
   mileage int [NOT NULL]
   serviceType int [NOT NULL]
   comment varchar
+  archive bool
 }
 
 Table portal.crashEvents{
@@ -155,6 +156,7 @@ Table portal.otherCosts{
   description varchar [NOT NULL]
   cost int [NOT NULL]
   date datetime [NOT NULL]
+  archive bool
 }
 
 Table portal.refuels{
@@ -165,6 +167,7 @@ Table portal.refuels{
   amount_of_fuel int [NOT NULL]
   premium_fuel bool [NOT NULL]
   fueling_date datetime [NOT NULL]
+  archive bool
 }
 
 Table portal.reviews{

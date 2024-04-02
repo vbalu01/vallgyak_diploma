@@ -1094,6 +1094,85 @@ namespace AutoPortal.Controllers
 
             return Redirect("manageVehicle?vehicleId="+vehId);
         }
-        #endregion
+
+        [HttpPost]
+        public async Task<IActionResult> newVehicleOwner(string vehicleId, string newOwnerMail)
+        {
+            if(_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == vehicleId && vp.target_id == loginId && vp.target_type == loginType && vp.permission == eVehiclePermissions.OWNER))
+            {
+                eVehicleTargetTypes userType;
+                int newUserId;
+                if(_SQL.users.Any(u=>u.email == newOwnerMail))
+                {
+                    userType = eVehicleTargetTypes.USER;
+                    newUserId = _SQL.users.Single(u => u.email == newOwnerMail).id;
+                }
+                else if(_SQL.services.Any(s=>s.email == newOwnerMail))
+                {
+                    userType = eVehicleTargetTypes.SERVICE;
+                    newUserId = _SQL.services.Single(s => s.email == newOwnerMail).id;
+                }
+                else if(_SQL.dealers.Any(d=>d.email == newOwnerMail))
+                {
+                    userType = eVehicleTargetTypes.DEALER;
+                    newUserId = _SQL.dealers.Single(d => d.email == newOwnerMail).id;
+                }
+                else if (_SQL.factories.Any(f=>f.email == newOwnerMail))
+                {
+                    _Notification.AddErrorToastMessage("Gyártó számára nem írható át a jogviszony!");
+                    return BadRequest("Gyártó számára nem írható át a jogviszony!");
+                }
+                else
+                {
+                    _Notification.AddErrorToastMessage("A keresett felhasználó nem található!");
+                    return BadRequest("A keresett felhasználó nem található!");
+                }
+
+                Vehicle v = _SQL.vehicles.Single(v => v.chassis_number == vehicleId);
+
+                List<Refuel> refuels = _SQL.refuels.Where(r=>r.vehicle_id == v.chassis_number).ToList();
+                List<OtherCost> otherCosts = _SQL.otherCosts.Where(r=>r.vehicle_id == v.chassis_number).ToList();
+                List<ServiceEvent> serviceEvents = _SQL.serviceEvents.Where(r=>r.vehicle_id == v.chassis_number).ToList();
+
+                foreach(Refuel rf in refuels)
+                {
+                    rf.archive = true;
+                    _SQL.refuels.Update(rf);
+                }
+                foreach(OtherCost oc in otherCosts)
+                {
+                    oc.archive = true;
+                    _SQL.otherCosts.Update(oc);
+                }
+                foreach(ServiceEvent se in serviceEvents)
+                {
+                    se.archive = true;
+                    _SQL.serviceEvents.Update(se);
+                }
+
+                List<VehiclePermission> permissions = _SQL.vehiclePermissions.Where(vp=>vp.vehicle_id ==  vehicleId).ToList();
+
+                if(_SQL.vehicleSales.Any(vs=>vs.vehicle_id == vehicleId))
+                {
+                    SaleVehicle sv = _SQL.vehicleSales.Single(vs => vs.vehicle_id == vehicleId);
+                    _SQL.vehicleSales.Remove(sv);
+                }
+                _SQL.vehiclePermissions.RemoveRange(permissions);
+
+                _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = eVehiclePermissions.OWNER, target_id = newUserId, target_type = userType, vehicle_id = vehicleId });
+                _SQL.vehicleOwnerChanges.Add(new VehicleOwnerChange() { id = Guid.NewGuid(), new_owner = newUserId, owner_type = userType, owner_change_date = DateTime.Now, vehicle_id = vehicleId });
+
+                await _SQL.SaveChangesAsync();
+
+                _Notification.AddSuccessToastMessage("Sikeres tulajváltás!");
+                return Ok("Sikeres tulajváltás!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("Nincs jogosultsága ehhez a művelethez!");
+                return BadRequest("Nincs jogosultsága ehhez a művelethez!");
+            }
+        }
+            #endregion
     }
 }

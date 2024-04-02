@@ -53,6 +53,20 @@
             });
         }
 
+        function newVehicleOwner(){
+            $.ajax({
+                type: "POST",
+                url: "newVehicleOwner",
+                data: {
+                    'vehicleId': vid,
+                    'newOwnerMail': $('#newVehicleOwnerMail').val()
+                },
+                success: function (data) {
+                    
+                }
+            });
+        }
+
         function addNewRefuel() {
             $('#newRefuelCost').removeClass("is-invalid");
             $('#newRefuelDistance').removeClass("is-invalid");
@@ -454,6 +468,18 @@
             {
                 <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
             }
+
+            <h3 style="margin-top:3%;">Jogi tulajdonosváltás</h3>
+            @if (ViewBag.vehicleData.p == eVehiclePermissions.OWNER)
+            {
+                <p><label class="text-danger"><b>FIGYELEM!</b></label> A jogi tulajdonosváltás minden jelenlegi jogosultságot töröl a járműről, és a rögzített adatok archiválásra kerülnek!</p>
+                <input type="text" class="form-control" placeholder="E-Mail" id="newVehicleOwnerMail" />
+                <button class="btn btn-success" style="width:100%;margin-bottom:1%;" onclick="newVehicleOwner();">Új tulajdonos rögzítése</button>
+            }
+            else
+            {
+                <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
+            }
         </div>
     </div>
     <hr />
@@ -521,7 +547,7 @@
                     <div class="content">
                         <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
                         <p><b>Leírás: </b>@se.description</p>
-                        <p><b>Költség: </b>@se.cost</p>
+                        <p><b>Költség: </b>@if (se.archive != null && (bool)se.archive) { Write("Archive adat"); } else { Write(se.cost); }</p>
                         <p><b>Dátum: </b>@se.date</p>
                         <p><b>Futásteljesítmény: </b>@se.mileage</p>
                         <p><b>Megjegyzés: </b>@se.comment</p>

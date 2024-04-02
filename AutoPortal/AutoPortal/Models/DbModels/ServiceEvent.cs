@@ -28,6 +28,7 @@ namespace AutoPortal.Models.DbModels
         [Required]
         public eServiceType serviceType { get; set; }
         public string comment { get; set; }
+        public bool? archive {  get; set; }
     }
 
     public partial class ServiceEvent

@@ -23,6 +23,7 @@ namespace AutoPortal.Models.DbModels
         public bool premium_fuel { get; set; }
         [Required]
         public DateTime fueling_date { get; set; }
+        public bool? archive {  get; set; }
     }
 
     public partial class Refuel
@@ -42,7 +43,14 @@ namespace AutoPortal.Models.DbModels
         public static List<Refuel> GetVehicleRefuels(string vehicle_id){
             using(SQL mysql = new SQL())
             {
-                return mysql.refuels.Where(tmp=>tmp.vehicle_id == vehicle_id).ToList();
+                return mysql.refuels.Where(tmp=>tmp.vehicle_id == vehicle_id && (!tmp.archive.HasValue || (tmp.archive.HasValue && !(bool)tmp.archive))).ToList();
+            }
+        }
+        public static List<Refuel> GetVehicleRefuelsAdmin(string vehicle_id)
+        {
+            using (SQL mysql = new SQL())
+            {
+                return mysql.refuels.Where(tmp => tmp.vehicle_id == vehicle_id).ToList();
             }
         }
     }

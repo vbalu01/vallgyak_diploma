@@ -224,6 +224,44 @@
                     </table>
                 </div>
             </div>
+
+            <hr />
+
+            <div class="row">
+                <div class="offset-2 col-8">
+                    <h2>Értékelések <lablel style="color:gray;font-size:16px; margin-left:5px;">(Átlag: @{if(ViewBag.Reviews != null){Write(((List<Review>)ViewBag.Reviews).Average(i=>i.rating).ToString("#.##"));}else{Write("-");}})</lablel></h2>
+                    <div style="overflow-y: scroll; max-height:70%;">
+                        @if (ViewBag.Reviews != null && ((List<Review>)ViewBag.Reviews).Count > 0)
+                        {
+                            @foreach (Review r in ViewBag.Reviews)
+                            {
+                                <div style="border: 1px solid grey; padding:5px; user-select: none;">
+                                    <p>
+                                        <b>@r.writerName</b> - @r.date.ToString("yyyy.MM.dd HH:mm") @if (r.edited)
+                                        {
+                                            <label style="color:gray">(edited)</label>
+                                        }
+                                        @for (int i = 1; i <= r.rating; i++)
+                                        {
+                                            <i class='bi bi-star-fill' style="color:orange; cursor:default;"></i>
+                                        }
+                                        @for (int i = 1; i <= 5 - r.rating; i++)
+                                        {
+                                            <i class='bi bi-star' style="color:orange; cursor:default;"></i>
+                                        }
+                                    </p>
+                                    <p>@r.description</p>
+                                </div>
+                                <hr />
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-danger">Még nem érkezett értékelés.</p>
+                        }
+                    </div>
+                </div>
+            </div>
         }
     </div>
 </div>

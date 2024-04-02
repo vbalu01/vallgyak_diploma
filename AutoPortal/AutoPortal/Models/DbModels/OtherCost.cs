@@ -21,6 +21,7 @@ namespace AutoPortal.Models.DbModels
         public int cost { get; set; }
         [Required]
         public DateTime date { get; set; }
+        public bool? archive { get; set; }
     }
 
     public partial class OtherCost
@@ -40,7 +41,14 @@ namespace AutoPortal.Models.DbModels
         {
             using(SQL mysql = new SQL())
             {
-                return mysql.otherCosts.Where(tmp=>tmp.vehicle_id == vehicleId).ToList();
+                return mysql.otherCosts.Where(tmp=>tmp.vehicle_id == vehicleId && (!tmp.archive.HasValue || (tmp.archive.HasValue && !(bool)tmp.archive))).ToList();
+            }
+        }
+        public static List<OtherCost> GetVehicleOtherCostsAdmin(string vehicleId)
+        {
+            using (SQL mysql = new SQL())
+            {
+                return mysql.otherCosts.Where(tmp => tmp.vehicle_id == vehicleId).ToList();
             }
         }
     }

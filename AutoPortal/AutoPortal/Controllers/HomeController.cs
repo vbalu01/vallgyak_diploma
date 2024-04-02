@@ -45,6 +45,11 @@ namespace AutoPortal.Controllers
                     ViewBag.city = user.city;
                     ViewBag.address = user.address;
                     ViewBag.website = user.website;
+                    List<Review> dreviews = _SQL.reviews.Where(r => r.target_type == loginType && r.target_id == loginId).ToList();
+                    dreviews.ForEach(r => {
+                        r.LoadReviewWriter();
+                    });
+                    ViewBag.Reviews = dreviews;
                     break;
                 case eVehicleTargetTypes.SERVICE:
                     ViewBag.loginType = "Szerviz";
@@ -59,6 +64,11 @@ namespace AutoPortal.Controllers
                     ViewBag.city = user.city;
                     ViewBag.address = user.address;
                     ViewBag.website = user.website;
+                    List<Review> sreviews = _SQL.reviews.Where(r => r.target_type == loginType && r.target_id == loginId).ToList();
+                    sreviews.ForEach(r => {
+                        r.LoadReviewWriter();
+                    });
+                    ViewBag.Reviews = sreviews;
                     break;
                 case eVehicleTargetTypes.USER:
                     ViewBag.loginType = "Felhasználó";

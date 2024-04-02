@@ -50,6 +50,11 @@ namespace AutoPortal.Controllers
             return View();
         }
 
+        public IActionResult sendMail()
+        {
+            return View();
+        }
+
         public IActionResult vehicleHandler(string vehicleId)
         {
             Vehicle v = _SQL.vehicles.SingleOrDefault(ve => ve.chassis_number == vehicleId);
@@ -59,8 +64,8 @@ namespace AutoPortal.Controllers
 
             List<MileageStandModel> mileageStands = v.getMileageStands();
 
-            ViewBag.Refuels = Refuel.GetVehicleRefuels(vehicleId);
-            ViewBag.OtherCosts = OtherCost.GetVehicleOtherCosts(vehicleId);
+            ViewBag.Refuels = Refuel.GetVehicleRefuelsAdmin(vehicleId);
+            ViewBag.OtherCosts = OtherCost.GetVehicleOtherCostsAdmin(vehicleId);
             ViewBag.MileageStands = mileageStands.OrderBy(tmp => tmp.RecordedDate).ToList();
             ViewBag.Vehicle = v;
             ViewBag.ServiceEvents = _SQL.serviceEvents.Where(tmp=>tmp.vehicle_id == vehicleId).ToList();
@@ -489,6 +494,12 @@ namespace AutoPortal.Controllers
             returnModel.Service = findService;
             returnModel.ServiceVehicles = vehicles;
 
+            List<Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.SERVICE && r.target_id == serviceId).ToList();
+            reviews.ForEach(r => {
+                r.LoadReviewWriter();
+            });
+            returnModel.Reviews = reviews;
+
             return Ok(returnModel);
         }
 
@@ -566,6 +577,12 @@ namespace AutoPortal.Controllers
 
             returnModel.Dealer = findDealer;
             returnModel.DealerVehicles = vehicles;
+
+            List<Review> reviews = _SQL.reviews.Where(r => r.target_type == eVehicleTargetTypes.DEALER && r.target_id == dealerId).ToList();
+            reviews.ForEach(r => {
+                r.LoadReviewWriter();
+            });
+            returnModel.Reviews = reviews;
 
             return Ok(returnModel);
         }
@@ -910,6 +927,149 @@ namespace AutoPortal.Controllers
                 _Notification.AddErrorToastMessage("A gyár nem található!");
                 return BadRequest("A gyár nem található!");
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendAdminMail(int mailtoCategory, string subject, string body)
+        {
+            if (mailtoCategory < 1 || mailtoCategory > 5)
+            {
+                _Notification.AddErrorToastMessage("Levél küldés sikertelen: célcsoport hiba!");
+                return BadRequest("Levél küldés sikertelen: célcsoport hiba!");
+            }
+            List<string> mails = new();
+            switch (mailtoCategory)
+            {
+                case 1: //Felhasználó
+                    mails = _SQL.users.Select(u => u.email).ToList();
+                    break;
+                case 2: //Szerviz
+                    mails = _SQL.services.Select(s => s.email).ToList();
+                    break;
+                case 3: //Kereskedő
+                    mails = _SQL.dealers.Select(d => d.email).ToList();
+                    break;
+                case 4: //Gyártó
+                    mails = _SQL.factories.Select(f => f.email).ToList();
+                    break;
+                case 5: //Mindenki
+                    mails.AddRange(_SQL.users.Select(u => u.email).ToList());
+                    mails.AddRange(_SQL.services.Select(s => s.email).ToList());
+                    mails.AddRange(_SQL.dealers.Select(d => d.email).ToList());
+                    mails.AddRange(_SQL.factories.Select(f => f.email).ToList());
+                    break;
+            }
+
+            try
+            {
+                foreach (string mail in mails)
+                {
+                    MailModel m = new MailModel()
+                    {
+                        to = mail,
+                        body = body,
+                        subject = subject,
+                        from = "admin@AutoPortal.hu",
+                        isHtml = true,
+                    };
+                    MailSender.SendMail(m);
+                }
+                _Notification.AddSuccessToastMessage($"Körléevél küldés sikeresen beütemezve {mails.Count} felhasználó számára!");
+                return Ok($"Körléevél küldés sikeresen beütemezve {mails.Count} felhasználó számára!");
+            }
+            catch
+            {
+                _Notification.AddErrorToastMessage("Körléevél küldése sikertelen!");
+                return BadRequest("Körléevél küldése sikertelen!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteReview(Guid ReviewId)
+        {
+            if(_SQL.reviews.Any(r=>r.id == ReviewId))
+            {
+                Review rev = _SQL.reviews.Single(r => r.id == ReviewId);
+                _SQL.reviews.Remove(rev);
+                await _SQL.SaveChangesAsync();
+                _Notification.AddSuccessToastMessage("Sikeres véleménytörlés!");
+                return Ok("Sikeres véleménytörlés!");
+            }
+            else {
+                _Notification.AddErrorToastMessage("A keresett vélemény nem található!");
+                return NotFound("A keresett vélemény nem található!");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> newVehicleOwner(string vehicleId, string newOwnerMail)
+        {
+            eVehicleTargetTypes userType;
+            int newUserId;
+            if (_SQL.users.Any(u => u.email == newOwnerMail))
+            {
+                userType = eVehicleTargetTypes.USER;
+                newUserId = _SQL.users.Single(u => u.email == newOwnerMail).id;
+            }
+            else if (_SQL.services.Any(s => s.email == newOwnerMail))
+            {
+                userType = eVehicleTargetTypes.SERVICE;
+                newUserId = _SQL.services.Single(s => s.email == newOwnerMail).id;
+            }
+            else if (_SQL.dealers.Any(d => d.email == newOwnerMail))
+            {
+                userType = eVehicleTargetTypes.DEALER;
+                newUserId = _SQL.dealers.Single(d => d.email == newOwnerMail).id;
+            }
+            else if (_SQL.factories.Any(f => f.email == newOwnerMail))
+            {
+                _Notification.AddErrorToastMessage("Gyártó számára nem írható át a jogviszony!");
+                return BadRequest("Gyártó számára nem írható át a jogviszony!");
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett felhasználó nem található!");
+                return BadRequest("A keresett felhasználó nem található!");
+            }
+
+            Vehicle v = _SQL.vehicles.Single(v => v.chassis_number == vehicleId);
+
+            List<Refuel> refuels = _SQL.refuels.Where(r => r.vehicle_id == v.chassis_number).ToList();
+            List<OtherCost> otherCosts = _SQL.otherCosts.Where(r => r.vehicle_id == v.chassis_number).ToList();
+            List<ServiceEvent> serviceEvents = _SQL.serviceEvents.Where(r => r.vehicle_id == v.chassis_number).ToList();
+
+            foreach (Refuel rf in refuels)
+            {
+                rf.archive = true;
+                _SQL.refuels.Update(rf);
+            }
+            foreach (OtherCost oc in otherCosts)
+            {
+                oc.archive = true;
+                _SQL.otherCosts.Update(oc);
+            }
+            foreach (ServiceEvent se in serviceEvents)
+            {
+                se.archive = true;
+                _SQL.serviceEvents.Update(se);
+            }
+
+            List<VehiclePermission> permissions = _SQL.vehiclePermissions.Where(vp => vp.vehicle_id == vehicleId).ToList();
+
+            if (_SQL.vehicleSales.Any(vs => vs.vehicle_id == vehicleId))
+            {
+                SaleVehicle sv = _SQL.vehicleSales.Single(vs => vs.vehicle_id == vehicleId);
+                _SQL.vehicleSales.Remove(sv);
+            }
+            _SQL.vehiclePermissions.RemoveRange(permissions);
+
+            _SQL.vehiclePermissions.Add(new VehiclePermission() { permission = eVehiclePermissions.OWNER, target_id = newUserId, target_type = userType, vehicle_id = vehicleId });
+            _SQL.vehicleOwnerChanges.Add(new VehicleOwnerChange() { id = Guid.NewGuid(), new_owner = newUserId, owner_type = userType, owner_change_date = DateTime.Now, vehicle_id = vehicleId });
+
+            await _SQL.SaveChangesAsync();
+
+            _Notification.AddSuccessToastMessage("Sikeres tulajváltás!");
+            return Ok("Sikeres tulajváltás!");
         }
 
         #endregion

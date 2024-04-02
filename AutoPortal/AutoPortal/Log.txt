@@ -62,3 +62,11 @@ SendMail: {"from":"noreply@autoportal.hu","to":"baxybalu@gmail.com","subject":"A
 ~~~~~~~~~~2024-03-09 13:33:24::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
 SendMail: {"from":"noreply@autoportal.hu","to":"vhbal2001@gmail.com","subject":"AutoPortal - Regisztráció","body":"<p><strong>Tisztelt User2!</strong></p>\r\n\r\n<p>Köszönjük, hogy regisztrált az AutoPortal oldalára, felhasználói fiókját sikeresen létrehoztuk.</p>\r\n\r\n<p>Kérjük, hogy az alkalmazás korlátok nélküli használata érdekében erősítse meg az e-mail címét <a href=\"http://localhost:4288/Token/ConfirmRegistration?token=ui3829z2okLw0poNdgVb9QL8\">ide</a> kattintva, vagy másolja be a böngészőbe az alábbi linket: </p>\r\n\r\n<p><a href=\"http://localhost:4288/Token/ConfirmRegistration?token=ui3829z2okLw0poNdgVb9QL8\">http://localhost:4288/Token/ConfirmRegistration?token=ui3829z2okLw0poNdgVb9QL8</a></p>\r\n\r\n<p><strong>Az AutoPortal csapata</strong></p>\r\n","isHtml":true}
 ~~~~~~~~~~2024-03-09 13:33:24~~~~~~~~~~
+
+~~~~~~~~~~2024-04-02 12:11:40::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"admin@AutoPortal.hu","to":"baxybalu@gmail.com","subject":"Üdvözlő","body":"<b>Tisztelt kereskedő partnereink!</b><p><br><p>Az AutoPortal csapata nevében szeretnénk megköszönni Önöknek, hogy cégünket választották a járműveik hirdetési platformjaként</p></p><p><br></p><p><i><span style=\"color:rgb(56,118,29);\">Üdvözlettel: Az AutoPortal csapata</span></i></p>","isHtml":true}
+~~~~~~~~~~2024-04-02 12:11:40~~~~~~~~~~
+
+~~~~~~~~~~2024-04-02 12:11:40::D:\programok\2021\Git\vallgyak_diploma\AutoPortal\AutoPortal\Libs\MailSender.cs::SendMail~~~~~~~~~~
+SendMail: {"from":"admin@AutoPortal.hu","to":"b0xupt@inf.elte.hu","subject":"Üdvözlő","body":"<b>Tisztelt kereskedő partnereink!</b><p><br><p>Az AutoPortal csapata nevében szeretnénk megköszönni Önöknek, hogy cégünket választották a járműveik hirdetési platformjaként</p></p><p><br></p><p><i><span style=\"color:rgb(56,118,29);\">Üdvözlettel: Az AutoPortal csapata</span></i></p>","isHtml":true}
+~~~~~~~~~~2024-04-02 12:11:40~~~~~~~~~~
