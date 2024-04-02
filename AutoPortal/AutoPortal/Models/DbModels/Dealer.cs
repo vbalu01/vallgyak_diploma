@@ -1,11 +1,12 @@
-﻿using AutoPortal.Models.AppModels;
+﻿using AutoPortal.Libs;
+using AutoPortal.Models.AppModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AutoPortal.Models.DbModels
 {
     [Table("dealers")]
-    public class Dealer
+    public partial class Dealer
     {
         [Key]
         public int id { get; set; }
@@ -27,5 +28,23 @@ namespace AutoPortal.Models.DbModels
         public string website { get; set; }
         [Required]
         public eAccountStatus status { get; set; }
+    }
+
+    public partial class Dealer
+    {
+        public static double GetDealerReviewAvg(int dealerId)
+        {
+            using(SQL mysql = new SQL())
+            {
+                if(mysql.reviews.Any(r=>r.target_type == eVehicleTargetTypes.DEALER && r.target_id == dealerId))
+                {
+                    return mysql.reviews.Where(r => r.target_type == eVehicleTargetTypes.DEALER && r.target_id == dealerId).Average(d => d.rating);
+                }
+                else
+                {
+                    return 1.0;
+                }
+            }
+        }
     }
 }

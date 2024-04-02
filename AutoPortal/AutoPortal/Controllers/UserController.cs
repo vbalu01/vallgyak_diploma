@@ -283,7 +283,7 @@ namespace AutoPortal.Controllers
                 }
             }
 
-            ViewBag.vehicleSales = sales;
+            ViewBag.vehicleSales = sales.OrderBy(s=>s.Sale.dealerId != 0).ThenByDescending(d=>Dealer.GetDealerReviewAvg(d.Sale.dealerId)).ToList();
             ViewBag.makes = _SQL.vehicleMakes.ToList();
             ViewBag.fuels = _SQL.fuelTypes.ToList();
             foreach (SaleVehicleModel item in ViewBag.vehicleSales)
