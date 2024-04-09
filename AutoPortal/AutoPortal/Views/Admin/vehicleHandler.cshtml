@@ -232,6 +232,40 @@
             console.log(location);
             location.reload();
         }
+
+        function updateVehicleDetails(){
+            $.ajax({
+                type: "POST",
+                url: "updateVehicleDetails",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    'chassis_number': $('#f_chassis_number').val(),
+                    'license': $('#f_license').val(),
+                    'make': $('#f_make').val(),
+                    'model': $('#f_model').val(),
+                    'modeltype': $('#f_modeltype').val(),
+                    'manufactyear': $('#f_manufactyear').val(),
+                    'category': $('#f_category').val(),
+                    'body': $('#f_body').val(),
+                    'numofdoors': $('#f_numofdoors').val(),
+                    'numofseats': $('#f_numofseats').val(),
+                    'weight': $('#f_weight').val(),
+                    'maxweight': $('#f_maxweight').val(),
+                    'enginenumber': $('#f_enginenumber').val(),
+                    'enginecode': $('#f_enginecode').val(),
+                    'fueltype': $('#f_fueltype').val(),
+                    'engineccm': $('#f_engineccm').val(),
+                    'performance': $('#f_performance').val(),
+                    'torque': $('#f_torque').val(),
+                    'transmissiontype': $('#f_transmissiontype').val(),
+                    'numofgears': $('#f_numofgears').val(),
+                    'drivetype': $('#f_drivetype').val()
+                }),
+                success: function (data) {
+                }
+            });
+        }
+
     </script>
 }
 
@@ -270,76 +304,131 @@
                         <tr><th class="tableTitle" colspan="4">Általános adatok</th></tr>
                         <tr>
                             <th class="tableLeft">Alvázszám</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.chassis_number</td>
+                            <td class="tableLeft">@ViewBag.Vehicle.chassis_number <input type="hidden" value="@ViewBag.Vehicle.chassis_number" id="f_chassis_number" /></td>
                             <th class="tableLeft">Rendszám</th>
-                            <td class="tableLeft"><input type="text" value="@ViewBag.Vehicle.license" /></td>
+                            <td class="tableLeft"><input type="text" class="form-control" value="@ViewBag.Vehicle.license" id="f_license" /></td>
                         </tr>
                         <tr>
                             <th class="tableLeft">Márka</th>
-                            <td>@ViewBag.Vehicle.make</td>
+                            <td><input type="text" class="form-control" value="@ViewBag.Vehicle.make" id="f_make" /></td>
                             <th class="tableLeft">Model</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.model</td>
+                            <td class="tableLeft"><input type="text" class="form-control" value="@ViewBag.Vehicle.model" id="f_model" /></td>
                         </tr>
                         <tr>
                             <th>Típusmegjelölés</th>
-                            <td>@ViewBag.Vehicle.modeltype</td>
+                            <td><input type="text" class="form-control" value="@ViewBag.Vehicle.modeltype" id="f_modeltype"/></td>
                             <th>Évjárat</th>
-                            <td>@ViewBag.Vehicle.manufact_year</td>
+                            <td><input type="number" class="form-control" value="@ViewBag.Vehicle.manufact_year" id="f_manufactyear"/></td>
                         </tr>
                         <tr>
                             <th class="tableLeft">Jármű kategória</th>
-                            <td class="tableLeft">@VehicleCategory.findCategoryById(ViewBag.Vehicle.category)</td>
+                            <td class="tableLeft">
+                                <select class="js-example-basic-multiple form-control" id="f_category">
+                                    @foreach (var category in ViewBag.vehicleCategories)
+                                    {
+                                        if (ViewBag.Vehicle.category == category.id)
+                                        {
+                                            <option value="@category.id" selected>@category.category</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@category.id">@category.category</option>
+                                        }
+                                        
+                                    }
+                                </select></td>
                             <th class="tableLeft">Kivitel</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.body</td>
+                            <td class="tableLeft"><input type="text" class="form-control" value="@ViewBag.Vehicle.body" id="f_body"/></td>
                         </tr>
                         <tr>
                             <th class="tableLeft">Ajtók száma</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.num_of_doors</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.num_of_doors" id="f_numofdoors" /></td>
                             <th class="tableLeft">Szállítható személyek száma</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.num_of_seats</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.num_of_seats" id="f_numofseats" /></td>
                         </tr>
                         <tr>
                             <th class="tableLeft">Karosszéria tömege</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.weight</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.weight" id="f_weight" /></td>
                             <th class="tableLeft">Megengedett legnagyobb össztömeg</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.max_weight</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.max_weight" id="f_maxweight" /></td>
                         </tr>
 
                         <tr><th class="tableTitle" colspan="4">Motor adatok</th></tr>
                         <tr>
                             <th class="tableLeft">Motorszám</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.engine_number</td>
+                            <td class="tableLeft"><input type="text" class="form-control" value="@ViewBag.Vehicle.engine_number" id="f_enginenumber" /></td>
                             <th class="tableLeft">Motorkód</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.engine_code</td>
+                            <td class="tableLeft"><input type="text" class="form-control" value="@ViewBag.Vehicle.engine_code" id="f_enginecode" /></td>
                         </tr>
                         <tr>
                             <th class="tableLeft">Üzemanyag</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.fuel</td>
+                            <td class="tableLeft">
+                                <select class="form-control" id="f_fueltype">
+                                    @foreach (var fuel in ViewBag.fuels)
+                                    {
+                                        if(@ViewBag.Vehicle.fuel == fuel.id){
+                                            <option value="@fuel.id" selected>@fuel.fuel</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@fuel.id">@fuel.fuel</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
                             <th class="tableLeft">Lökettérfogat</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.engine_ccm</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.engine_ccm" id="f_engineccm" /></td>
                         </tr>
                         <tr>
                             <th class="tableLeft">Teljesítmény</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.performance</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.performance" id="f_performance" /></td>
                             <th class="tableLeft">Nyomaték</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.torque</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.torque" id="f_torque" /></td>
                         </tr>
 
                         <tr><th class="tableTitle" colspan="4">Hajtáslánc adatok</th></tr>
                         <tr>
                             <th class="tableLeft">Váltó típusa</th>
-                            <td class="tableLeft">@TransmissionType.findTransmissionById(ViewBag.Vehicle.transmission)</td>
+                            <td class="tableLeft">
+                                <select class="form-control" id="f_transmissiontype" >
+                                    @foreach (var transmission in ViewBag.transmissions)
+                                    {
+                                        if (ViewBag.Vehicle.transmission == transmission.id)
+                                        {
+                                            <option value="@transmission.id" selected>@transmission.transmission</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@transmission.id">@transmission.transmission</option>
+                                        }
+                                        
+                                    }
+                                </select>
+                            </td>
                             <th class="tableLeft">Váltó fokozatok száma</th>
-                            <td class="tableLeft">@ViewBag.Vehicle.num_of_gears</td>
+                            <td class="tableLeft"><input type="number" class="form-control" value="@ViewBag.Vehicle.num_of_gears" id="f_numofgears" /></td>
                         </tr>
                         <tr>
                             <th class="">Meghajtás</th>
-                            <td class="">@DriveType.findDriveTypeById(ViewBag.Vehicle.drive)</td>
+                            <td class="">
+                                <select class="form-control" id="f_drivetype">
+                                    @foreach (var drive in ViewBag.drives)
+                                    {
+                                        if (ViewBag.Vehicle.drive == drive.id)
+                                        {
+                                            <option value="@drive.id" selected>@drive.drive</option>
+                                        }else{
+                                            <option value="@drive.id">@drive.drive</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
                             <th></th>
                             <td></td>
                         </tr>
                     </tbody>
                 </table>
+                <button class="btn btn-success" style="width:100%;margin-bottom:2%;" onclick="updateVehicleDetails();">Módosítások mentése</button>
             </div>
 
             <!--Adat rögzítés (tankolás, egyéb kiadás)-->
@@ -371,7 +460,7 @@
                             <label for="newRefuelDate">Tankolás időpontja</label>
                             <input type="datetime-local" class="form-control" id="newRefuelDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
 
-                            <button class="btn btn-success" style="width:100%;" onclick="addFuelingData('@ViewBag.Vehicle.chassis_number');">Tankolás rögzítése</button>
+                            <button class="btn btn-success" style="width:100%; margin-top:3%;margin-bottom:2%;" onclick="addFuelingData('@ViewBag.Vehicle.chassis_number');">Tankolás rögzítése</button>
                         </fieldset>
                     </div>
                 </div>
@@ -392,7 +481,7 @@
                         <label for="newCostDate">Dátum</label>
                         <input type="datetime-local" class="form-control" id="newCostDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
 
-                        <button class="btn btn-success" style="width:100%;" onclick="addOtherCost('@ViewBag.Vehicle.chassis_number');">Költség rögzítése</button>
+                        <button class="btn btn-success" style="width:100%; margin-top:3%;" onclick="addOtherCost('@ViewBag.Vehicle.chassis_number');">Költség rögzítése</button>
                     </div>
                 </div>
 
@@ -438,7 +527,7 @@
                         <label for="newServiceOther">Megjegyzés</label>
                         <input type="text" class="form-control" name="newServiceOther" id="newServiceOther" />
 
-                        <button class="btn btn-success" style="width:100%;" onclick="addServiceEvent('@ViewBag.Vehicle.chassis_number');">Szerviz rögzítése</button>
+                        <button class="btn btn-success" style="width:100%; margin-top:3%;" onclick="addServiceEvent('@ViewBag.Vehicle.chassis_number');">Szerviz rögzítése</button>
                     </div>
                 </div>
 
@@ -507,20 +596,20 @@
                             <option value="4">Kereskedő</option>
                             <option value="0" selected>Nincs</option>
                         </select>
-                        <button class="btn btn-success" onclick="changeUserVehiclePermBtb();">Jogosultság felvétele</button>
+                        <button class="btn btn-success" onclick="changeUserVehiclePermBtb();" style="margin-top:3%; width:100%;">Jogosultság felvétele</button>
                     </div>
 
                     <h3 style="margin-top:3%;">Jogi tulajdonosváltás</h3>
                     <p><label class="text-danger"><b>FIGYELEM!</b></label> A jogi tulajdonosváltás minden jelenlegi jogosultságot töröl a járműről, és a rögzített adatok archiválásra kerülnek!</p>
                     <input type="text" class="form-control" placeholder="E-Mail" id="newVehicleOwnerMail" />
-                    <button class="btn btn-success" style="width:100%;margin-bottom:1%;" onclick="newVehicleOwner();">Új tulajdonos rögzítése</button>
+                    <button class="btn btn-success" style="width:100%;margin-bottom:1%;margin-top:3%;" onclick="newVehicleOwner();">Új tulajdonos rögzítése</button>
                 </div>
             </div>
 
             <hr />
             <!--Esemény adatok-->
             <div>
-                <button type="button" class="collapsible">Tankolási adatok</button>
+                <button type="button" class="collapsible bi-arrow-90deg-down"> Tankolási adatok</button>
                 <div class="col-12 content">
                     <h2>Korábbi tankolások</h2>
                     @if (ViewBag.Refuels == null || ((List<Refuel>)ViewBag.Refuels).Count == 0)
@@ -532,7 +621,7 @@
                         @foreach (Refuel rf in ViewBag.Refuels)
                         {
                             <div id="refuelData_@rf.id">
-                                <button type="button" class="collapsible">Tankolás - @rf.fueling_date</button>
+                                <button type="button" class="collapsible bi-arrow-90deg-down"> Tankolás - @rf.fueling_date</button>
                                 <div class="content">
                                     <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteFueilingEvent('@rf.id')" ></button>
                                     <div class="row col-12">
@@ -565,7 +654,7 @@
                     }
                 </div>
 
-                <button type="button" class="collapsible">Futás adatok</button>
+                <button type="button" class="collapsible bi-arrow-90deg-down"> Futás adatok</button>
                 <div class="col-12 content">
                     <h2>Futás adatok</h2>
                     @if (ViewBag.MileageStands == null || ((List<MileageStandModel>)ViewBag.MileageStands).Count == 0)
@@ -604,7 +693,7 @@
                     }
                 </div>
 
-                <button type="button" class="collapsible">Szerviz adatok</button>
+                <button type="button" class="collapsible bi-arrow-90deg-down"> Szerviz adatok</button>
                 <div class="col-12 content">
                     <h2>Korábbi szervizek</h2>
                     @if (ViewBag.ServiceEvents == null || ((List<ServiceEvent>)ViewBag.ServiceEvents).Count == 0)
@@ -616,7 +705,7 @@
                         @foreach (ServiceEvent se in ViewBag.ServiceEvents)
                         {
                             <div id="serviceEventData_@se.id">
-                                <button type="button" class="collapsible">@se.title</button>
+                                <button type="button" class="collapsible bi-arrow-90deg-down"> @se.title</button>
                                 <div class="content">
                                     <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteServiceEvent('@se.id')"></button>
                                     <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
@@ -632,7 +721,7 @@
                     }
                 </div>
 
-                <button type="button" class="collapsible">Egyéb költség adatok</button>
+                <button type="button" class="collapsible bi-arrow-90deg-down"> Egyéb költség adatok</button>
                 <div class="col-12 content">
                     <h2>Korábbi egyéb költségek</h2>
                     @if (ViewBag.OtherCosts == null || ((List<OtherCost>)ViewBag.OtherCosts).Count == 0)
@@ -644,7 +733,7 @@
                         @foreach (OtherCost of in ViewBag.OtherCosts)
                         {
                             <div id="otherCostDiv_@of.id">
-                                <button type="button" class="collapsible">@of.title</button>
+                                <button type="button" class="collapsible bi-arrow-90deg-down"> @of.title</button>
                                 <div class="content">
                                     <button style="float:right; margin-top:5px;" class="btn btn-danger bi bi-trash" onclick="deleteOtherCost('@of.id')"></button>
                                     <p><b>Leírás: </b>@of.description</p>

@@ -4,19 +4,50 @@
     ViewData["Title"] = "Szerviz keresése";
 }
 
-<h1>Szerviz keresés</h1>
+<div class="row">
+    <h1 style="margin-bottom:3%;">Szerviz keresés</h1><br />
 
-@if (!((List<Service>)ViewBag.Services).IsNullOrEmpty())
-{
-    <div>
-        @foreach (var item in ViewBag.Services)
-        {
-            <div class="row">
-                <h2><a href="servicePublicProfile?serviceId=@item.id">@item.name</a></h2>
-                <p>@item.country, @item.city @item.address</p>
-            </div>
-            <hr />
-        }
+    <div class="col-2">
+        <!--Kereső-->
+        <form method="get">
+            <h5>Kereső</h5>
+            <p style="margin-bottom:1px;">Kereskedő</p>
+            <input type="text" name="serviceFilter" value="@if(ViewBag.serviceFilter != null) {@ViewBag.serviceFilter}else{}" class="form-control" style="margin-bottom:3%;" />
+
+            <p style="margin-bottom:1px;">Település</p>
+            <input type="text" name="cityFilter" value="@if(ViewBag.cityFilter != null) {@ViewBag.cityFilter}else{}" class="form-control" style="margin-bottom:5%;" />
+
+            <button class="btn btn-info" style="width:100%;">Keresés</button>
+        </form>
     </div>
 
-}
+    <div class="offset-1 col-9">
+        @if (!((List<Service>)ViewBag.Services).IsNullOrEmpty())
+        {
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                @foreach (var item in ViewBag.Services)
+                {
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">@item.name</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">@item.country, @item.city @item.address</h6>
+                                <p class="card-text">@item.description</p>
+                                <a href="dealerPublicProfile?dealerId=@item.id" class="card-link">Részletek</a>
+                                @if (string.IsNullOrEmpty(item.website))
+                                {
+                                    <a href="#" class="card-link disabled" style="pointer-events: none;color:grey;">Weboldal</a>
+                                }
+                                else
+                                {
+                                    <a href="@item.website" class="card-link disabled">Weboldal</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        }
+    </div>
+</div>

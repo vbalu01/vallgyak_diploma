@@ -70,6 +70,12 @@ namespace AutoPortal.Controllers
             ViewBag.Vehicle = v;
             ViewBag.ServiceEvents = _SQL.serviceEvents.Where(tmp=>tmp.vehicle_id == vehicleId).ToList();
 
+            ViewBag.vehicleCategories = _SQL.vehicleCategories.ToList();
+            ViewBag.fuels = _SQL.fuelTypes.ToList();
+            ViewBag.transmissions = _SQL.transmissionTypes.ToList();
+            ViewBag.drives = _SQL.driveTypes.ToList();
+            ViewBag.bodyTypes = _SQL.bodyTypes.ToList();
+
             List<Service> services = _SQL.services.ToList();
             foreach (Service service in services)
             {
@@ -1072,6 +1078,55 @@ namespace AutoPortal.Controllers
             return Ok("Sikeres tulajváltás!");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> updateVehicleDetails([FromBody]AdminUpdateVehicleModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                if (_SQL.vehicles.Any(v => v.chassis_number == model.chassis_number))
+                {
+                    Vehicle veh = _SQL.vehicles.Single(v => v.chassis_number == model.chassis_number);
+                    veh.license = model.license;
+                    veh.make = model.make;
+                    veh.model = model.model;
+                    veh.modeltype = model.modeltype;
+                    veh.manufact_year = model.manufactyear;
+                    veh.category = model.category;
+                    veh.body = model.body;
+                    veh.num_of_doors = model.numofdoors;
+                    veh.num_of_seats = model.numofseats;
+                    veh.weight = model.weight;
+                    veh.max_weight = model.maxweight;
+                    veh.engine_number = model.enginenumber;
+                    veh.engine_code = model.enginecode;
+                    veh.fuel = model.fueltype;
+                    veh.engine_ccm = model.engineccm;
+                    veh.performance = model.performance;
+                    veh.torque = model.torque;
+                    veh.transmission = model.transmissiontype;
+                    veh.num_of_gears = model.numofgears;
+                    veh.drive = model.drivetype;
+
+                    _SQL.vehicles.Update(veh);
+                    await _SQL.SaveChangesAsync();
+
+                    _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    return Ok("Sikeres módosítás!");
+                }
+                else
+                {
+                    _Notification.AddErrorToastMessage("A keresett jármű nem található!");
+                    return NotFound("A keresett jármű nem található!");
+                }
+                
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("Hibás adatok!");
+                return BadRequest("Hibás adatok!");
+            }
+            
+        }
         #endregion
     }
 }

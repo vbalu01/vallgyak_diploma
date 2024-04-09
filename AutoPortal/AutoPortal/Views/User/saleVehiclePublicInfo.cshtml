@@ -219,7 +219,7 @@
     <!--Esemény adatok-->
     <h2 style="margin-top:2%;">Jármű információk</h2>
     <div>
-        <button type="button" class="collapsible">Futás adatok</button>
+        <button type="button" class="collapsible bi-arrow-90deg-down"> Futás adatok</button>
         <div class="col-12 content">
             <h2>Futás adatok</h2>
             @if (ViewBag.Info.mileages == null || ((List<MileageStandModel>)ViewBag.Info.mileages).Count == 0)
@@ -252,7 +252,7 @@
             }
         </div>
 
-        <button type="button" class="collapsible">Szerviz adatok</button>
+        <button type="button" class="collapsible bi-arrow-90deg-down"> Szerviz adatok</button>
         <div class="col-12 content">
             <h2>Korábbi szervizek</h2>
             @if (ViewBag.Info.services == null || ((List<ServiceEvent>)ViewBag.Info.services).Count == 0)
@@ -263,7 +263,7 @@
             {
                 @foreach (ServiceEvent se in ViewBag.Info.services)
                 {
-                    <button type="button" class="collapsible">@se.title</button>
+                    <button type="button" class="collapsible bi-arrow-90deg-down"> @se.title</button>
                     <div class="content">
                         <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
                         <p><b>Dátum: </b>@se.date</p>

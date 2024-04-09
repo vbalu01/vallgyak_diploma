@@ -240,7 +240,7 @@
                     <th class="tableLeft">Alvázszám</th>
                     <td class="tableLeft">@ViewBag.vehicleData.v.chassis_number</td>
                     <th class="tableLeft">Rendszám</th>
-                    <td class="tableLeft"><input type="text" value="@ViewBag.vehicleData.v.license" /></td>
+                    <td class="tableLeft"><form method="post" asp-controller="User" asp-action="changeLicense"><input type="hidden" value="@ViewBag.vehicleData.v.chassis_number" name="vehicleId" /><input type="text" value="@ViewBag.vehicleData.v.license" class="form-control" style="width:50%;float:left;" name="newLicense" /><button type="submit" class="btn btn-sm btn-success bi-check2" style="width:45%;margin-left:5%;"> Mentés</button></form></td>
                 </tr>
                 <tr>
                     <th class="tableLeft">Márka</th>
@@ -339,7 +339,7 @@
                     <label for="newRefuelDate">Tankolás időpontja</label>
                     <input type="datetime-local" class="form-control" id="newRefuelDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
 
-                    <button class="btn btn-success" style="width:100%;" onclick="addNewRefuel();">Tankolás rögzítése</button>
+                    <button class="btn btn-success" style="width:100%;margin-top:2%;" onclick="addNewRefuel();">Tankolás rögzítése</button>
                 </fieldset>
                 </div>
             }
@@ -365,7 +365,7 @@
                     <label for="newCostDate">Dátum</label>
                     <input type="datetime-local" class="form-control" id="newCostDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
 
-                    <button class="btn btn-success" style="width:100%;" onclick="addNewCost();">Költség rögzítése</button>
+                    <button class="btn btn-success" style="width:100%; margin-top:2%;" onclick="addNewCost();">Költség rögzítése</button>
                 </div>
             }else {
                 <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
@@ -447,7 +447,7 @@
                     <option value="4">Kereskedő</option>
                     <option value="0" selected>Nincs</option>
                 </select>
-                <button class="btn btn-success" style="width:100%;" onclick="changeUserVehiclePermBtb();">Jogosultság felvétele</button>
+                <button class="btn btn-success" style="width:100%;margin-top:2%;margin-bottom:2%;" onclick="changeUserVehiclePermBtb();">Jogosultság felvétele</button>
             }
             else {
                 <p class="text-danger"><b>Nincs jogosultsága ehhez a művelethez!</b></p>
@@ -460,8 +460,8 @@
             {
                 <form method="POST" asp-controller="User" asp-action="addCurrentMileage">
                     <input type="number" class="form-control" name="currentMileageStand"/>
-                <input type="hidden" name="vehId" value="@ViewBag.vehicleData.v.chassis_number" />
-                <button class="btn btn-success" style="width:100%;">Futásteljesítmény rögzítése</button>
+                    <input type="hidden" name="vehId" value="@ViewBag.vehicleData.v.chassis_number" />
+                    <button class="btn btn-success" style="width:100%;margin-top:2%;">Futásteljesítmény rögzítése</button>
                 </form>
             }
             else
@@ -474,7 +474,7 @@
             {
                 <p><label class="text-danger"><b>FIGYELEM!</b></label> A jogi tulajdonosváltás minden jelenlegi jogosultságot töröl a járműről, és a rögzített adatok archiválásra kerülnek!</p>
                 <input type="text" class="form-control" placeholder="E-Mail" id="newVehicleOwnerMail" />
-                <button class="btn btn-success" style="width:100%;margin-bottom:1%;" onclick="newVehicleOwner();">Új tulajdonos rögzítése</button>
+                <button class="btn btn-success" style="width:100%;margin-top:2%;margin-bottom:2%;" onclick="newVehicleOwner();">Új tulajdonos rögzítése</button>
             }
             else
             {
@@ -485,14 +485,14 @@
     <hr />
     <!--Esemény adatok-->
     <div>
-        <button type="button" class="collapsible">Tankolási adatok</button>
+        <button type="button" class="collapsible bi-arrow-90deg-down"> Tankolási adatok</button>
         <div class="col-12 content">
             <h2>Korábbi tankolások</h2>
             @if (ViewBag.Refuels == null || ((List<Refuel>)ViewBag.Refuels).Count == 0) {
                 <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
             } else {
                 @foreach(Refuel rf in ViewBag.Refuels) {
-                    <button type="button" class="collapsible">Tankolás - @rf.fueling_date</button>
+                    <button type="button" class="collapsible bi-arrow-90deg-down"> Tankolás - @rf.fueling_date</button>
                     <div class="content">
                         <div class="row col-12">
                             <div class="offset-2 col-4">
@@ -512,7 +512,7 @@
             }
         </div>
 
-        <button type="button" class="collapsible">Futás adatok</button>
+        <button type="button" class="collapsible bi-arrow-90deg-down"> Futás adatok</button>
         <div class="col-12 content">
             <h2>Futás adatok</h2>
             @if (ViewBag.MileageStands == null || ((List<MileageStandModel>)ViewBag.MileageStands).Count == 0) {
@@ -536,14 +536,14 @@
             }
         </div>
 
-        <button type="button" class="collapsible">Szerviz adatok</button>
+        <button type="button" class="collapsible bi-arrow-90deg-down"> Szerviz adatok</button>
         <div class="col-12 content">
             <h2>Korábbi szervizek</h2>
             @if (ViewBag.ServiceEvents == null || ((List<ServiceEvent>)ViewBag.ServiceEvents).Count == 0) {
                 <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
             } else {
                 @foreach(ServiceEvent se in ViewBag.ServiceEvents) {
-                    <button type="button" class="collapsible">@se.title</button>
+                    <button type="button" class="collapsible bi-arrow-90deg-down"> @se.title</button>
                     <div class="content">
                         <p><b>Típus: </b>@EnumHelper.GetServiceTypeString(se.serviceType)</p>
                         <p><b>Leírás: </b>@se.description</p>
@@ -557,14 +557,14 @@
             }
         </div>
 
-        <button type="button" class="collapsible">Egyéb költség adatok</button>
+        <button type="button" class="collapsible bi-arrow-90deg-down"> Egyéb költség adatok</button>
         <div class="col-12 content">
             <h2>Korábbi egyéb költségek</h2>
             @if (ViewBag.OtherCosts == null || ((List<OtherCost>)ViewBag.OtherCosts).Count == 0) {
                 <p class="text-danger"><b>Nem található adat ebben a kategóriában!</b></p>
             } else {
                 @foreach(OtherCost of in ViewBag.OtherCosts) {
-                    <button type="button" class="collapsible">@of.title</button>
+                    <button type="button" class="collapsible bi-arrow-90deg-down"> @of.title</button>
                     <div class="content">
                         <p><b>Leírás: </b>@of.description</p>
                         <p><b>Költség: </b>@of.cost</p>

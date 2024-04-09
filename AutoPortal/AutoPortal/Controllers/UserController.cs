@@ -179,15 +179,36 @@ namespace AutoPortal.Controllers
             return View();
         }
 
-        public IActionResult findService()
+        public IActionResult findService(string? serviceFilter, string? cityFilter)
         {
-            ViewBag.Services = _SQL.services.Where(d => d.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && !d.status.HasFlag(eAccountStatus.BANNED) && !d.status.HasFlag(eAccountStatus.DISABLED)).ToList();
+            List<Service> services = _SQL.services.Where(s => s.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && !s.status.HasFlag(eAccountStatus.BANNED) && !s.status.HasFlag(eAccountStatus.DISABLED)).ToList();
+
+            if (!string.IsNullOrWhiteSpace(serviceFilter)) {
+                services = services.Where(s => s.name.ToLower().Contains(serviceFilter.ToLower())).ToList();
+                ViewBag.serviceFilter = serviceFilter;
+            }
+            if (!string.IsNullOrWhiteSpace(cityFilter)) {
+                services = services.Where(s => s.city.ToLower().Contains(cityFilter.ToLower())).ToList();
+                ViewBag.cityFilter = cityFilter;
+            }
+
+            ViewBag.Services = services;
             return View();
         }
 
-        public IActionResult findDealer()
+        public IActionResult findDealer(string? dealerFilter, string? cityFilter)
         {
-            ViewBag.Dealers = _SQL.dealers.Where(d=>d.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && !d.status.HasFlag(eAccountStatus.BANNED) && !d.status.HasFlag(eAccountStatus.DISABLED)).ToList();
+            List<Dealer> dealers = _SQL.dealers.Where(d => d.status.HasFlag(eAccountStatus.EMAIL_CONFIRM) && !d.status.HasFlag(eAccountStatus.BANNED) && !d.status.HasFlag(eAccountStatus.DISABLED)).ToList();
+
+            if (!string.IsNullOrWhiteSpace(dealerFilter)) {
+                dealers = dealers.Where(d => d.name.ToLower().Contains(dealerFilter.ToLower())).ToList();
+                ViewBag.dealerFilter = dealerFilter;
+            }
+            if (!string.IsNullOrWhiteSpace(cityFilter)) {
+                dealers = dealers.Where(d => d.city.ToLower().Contains(cityFilter.ToLower())).ToList();
+                ViewBag.cityFilter = cityFilter;
+            }
+            ViewBag.Dealers = dealers;
             return View();
         }
 
@@ -1173,6 +1194,49 @@ namespace AutoPortal.Controllers
                 return BadRequest("Nincs jogosultsága ehhez a művelethez!");
             }
         }
-            #endregion
+
+        [HttpPost]
+        public async Task<IActionResult> changeLicense(string vehicleId, string newLicense)
+        {
+            if(_SQL.vehicles.Any(v=>v.chassis_number == vehicleId))
+            {
+                if(_SQL.vehiclePermissions.Any(vp=>vp.vehicle_id == vehicleId && vp.target_id == loginId && vp.target_type == loginType && (vp.permission == eVehiclePermissions.SUBOWNER || vp.permission == eVehiclePermissions.OWNER)))
+                {
+                    if (string.IsNullOrWhiteSpace(newLicense) || newLicense.Length < 3)
+                    {
+                        _Notification.AddWarningToastMessage("Hibás rendszám!");
+                    }
+                    else
+                    {
+                        Vehicle veh = _SQL.vehicles.Single(v => v.chassis_number == vehicleId);
+                        veh.license = newLicense;
+                        _SQL.vehicles.Update(veh);
+                        await _SQL.SaveChangesAsync();
+                        _Notification.AddSuccessToastMessage("Sikeres módosítás!");
+                    }
+                    return Redirect($"manageVehicle?vehicleId={vehicleId}");
+                }
+                else
+                {
+                    if (_SQL.vehiclePermissions.Any(vp => vp.vehicle_id == vehicleId && vp.target_id == loginId && vp.target_type == loginType))
+                    {
+                        _Notification.AddWarningToastMessage("Nincs jogosultsága a jármű rendszámát módosítani!");
+                        return Redirect($"manageVehicle?vehicleId={vehicleId}");
+                    }
+                    else
+                    {
+                        _Notification.AddWarningToastMessage("Nincs jogosultsága a járműhöz!");
+                        return Redirect("myCars");
+                    }
+                }
+            }
+            else
+            {
+                _Notification.AddErrorToastMessage("A keresett jármű nem található!");
+                return Redirect("myCars");
+            }
+            return Ok();
+        }
+        #endregion
     }
 }

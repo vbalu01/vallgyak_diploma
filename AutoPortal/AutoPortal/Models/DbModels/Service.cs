@@ -25,7 +25,7 @@ namespace AutoPortal.Models.DbModels
         public string city { get; set; }
         [Required]
         public string address { get; set; }
-        public string website { get; set; }
+        public string? website { get; set; }
         [Required]
         public eAccountStatus status { get; set; }
     }
