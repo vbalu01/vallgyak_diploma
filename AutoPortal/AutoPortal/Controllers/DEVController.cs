@@ -98,15 +98,29 @@ namespace AutoPortal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> NofifySuccess(string notify)
+        public async Task<IActionResult> NotifySuccess(string msg)
         {
-            _Notification.AddSuccessToastMessage(notify, new ToastrOptions() { Title = "Siker" });
+            _Notification.AddSuccessToastMessage(msg);
             return Redirect("/");
         }
         [HttpGet]
-        public async Task<IActionResult> NofifyWarning(string notify)
+        public async Task<IActionResult> NotifyWarning(string msg)
         {
-            _Notification.AddWarningToastMessage(notify, new ToastrOptions() { Title = "Figyelmeztetés" });
+            _Notification.AddWarningToastMessage(msg);
+            return Redirect("/");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> NotifyError(string msg)
+        {
+            _Notification.AddErrorToastMessage(msg);
+            return Redirect("/");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> NotifyInfo(string msg)
+        {
+            _Notification.AddInfoToastMessage(msg);
             return Redirect("/");
         }
     }
