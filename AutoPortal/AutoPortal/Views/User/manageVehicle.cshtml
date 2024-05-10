@@ -10,6 +10,13 @@
 
         let vid = "@ViewBag.vehicleData.v.chassis_number"; //Jármű id
 
+        function refreshPage() {
+            console.log(location);
+            setTimeout(function () {
+                location.reload(true);
+            }, 1000);
+        }
+
         function addNewCost() {
             $('#newCostTitle').removeClass("is-invalid");
             $('#newCostDescription').removeClass("is-invalid");
@@ -46,11 +53,10 @@
                     'date': $('#newCostDate').val()
                 }),
                 success: function (data) {
-                    $('#newCostTitle').val("");
-                    $('#newCostDescription').val("");
-                    $('#newCostCost').val(0);
+                    
                 }
             });
+            refreshPage();
         }
 
         function newVehicleOwner(){
@@ -62,7 +68,7 @@
                     'newOwnerMail': $('#newVehicleOwnerMail').val()
                 },
                 success: function (data) {
-                    
+                    refreshPage();
                 }
             });
         }
@@ -104,11 +110,10 @@
                     'fueling_date': $('#newRefuelDate').val()
                 }),
                 success: function (data) {
-                    $('#newRefuelCost').val(0);
-                    $('#newRefuelDistance').val(0);
-                    $('#newRefuelAmount').val(0);
+                    refreshPage();
                 }
             });
+            refreshPage();
         }
 
         $(document).ready(function() {

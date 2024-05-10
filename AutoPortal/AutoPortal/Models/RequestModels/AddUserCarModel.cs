@@ -19,7 +19,7 @@ namespace AutoPortal.Models.RequestModels
         public string make { get; set; }
         [Required]
         public string model { get; set; }
-        public string modelType { get; set; }
+        public string? modelType { get; set; }
         [Required]
         public string fuel { get; set; }
         [Required]

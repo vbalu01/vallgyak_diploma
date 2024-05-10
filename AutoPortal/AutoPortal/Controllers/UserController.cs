@@ -237,13 +237,13 @@ namespace AutoPortal.Controllers
         
         public IActionResult servicePublicProfile(int serviceId)
         {
-            if (!_SQL.services.Any(d => d.id == serviceId))
+            if (!_SQL.services.Any(s => s.id == serviceId))
             {
                 _Notification.AddErrorToastMessage("A keresett szerviz nem található!");
                 return Redirect("/");
             }
             ViewBag.Service = _SQL.services.SingleOrDefault(s=>s.id == serviceId);
-            if (_SQL.services.SingleOrDefault(d => d.id == serviceId).status.HasFlag(eAccountStatus.BANNED) || _SQL.dealers.SingleOrDefault(d => d.id == serviceId).status.HasFlag(eAccountStatus.DISABLED))
+            if (_SQL.services.SingleOrDefault(s => s.id == serviceId).status.HasFlag(eAccountStatus.BANNED) || _SQL.services.SingleOrDefault(s => s.id == serviceId).status.HasFlag(eAccountStatus.DISABLED))
             {
                 _Notification.AddInfoToastMessage("A keresett szerviz pillanatnyilag nem elérhető!");
                 return Redirect("/");
@@ -933,6 +933,11 @@ namespace AutoPortal.Controllers
 
             if (_SQL.users.Any(u => u.email == targerMail))
             {
+                if(perm == eVehiclePermissions.DEALER)
+                {
+                    _Notification.AddWarningToastMessage("Kereskedői jogosultság csak kereskedői fióknak adható.");
+                    return BadRequest("Kereskedői jogosultság csak kereskedői fióknak adható.");
+                }
                 int id = _SQL.users.SingleOrDefault(tmp => tmp.email == targerMail).id;
                 if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.USER && tmp.target_id == id))
                 {
@@ -970,6 +975,11 @@ namespace AutoPortal.Controllers
             }
             else if (_SQL.services.Any(u => u.email == targerMail))
             {
+                if (perm == eVehiclePermissions.DEALER)
+                {
+                    _Notification.AddWarningToastMessage("Kereskedői jogosultság csak kereskedői fióknak adható.");
+                    return BadRequest("Kereskedői jogosultság csak kereskedői fióknak adható.");
+                }
                 int id = _SQL.services.SingleOrDefault(tmp => tmp.email == targerMail).id;
                 if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.SERVICE && tmp.target_id == id))
                 {
@@ -1043,6 +1053,11 @@ namespace AutoPortal.Controllers
             }
             else if (_SQL.factories.Any(u => u.email == targerMail))
             {
+                if (perm == eVehiclePermissions.DEALER)
+                {
+                    _Notification.AddWarningToastMessage("Kereskedői jogosultság csak kereskedői fióknak adható.");
+                    return BadRequest("Kereskedői jogosultság csak kereskedői fióknak adható.");
+                }
                 int id = _SQL.factories.SingleOrDefault(tmp => tmp.email == targerMail).id;
                 if (_SQL.vehiclePermissions.Any(tmp => tmp.vehicle_id == vehId && tmp.target_type == eVehicleTargetTypes.FACTORY && tmp.target_id == id))
                 {
@@ -1235,7 +1250,6 @@ namespace AutoPortal.Controllers
                 _Notification.AddErrorToastMessage("A keresett jármű nem található!");
                 return Redirect("myCars");
             }
-            return Ok();
         }
         #endregion
     }

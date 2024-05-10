@@ -66,6 +66,7 @@ namespace AutoPortal.Controllers
                     }
                     d.status = d.status | eAccountStatus.EMAIL_CONFIRM;
                     _SQL.dealers.Update(d);
+                    _SQL.SaveChanges();
                     break;
                 case eVehicleTargetTypes.USER:
                     if (!_SQL.users.Any(usr => usr.id == t.target_id))
@@ -81,6 +82,7 @@ namespace AutoPortal.Controllers
                     }
                     u.status = u.status | eAccountStatus.EMAIL_CONFIRM;
                     _SQL.users.Update(u);
+                    _SQL.SaveChanges();
                     break;
                 case eVehicleTargetTypes.SERVICE:
                     if (!_SQL.services.Any(se => se.id == t.target_id))
@@ -96,6 +98,7 @@ namespace AutoPortal.Controllers
                     }
                     s.status = s.status | eAccountStatus.EMAIL_CONFIRM;
                     _SQL.services.Update(s);
+                    _SQL.SaveChanges();
                     break;
                 case eVehicleTargetTypes.FACTORY:
                     if (!_SQL.factories.Any(fa => fa.id == t.target_id))
@@ -111,12 +114,13 @@ namespace AutoPortal.Controllers
                     }
                     f.status = f.status | eAccountStatus.EMAIL_CONFIRM;
                     _SQL.factories.Update(f);
+                    _SQL.SaveChanges();
                     break;
             }
 
             this._SQL.tokens.Remove(t);
 
-            this._SQL.SaveChangesAsync();
+            this._SQL.SaveChanges();
 
             this._Notification.AddSuccessToastMessage("Sikeres megerősítés!", new ToastrOptions() { Title = "Siker" });
             return Redirect("/Auth/Login");

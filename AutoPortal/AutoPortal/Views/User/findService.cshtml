@@ -33,7 +33,7 @@
                                 <h5 class="card-title">@item.name</h5>
                                 <h6 class="card-subtitle mb-2 text-muted">@item.country, @item.city @item.address</h6>
                                 <p class="card-text">@item.description</p>
-                                <a href="dealerPublicProfile?dealerId=@item.id" class="card-link">Részletek</a>
+                                <a href="servicePublicProfile?serviceId=@item.id" class="card-link">Részletek</a>
                                 @if (string.IsNullOrEmpty(item.website))
                                 {
                                     <a href="#" class="card-link disabled" style="pointer-events: none;color:grey;">Weboldal</a>

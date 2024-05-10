@@ -155,7 +155,7 @@ namespace AutoPortal.Controllers
                     return BadRequest(resp.ToString());
                 }
 
-                int regId = -1;
+                dynamic u;
                 eVehicleTargetTypes type = eVehicleTargetTypes.NONE;
 
                 if (m.regType) { //Szerviz
@@ -171,7 +171,7 @@ namespace AutoPortal.Controllers
                     };
                     _SQL.services.Add(s);
                     await _SQL.SaveChangesAsync();
-                    regId = s.id;
+                    u = s;
                 } else { //Kereskedő
                     type = eVehicleTargetTypes.DEALER;
                     Dealer d = new Dealer()
@@ -185,14 +185,14 @@ namespace AutoPortal.Controllers
                     };
                     _SQL.dealers.Add(d);
                     await _SQL.SaveChangesAsync();
-                    regId = d.id;
+                    u = d;
                 }
 
-                Token t = TokenHandler.GenerateMailConfirmToken(regId, type);
+                Token t = TokenHandler.GenerateMailConfirmToken(u.id, type);
                 _SQL.tokens.Add(t);
                 _SQL.SaveChanges();
 
-                await MailSender.SendSuccessRegisterMail(regId, t, this.Request.Host.ToString());
+                await MailSender.SendSuccessRegisterMail(u, t, this.Request.Host.ToString());
 
                 _Notification.AddSuccessToastMessage("Sikeres regisztráció!", new ToastrOptions() { Title = "Siker" });
                 resp.Message = "Register success!";

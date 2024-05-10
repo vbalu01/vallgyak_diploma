@@ -114,7 +114,7 @@ BEGIN
     DECLARE dealeremailcount INT;
     DECLARE factoryemailcount INT;
     
-    SELECT COUNT(*) INTO useremailcount FROM users WHERE email = NEW.email;
+    SELECT COUNT(*) INTO useremailcount FROM users WHERE email = NEW.email AND id <> NEW.id;
     SELECT COUNT(*) INTO serviceemailcount FROM services WHERE email = NEW.email;
     SELECT COUNT(*) INTO dealeremailcount FROM dealers WHERE email = NEW.email;
     SELECT COUNT(*) INTO factoryemailcount FROM factories WHERE email = NEW.email;
@@ -140,7 +140,7 @@ BEGIN
     
     SELECT COUNT(*) INTO useremailcount FROM users WHERE email = NEW.email;
     SELECT COUNT(*) INTO serviceemailcount FROM services WHERE email = NEW.email;
-    SELECT COUNT(*) INTO dealeremailcount FROM dealers WHERE email = NEW.email;
+    SELECT COUNT(*) INTO dealeremailcount FROM dealers WHERE email = NEW.email AND id <> NEW.id;
     SELECT COUNT(*) INTO factoryemailcount FROM factories WHERE email = NEW.email;
     
     IF useremailcount > 0 OR serviceemailcount > 0 OR dealeremailcount > 0 OR factoryemailcount >0 THEN
@@ -163,7 +163,7 @@ BEGIN
     DECLARE factoryemailcount INT;
     
     SELECT COUNT(*) INTO useremailcount FROM users WHERE email = NEW.email;
-    SELECT COUNT(*) INTO serviceemailcount FROM services WHERE email = NEW.email;
+    SELECT COUNT(*) INTO serviceemailcount FROM services WHERE email = NEW.email AND id <> NEW.id;
     SELECT COUNT(*) INTO dealeremailcount FROM dealers WHERE email = NEW.email;
     SELECT COUNT(*) INTO factoryemailcount FROM factories WHERE email = NEW.email;
     
@@ -189,7 +189,7 @@ BEGIN
     SELECT COUNT(*) INTO useremailcount FROM users WHERE email = NEW.email;
     SELECT COUNT(*) INTO serviceemailcount FROM services WHERE email = NEW.email;
     SELECT COUNT(*) INTO dealeremailcount FROM dealers WHERE email = NEW.email;
-    SELECT COUNT(*) INTO factoryemailcount FROM factories WHERE email = NEW.email;
+    SELECT COUNT(*) INTO factoryemailcount FROM factories WHERE email = NEW.email AND id <> NEW.id;
     
     IF useremailcount > 0 OR serviceemailcount > 0 OR dealeremailcount > 0 OR factoryemailcount >0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Az email cím már használatban van valamelyik táblában!';
@@ -330,10 +330,10 @@ BEGIN
     END IF;
     
     IF NEW.target_type = 3 THEN
-		SELECT id INTO targetId FROM users WHERE id = NEW.target_id;
+		SELECT id INTO targetId FROM dealers WHERE id = NEW.target_id;
     END IF;
     IF NEW.target_type = 4 THEN
-		SELECT id INTO targetId FROM factories WHERE id = NEW.target_id;
+		SELECT id INTO targetId FROM services WHERE id = NEW.target_id;
     END IF;
     
     
@@ -370,10 +370,10 @@ BEGIN
     END IF;
     
     IF NEW.target_type = 3 THEN
-		SELECT id INTO targetId FROM users WHERE id = NEW.target_id;
+		SELECT id INTO targetId FROM dealers WHERE id = NEW.target_id;
     END IF;
     IF NEW.target_type = 4 THEN
-		SELECT id INTO targetId FROM factories WHERE id = NEW.target_id;
+		SELECT id INTO targetId FROM services WHERE id = NEW.target_id;
     END IF;
     
     
