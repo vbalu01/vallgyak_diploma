@@ -49,7 +49,7 @@ namespace AutoPortal.Controllers
         }
 
         
-        public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden API hívás előtt lefut
+        public override void OnActionExecuting(ActionExecutingContext context) //Ez a metódus minden hívás előtt lefut
         {
             var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
             var methodInfo = descriptor.MethodInfo;
@@ -106,7 +106,7 @@ namespace AutoPortal.Controllers
             base.OnActionExecuting(context);
         }
 
-        public override void OnActionExecuted(ActionExecutedContext context)//Ez a metódus lefut minden API hívás lefutása után
+        public override void OnActionExecuted(ActionExecutedContext context)//Ez a metódus lefut minden hívás lefutása után
         {
             base.OnActionExecuted(context);
         }

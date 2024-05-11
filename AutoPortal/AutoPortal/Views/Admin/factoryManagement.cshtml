@@ -16,8 +16,6 @@
             $.ajax({
                 type: "POST",
                 url: "registerFactory",
-                //contentType: "application/json",
-                //dataType: "json",
                 data: {
                     'email': $('#email').val(),
                     'name': $('#name').val(),
@@ -34,8 +32,6 @@
             $.ajax({
                 type: "POST",
                 url: "updateUserVehiclePerm",
-                //dataType: "json",
-                //contentType: "application/json",
                 data: {
                     'perm': perm,
                     'vehId': vehId,
@@ -90,13 +86,10 @@
             $.ajax({
                 type: "POST",
                 url: "askNewFactoryPassword",
-                //dataType: "json",
-                //contentType: "application/json",
                 data: {
                     'factoryId': id
                 },
                 success: function (data) {
-                    //alert(data);
                 }
             });
         }

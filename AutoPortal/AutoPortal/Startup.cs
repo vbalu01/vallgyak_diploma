@@ -25,7 +25,6 @@ namespace AutoPortal
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             SQLConnectionString = Configuration.GetConnectionString("SQL");
@@ -37,7 +36,7 @@ namespace AutoPortal
                 option.UseMySql(SQLConnectionString, v_MysqlVersion);
             });
 
-            //Mail sender setup
+            //Mail küldő adatok
             MailSettingsModel.host = Configuration.GetSection("MailSettings").GetValue(typeof(string), "Host").ToString();
             MailSettingsModel.port = Convert.ToInt32(Configuration.GetSection("MailSettings").GetValue(typeof(int), "Port"));
             MailSettingsModel.username = Configuration.GetSection("MailSettings").GetValue(typeof(string), "Username").ToString();
@@ -79,7 +78,6 @@ namespace AutoPortal
             services.AddRazorPages();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -89,7 +87,6 @@ namespace AutoPortal
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

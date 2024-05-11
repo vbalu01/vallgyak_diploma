@@ -11,13 +11,6 @@ namespace AutoPortal.Controllers
 {
     public class HomeController : BaseController
     {
-        /*private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }*/
-
         public HomeController(IConfiguration config, SQL sql, IToastNotification notification) : base(config, sql, notification)
         {
         }
